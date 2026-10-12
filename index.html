@@ -166,29 +166,35 @@
             </div>
         </div>
 
-        <!-- 🆕 戰鬥先攻助手 (獨立分頁) -->
-        <div id="tab-combat" class="tab-content max-w-6xl mx-auto pb-10">
-            <div class="bg-white p-5 rounded-xl shadow border flex flex-col min-h-[35rem]">
-                <h3 class="text-xl font-bold mb-3 border-b pb-2 flex justify-between items-center">
-                    <span><i class="fa-solid fa-swords mr-2 text-red-600"></i>戰鬥先攻助手</span>
-                    <button onclick="cmbs=[];renderCmb();" class="text-sm bg-red-100 text-red-700 px-3 py-1 rounded hover:bg-red-200 font-bold transition">清空列表</button>
-                </h3>
-                <div class="flex gap-2 mb-4 bg-gray-50 p-2.5 rounded border">
-                    <input type="number" id="c-init" placeholder="先攻" class="w-1/6 px-2 py-1.5 border rounded text-center font-bold outline-none focus:border-blue-500">
-                    <input type="text" id="c-name" placeholder="角色 / 怪物名稱" class="w-1/3 px-3 py-1.5 border rounded font-bold outline-none focus:border-blue-500">
-                    <input type="number" id="c-ac" placeholder="AC" class="w-1/6 px-2 py-1.5 border rounded text-center text-blue-800 font-bold outline-none">
-                    <input type="number" id="c-hp" placeholder="HP" class="w-1/6 px-2 py-1.5 border rounded text-center text-red-600 font-bold outline-none">
-                    <select id="c-fac" class="w-1/6 px-2 py-1.5 border rounded text-sm outline-none font-bold">
-                        <option value="e">敵方</option>
-                        <option value="p">友方</option>
-                    </select>
-                    <button onclick="addCmb()" class="bg-green-600 text-white px-5 py-1.5 rounded font-black hover:bg-green-700 transition shadow"><i class="fa-solid fa-plus"></i></button>
-                </div>
-                <div class="text-xs text-gray-500 mb-2 border-b pb-2">💡 提示：點擊列表中的數字可直接修改，修改「先攻」後系統會自動重新排序。</div>
-                <div class="flex-grow overflow-y-auto custom-scrollbar space-y-2 h-[450px] pr-2" id="combat-list"></div>
-            </div>
+<!-- 🆕 戰鬥先攻助手 (獨立分頁) -->
+<div id="tab-combat" class="tab-content max-w-6xl mx-auto pb-10">
+    <div class="bg-white p-5 rounded-xl shadow border flex flex-col min-h-[35rem]">
+        <h3 class="text-xl font-bold mb-3 border-b pb-2 flex justify-between items-center">
+            <span><i class="fa-solid fa-swords mr-2 text-red-600"></i>戰鬥先攻助手</span>
+            <button onclick="cmbs=[];cmbLog=[];renderCmb();renderCmbLog();" class="text-sm bg-red-100 text-red-700 px-3 py-1 rounded hover:bg-red-200 font-bold transition">清空列表與紀錄</button>
+        </h3>
+        <div class="flex gap-2 mb-4 bg-gray-50 p-2.5 rounded border">
+            <input type="number" id="c-init" placeholder="先攻" class="w-1/6 px-2 py-1.5 border rounded text-center font-bold outline-none focus:border-blue-500">
+            <input type="text" id="c-name" placeholder="角色 / 怪物名稱" class="w-1/3 px-3 py-1.5 border rounded font-bold outline-none focus:border-blue-500">
+            <input type="number" id="c-ac" placeholder="AC" class="w-1/6 px-2 py-1.5 border rounded text-center text-blue-800 font-bold outline-none">
+            <input type="number" id="c-hp" placeholder="HP" class="w-1/6 px-2 py-1.5 border rounded text-center text-red-600 font-bold outline-none">
+            <select id="c-fac" class="w-1/6 px-2 py-1.5 border rounded text-sm outline-none font-bold">
+                <option value="e">敵方</option>
+                <option value="p">友方</option>
+            </select>
+            <button onclick="addCmb()" class="bg-green-600 text-white px-5 py-1.5 rounded font-black hover:bg-green-700 transition shadow"><i class="fa-solid fa-plus"></i></button>
+        </div>
+        
+        <!-- 🆕 戰鬥操作紀錄區 -->
+        <div class="mb-3 bg-gray-800 text-gray-300 rounded-lg p-2 text-xs font-mono h-24 overflow-y-auto custom-scrollbar shadow-inner border border-gray-900" id="combat-log">
+            <div class="text-gray-500 italic">系統：戰鬥紀錄已準備就緒...</div>
         </div>
 
+        <div class="text-xs text-gray-500 mb-2 border-b pb-2">💡 提示：點擊列表中的數字可直接修改，修改「先攻」後系統會自動重新排序。輸入負數傷害可作為「治療」。</div>
+        
+        <div class="flex-grow overflow-y-auto custom-scrollbar space-y-2 h-[350px] pr-2" id="combat-list"></div>
+    </div>
+</div>
 
 
         <!-- DM 工具 -->
@@ -1700,16 +1706,97 @@ let savedQuests = JSON.parse(localStorage.getItem('dm_saved_quests') || '{}');
             $('dice-hist').insertAdjacentHTML('afterbegin', `<div class="border-b py-1 text-gray-600">擲出 D${s}: <b class="text-gray-900">${r}</b></div>`);
         }
 
-        let cmbs = [];
+let cmbs = [];
+        let cmbLog = []; // 🆕 新增紀錄陣列
+
+        // 🆕 新增寫入紀錄的函數
+        function addCombatLog(msg) {
+            const time = new Date().toLocaleTimeString('zh-TW', {hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit'});
+            cmbLog.unshift(`<div class="mb-0.5"><span class="text-gray-500">[${time}]</span> ${msg}</div>`);
+            if(cmbLog.length > 50) cmbLog.pop(); // 最多保留 50 筆避免過載
+            renderCmbLog();
+        }
+
+        function renderCmbLog() {
+            const logDiv = document.getElementById('combat-log');
+            if(logDiv) {
+                logDiv.innerHTML = cmbLog.length > 0 ? cmbLog.join('') : '<div class="text-gray-500 italic">系統：戰鬥紀錄已準備就緒...</div>';
+            }
+        }
+
         function addCmb() {
             const n = getV('c-name'), i = parseInt(getV('c-init'))||0, hp = parseInt(getV('c-hp'))||10;
-            if(n) { cmbs.push({id:Date.now(), n, i, ac:parseInt(getV('c-ac'))||10, hp, f:getV('c-fac')}); $('c-name').value=$('c-init').value=$('c-hp').value=''; renderCmb(); }
+            if(n) { 
+                cmbs.push({id:Date.now(), n, i, ac:parseInt(getV('c-ac'))||10, hp, f:getV('c-fac')}); 
+                $('c-name').value=$('c-init').value=$('c-hp').value=''; 
+                addCombatLog(`<span class="text-green-400 font-bold">加入</span> ${n} (先攻:${i}, HP:${hp})`);
+                renderCmb(); 
+            }
         }
-        window.modCmb = (id,k,v) => { const c = cmbs.find(x=>x.id===id); if(c){ c[k] = (k==='n')?v:(parseInt(v)||0); renderCmb(); } };
-        window.dmgCmb = (id,v) => { const c = cmbs.find(x=>x.id===id); if(c){ c.hp-=(parseInt(v)||0); if(c.hp<0)c.hp=0; renderCmb(); } };
+
+        window.modCmb = (id,k,v) => { 
+            const c = cmbs.find(x=>x.id===id); 
+            if(c){ 
+                const oldVal = c[k];
+                c[k] = (k==='n')?v:(parseInt(v)||0); 
+                
+                if (oldVal !== c[k]) {
+                    const kName = {'i':'先攻', 'ac':'AC', 'hp':'HP', 'n':'名稱'}[k] || k;
+                    addCombatLog(`<span class="text-blue-400 font-bold">修改</span> ${c.n} 的 ${kName}: ${oldVal} ➔ ${c[k]}`);
+                }
+                renderCmb(); 
+            } 
+        };
+
+        window.dmgCmb = (id,v) => { 
+            const dmg = parseInt(v);
+            const c = cmbs.find(x=>x.id===id); 
+            if(c && !isNaN(dmg) && dmg !== 0){ 
+                const oldHp = c.hp;
+                c.hp -= dmg; 
+                if(c.hp<0) c.hp=0; 
+                
+                if (dmg > 0) {
+                    addCombatLog(`<span class="text-red-400 font-bold">受傷</span> ${c.n} 受到 ${dmg} 點傷害 (HP: ${oldHp} ➔ ${c.hp})`);
+                } else {
+                    addCombatLog(`<span class="text-green-400 font-bold">治療</span> ${c.n} 恢復 ${Math.abs(dmg)} 點 HP (HP: ${oldHp} ➔ ${c.hp})`);
+                }
+                renderCmb(); 
+            } 
+        };
+
         function renderCmb() {
             cmbs.sort((a,b)=>b.i-a.i);
-            setH('combat-list', cmbs.map(c => `<div class="flex items-center justify-between p-1.5 rounded border ${c.f==='p'?'bg-blue-50 border-blue-200':'bg-red-50 border-red-200'} shadow-sm relative group"><button onclick="cmbs=cmbs.filter(x=>x.id!==${c.id});renderCmb()" class="absolute -top-2 -right-2 bg-gray-800 hover:bg-red-600 text-white rounded-full w-5 h-5 text-[10px] z-10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition"><i class="fa-solid fa-times"></i></button><div class="flex flex-col items-center justify-center bg-white rounded border px-1 mr-1"><span class="text-[8px] text-gray-400 font-bold uppercase">Init</span><input type="number" value="${c.i}" onchange="modCmb(${c.id},'i',this.value)" class="w-7 text-center bg-transparent text-sm font-black outline-none -mt-1"></div><div class="flex flex-col w-1/3"><span class="text-[8px] text-gray-400 font-bold uppercase ml-1">Name</span><input type="text" value="${c.n}" onchange="modCmb(${c.id},'n',this.value)" class="w-full bg-transparent text-sm font-bold outline-none px-1 text-gray-800 -mt-1 truncate"></div><div class="flex flex-col items-center justify-center bg-white rounded border px-1 mx-1"><span class="text-[8px] text-blue-400 font-bold uppercase">AC</span><input type="number" value="${c.ac}" onchange="modCmb(${c.id},'ac',this.value)" class="w-7 text-center bg-transparent text-blue-800 text-sm font-bold outline-none -mt-1"></div><div class="flex flex-col items-center justify-center bg-white rounded border px-1"><span class="text-[8px] text-red-400 font-bold uppercase">HP</span><input type="number" value="${c.hp}" onchange="modCmb(${c.id},'hp',this.value)" class="w-9 text-center bg-transparent text-red-600 text-sm font-black outline-none -mt-1 ${c.hp<=0?'line-through text-gray-400':''}"></div><div class="flex ml-auto"><input type="number" id="dmg-${c.id}" placeholder="受傷" class="w-10 px-1 border border-r-0 rounded-l text-xs text-center outline-none focus:border-red-500" onkeypress="if(event.key==='Enter'){dmgCmb(${c.id},this.value);this.value='';}"><button onclick="dmgCmb(${c.id},getV('dmg-${c.id}'));$('dmg-${c.id}').value='';" class="bg-red-200 text-red-800 px-2 rounded-r font-black text-xs hover:bg-red-300 transition">-</button></div></div>`).join(''));
+            setH('combat-list', cmbs.map(c => 
+                `<div class="flex items-center justify-between p-3 mb-2 rounded-lg border-2 ${c.f==='p'?'bg-blue-50 border-blue-200':'bg-red-50 border-red-200'} shadow-sm relative group">
+                    <button onclick="addCombatLog('<span class=\\'text-gray-400 font-bold\\'>移除</span> ${c.n}'); cmbs=cmbs.filter(x=>x.id!==${c.id}); renderCmb();" class="absolute -top-2 -right-2 bg-gray-800 hover:bg-red-600 text-white rounded-full w-6 h-6 text-xs z-10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition shadow"><i class="fa-solid fa-times"></i></button>
+                    
+                    <div class="flex flex-col items-center justify-center bg-white rounded border px-2 py-1 mr-2">
+                        <span class="text-[10px] text-gray-400 font-bold uppercase">Init</span>
+                        <input type="number" value="${c.i}" onchange="modCmb(${c.id},'i',this.value)" class="w-10 text-center bg-transparent text-lg font-black outline-none">
+                    </div>
+                    
+                    <div class="flex flex-col w-1/3 mr-2">
+                        <span class="text-[10px] text-gray-400 font-bold uppercase ml-1">Name</span>
+                        <input type="text" value="${c.n}" onchange="modCmb(${c.id},'n',this.value)" class="w-full bg-transparent text-lg font-bold outline-none px-1 text-gray-800 truncate">
+                    </div>
+                    
+                    <div class="flex flex-col items-center justify-center bg-white rounded border px-2 py-1 mx-1">
+                        <span class="text-[10px] text-blue-400 font-bold uppercase">AC</span>
+                        <input type="number" value="${c.ac}" onchange="modCmb(${c.id},'ac',this.value)" class="w-10 text-center bg-transparent text-blue-800 text-lg font-bold outline-none">
+                    </div>
+                    
+                    <div class="flex flex-col items-center justify-center bg-white rounded border px-2 py-1 mx-1">
+                        <span class="text-[10px] text-red-400 font-bold uppercase">HP</span>
+                        <input type="number" value="${c.hp}" onchange="modCmb(${c.id},'hp',this.value)" class="w-12 text-center bg-transparent text-red-600 text-lg font-black outline-none ${c.hp<=0?'line-through text-gray-400':''}">
+                    </div>
+                    
+                    <div class="flex ml-auto">
+                        <input type="number" id="dmg-${c.id}" placeholder="受傷" class="w-14 px-2 py-1 border border-r-0 rounded-l text-sm text-center font-bold outline-none focus:border-red-500" onkeypress="if(event.key==='Enter'){dmgCmb(${c.id},this.value);this.value='';}">
+                        <button onclick="dmgCmb(${c.id},getV('dmg-${c.id}'));$('dmg-${c.id}').value='';" class="bg-red-200 text-red-800 px-3 rounded-r font-black text-sm hover:bg-red-300 transition">-</button>
+                    </div>
+                </div>`
+            ).join(''));
         }
 
         let o = {A:1,B:1,D:5,mA:0,mB:0};
