@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TRPG 凡戴爾戰役助手</title>
+    <title>TRPG 戰役助手</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script>
@@ -83,23 +83,47 @@
 <nav class="container mx-auto px-2 flex space-x-1 overflow-x-auto custom-scrollbar pb-1">
     <button onclick="switchTab('tab-story')" class="tab-btn bg-gray-700 text-gray-300 px-4 py-2 rounded-t-lg whitespace-nowrap"><i class="fa-solid fa-clipboard-list mr-2"></i>任務板</button>
     <button onclick="switchTab('tab-locations')" class="tab-btn bg-gray-700 text-gray-300 px-4 py-2 rounded-t-lg whitespace-nowrap"><i class="fa-solid fa-map-pin mr-2"></i>地點與NPC</button>
+<button onclick="switchTab('tab-timeline')" class="tab-btn bg-gray-700 text-gray-300 px-4 py-2 rounded-t-lg whitespace-nowrap"><i class="fa-solid fa-clock-rotate-left mr-2"></i>時間線</button>
+<button onclick="switchTab('tab-entities')" class="tab-btn bg-gray-700 text-gray-300 px-4 py-2 rounded-t-lg whitespace-nowrap"><i class="fa-solid fa-database mr-2"></i>實體百科</button>
     
     <!-- 🆕 新增的三個獨立功能按鈕 -->
     <button onclick="switchTab('tab-spells')" class="tab-btn bg-gray-700 text-gray-300 px-4 py-2 rounded-t-lg whitespace-nowrap"><i class="fa-solid fa-wand-magic-sparkles mr-2"></i>法術庫</button>
     <button onclick="switchTab('tab-store')" class="tab-btn bg-gray-700 text-gray-300 px-4 py-2 rounded-t-lg whitespace-nowrap"><i class="fa-solid fa-store mr-2"></i>萬物商店</button>
     <button onclick="switchTab('tab-combat')" class="tab-btn bg-gray-700 text-gray-300 px-4 py-2 rounded-t-lg whitespace-nowrap"><i class="fa-solid fa-swords mr-2"></i>先攻助手</button>
-    
     <button onclick="switchTab('tab-tools')" class="tab-btn active bg-white text-campaign-dark px-4 py-2 rounded-t-lg font-bold whitespace-nowrap"><i class="fa-solid fa-dice-d20 mr-2"></i>DM 工具</button>
     <button onclick="switchTab('tab-players')" class="tab-btn bg-gray-700 text-gray-300 px-4 py-2 rounded-t-lg whitespace-nowrap"><i class="fa-solid fa-id-card mr-2"></i>玩家面板</button>
     <button onclick="switchTab('tab-ref')" class="tab-btn bg-gray-700 text-gray-300 px-4 py-2 rounded-t-lg whitespace-nowrap"><i class="fa-solid fa-book-bookmark mr-2"></i>5e 規則速查</button>
+	<button onclick="switchTab('tab-minigames')" class="tab-btn bg-gray-700 text-gray-300 px-4 py-2 rounded-t-lg whitespace-nowrap"><i class="fa-solid fa-gamepad mr-2"></i>採集小遊戲</button>
 </nav>
-
-
-
     </header>
 
     <main class="flex-grow overflow-y-auto custom-scrollbar p-4 relative" id="main-content">
    
+
+<!-- 🆕 動態時間線 (獨立分頁) -->
+<div id="tab-timeline" class="tab-content w-full h-full bg-gray-900 text-gray-100 overflow-y-auto">
+    <div class="p-6 max-w-6xl mx-auto">
+        <!-- 將 index.html 左側的 API 輸入框移到這裡作為頂部控制列 -->
+        <div class="mb-8 p-4 bg-gray-800 rounded-lg border border-gray-700 flex gap-4 items-center">
+            <input type="text" id="apiUrl" placeholder="貼上 Google Apps Script API 網址..." class="flex-1 bg-gray-900 border border-gray-600 rounded px-3 py-2 text-sm">
+            <button onclick="fetchData()" class="bg-amber-600 hover:bg-amber-500 text-white px-4 py-2 rounded text-sm font-bold shadow">連線並載入</button>
+        </div>
+</div>
+        <!-- 貼上 index.html 的 #view-timeline 內容 -->
+ <div id="view-timeline" class="max-w-7xl mx-auto space-y-8 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-gray-800 before:via-gray-600 before:to-gray-800">
+    </div>
+</div>
+
+<!-- 🆕 實體與狀態百科 (獨立分頁) -->
+<div id="tab-entities" class="tab-content w-full h-full bg-gray-900 text-gray-100 overflow-y-auto">
+    <div class="p-6 max-w-6xl mx-auto">
+          <div id="view-entities" class="hidden max-w-6xl mx-auto pb-12">
+        <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6" id="entities-grid"></div>
+    </div>
+</div>
+</div>
+
+
 
 <!-- 任務板 -->
         <div id="tab-story" class="tab-content max-w-[1400px] mx-auto space-y-4">
@@ -196,6 +220,173 @@
     </div>
 </div>
 
+<!-- 🆕 採集小遊戲 (DM 判定速查表) -->
+<div id="tab-minigames" class="tab-content max-w-6xl mx-auto pb-10">
+    <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start">
+        
+        <!-- ⛏️ 凡戴爾礦坑：採礦速查表 -->
+        <div class="bg-white p-5 rounded-xl shadow border">
+            <h3 class="text-xl font-bold mb-3 border-b pb-2 flex justify-between items-center text-gray-800">
+                <span><i class="fa-solid fa-pickaxe mr-2 text-gray-600"></i>凡戴爾礦坑：採礦速查表</span>
+            </h3>
+            
+            <!-- 第一階段 -->
+            <div class="mb-4">
+                <h4 class="font-bold text-gray-900 bg-gray-200 px-2 py-1 rounded-t border border-b-0 text-sm">第一階段：尋找礦脈 (感知：求生)</h4>
+                <table class="w-full text-xs text-left border rounded-b bg-gray-50">
+                    <tbody>
+                        <tr class="border-b"><td class="p-2 font-bold text-purple-600 w-1/4">≥ 20</td><td class="p-2"><b>極優礦點：</b>產量 <b>x3</b>。解鎖「星銀礦」。</td></tr>
+                        <tr class="border-b"><td class="p-2 font-bold text-blue-600">15 - 19</td><td class="p-2"><b>普通礦點：</b>產量 <b>x2</b> (若有傳奇之鎬升為 x3)。無星銀礦。</td></tr>
+                        <tr class="border-b"><td class="p-2 font-bold text-orange-600">2 - 14</td><td class="p-2"><b>貧瘠礦點：</b>產量強制 <b>x1</b>。</td></tr>
+                        <tr><td class="p-2 font-bold text-red-600">自然 1</td><td class="p-2"><b>大失敗：</b>驚動地底怪物 或 遭遇落石陷阱 (1d6 傷害)。</td></tr>
+                    </tbody>
+                </table>
+                <div class="text-[10px] text-gray-500 mt-1 italic">※ DM 暗骰 1d4，決定該礦點可以進行幾次「開採判定」就會枯竭。</div>
+            </div>
+
+            <!-- 第二階段 -->
+            <div>
+                <h4 class="font-bold text-gray-900 bg-gray-800 text-white px-2 py-1 rounded-t border border-b-0 text-sm">第二階段：開採判定 (1d20 + 力量/體質 + 工具)</h4>
+                <table class="w-full text-xs text-left border rounded-b">
+                    <thead class="bg-gray-100"><tr><th class="p-2 w-1/4">總和 / 骰面</th><th class="p-2">獲得礦石 (單價)</th><th class="p-2">備註</th></tr></thead>
+                    <tbody>
+                        <tr class="border-b bg-purple-50"><td class="p-2 font-black text-purple-700">自然 20</td><td class="p-2 font-bold text-purple-800">✨ 星銀礦 x1 (100gp)</td><td class="p-2 text-gray-600">若在普通/貧瘠礦點，需有「傳奇之鎬」，否則轉為金礦。</td></tr>
+                        <tr class="border-b bg-yellow-50"><td class="p-2 font-bold text-yellow-700">18 - 19</td><td class="p-2 font-bold text-yellow-800">金礦 (20gp)</td><td class="p-2 text-gray-600 text-[10px]">產出數量乘以第一階段倍率。</td></tr>
+                        <tr class="border-b bg-gray-50"><td class="p-2 font-bold text-gray-700">16 - 17</td><td class="p-2 font-bold">銀礦 (10gp)</td><td class="p-2 text-gray-600 text-[10px]">產出數量乘以第一階段倍率。</td></tr>
+                        <tr class="border-b bg-orange-50"><td class="p-2 font-bold text-orange-700">13 - 15</td><td class="p-2 font-bold text-orange-800">銅礦 (5gp)</td><td class="p-2 text-gray-600 text-[10px]">產出數量乘以第一階段倍率。</td></tr>
+                        <tr class="border-b"><td class="p-2 font-bold text-gray-600">10 - 12</td><td class="p-2 font-bold">鐵礦 (1gp)</td><td class="p-2 text-gray-600 text-[10px]">產出數量乘以第一階段倍率。</td></tr>
+                        <tr class="border-b"><td class="p-2 font-bold text-gray-400">2 - 9</td><td class="p-2 text-gray-500">碎石 (0gp)</td><td class="p-2 text-gray-400 text-[10px]">揮棒落空，消耗次數。</td></tr>
+                        <tr><td class="p-2 font-black text-red-600">自然 1</td><td class="p-2 font-bold text-red-700">工具損壞 / 怪物出沒</td><td class="p-2 text-gray-500 text-[10px]">敲擊聲過大引來危機。</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 🎣 野外垂釣速查表 -->
+        <div class="bg-white p-5 rounded-xl shadow border">
+            <h3 class="text-xl font-bold mb-3 border-b pb-2 flex justify-between items-center text-blue-900">
+                <span><i class="fa-solid fa-fishing-rod mr-2 text-blue-600"></i>凡戴爾水域：釣魚速查表</span>
+            </h3>
+            
+            <!-- 第一階段 -->
+            <div class="mb-4">
+                <h4 class="font-bold text-blue-900 bg-blue-100 px-2 py-1 rounded-t border border-blue-200 border-b-0 text-sm">第一階段：尋找釣點 (感知：求生)</h4>
+                <table class="w-full text-xs text-left border border-blue-200 rounded-b bg-blue-50">
+                    <tbody>
+                        <tr class="border-b border-blue-200"><td class="p-2 font-bold text-purple-600 w-1/4">≥ 20</td><td class="p-2"><b>魚群爆發：</b>產量 <b>x3</b>。解鎖「奇幻魚類」。</td></tr>
+                        <tr class="border-b border-blue-200"><td class="p-2 font-bold text-blue-600">15 - 19</td><td class="p-2"><b>優良釣點：</b>產量 <b>x2</b> (若有傳說釣竿升為 x3)。</td></tr>
+                        <tr class="border-b border-blue-200"><td class="p-2 font-bold text-orange-600">2 - 14</td><td class="p-2"><b>貧瘠水域：</b>產量強制 <b>x1</b>。</td></tr>
+                        <tr><td class="p-2 font-bold text-red-600">自然 1</td><td class="p-2"><b>大失敗：</b>驚動水底怪物 或 釣具卡底報銷。</td></tr>
+                    </tbody>
+                </table>
+                <div class="text-[10px] text-gray-500 mt-1 italic">※ DM 暗骰 1d4，決定該釣點可以進行幾次「拋竿判定」。</div>
+            </div>
+
+            <!-- 第二階段 -->
+            <div>
+                <h4 class="font-bold text-white bg-blue-800 px-2 py-1 rounded-t border border-blue-800 border-b-0 text-sm">第二階段：拋竿判定 (1d20 + 敏捷/力量 + 工具)</h4>
+                <table class="w-full text-xs text-left border border-blue-200 rounded-b">
+                    <thead class="bg-blue-50"><tr><th class="p-2 w-1/4 text-blue-900">總和 / 骰面</th><th class="p-2 text-blue-900">獲得漁獲 (單價)</th><th class="p-2 text-blue-900">對應奇遇表</th></tr></thead>
+                    <tbody>
+                        <tr class="border-b bg-pink-50"><td class="p-2 font-black text-pink-700 leading-tight">自然 20<br><span class="text-[9px] font-normal">(需傳說釣竿)</span></td><td class="p-2 font-bold text-pink-800">💎 珍奇異寶 x1</td><td class="p-2 text-gray-600 font-bold">👉 查閱【表D】</td></tr>
+                        <tr class="border-b bg-purple-50"><td class="p-2 font-black text-purple-700 leading-tight">> 20 總和<br><span class="text-[9px] font-normal">(或無傳說的自然20)</span></td><td class="p-2 font-bold text-purple-800">🐟 奇幻魚類 x1</td><td class="p-2 text-gray-600 font-bold">👉 查閱【表C】</td></tr>
+                        <tr class="border-b bg-yellow-50"><td class="p-2 font-bold text-yellow-700">17 - 20</td><td class="p-2 font-bold text-yellow-800">黃金錦鯉 (20gp)</td><td class="p-2 text-gray-600 text-[10px]">數量 x 第一階段倍率</td></tr>
+                        <tr class="border-b bg-blue-50/50"><td class="p-2 font-bold text-blue-700">14 - 16</td><td class="p-2 font-bold text-blue-800">銀光鱸魚 (10gp)</td><td class="p-2 text-gray-600 text-[10px]">數量 x 第一階段倍率</td></tr>
+                        <tr class="border-b bg-green-50"><td class="p-2 font-bold text-green-700">11 - 13</td><td class="p-2 font-bold text-green-800">青銅鯉 (5gp)</td><td class="p-2 text-gray-600 text-[10px]">數量 x 第一階段倍率</td></tr>
+                        <tr class="border-b"><td class="p-2 font-bold text-gray-600">2 - 10</td><td class="p-2 font-bold text-gray-500">📜 故事性雜物</td><td class="p-2 text-gray-600 font-bold">👉 查閱【表B】</td></tr>
+                        <tr><td class="p-2 font-black text-red-600">自然 1</td><td class="p-2 font-bold text-red-700">☠️ 水底威脅</td><td class="p-2 text-gray-600 font-bold">👉 查閱【表A】</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- 🎲 釣魚專用 D10 奇遇表 (全寬度) -->
+        <div class="bg-white p-5 rounded-xl shadow border xl:col-span-2">
+            <h3 class="text-lg font-bold mb-3 border-b pb-2 flex items-center text-gray-800">
+                <i class="fa-solid fa-dice-d10 mr-2 text-purple-600"></i>釣魚專用 D10 奇遇表 <span class="text-xs text-gray-400 ml-2 font-normal">(玩家擲出對應區間時，DM 擲 d10 決定結果)</span>
+            </h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                
+                <!-- 表A & 表B -->
+                <div class="space-y-4">
+                    <!-- 表A: 水底威脅 -->
+                    <div class="border rounded-lg overflow-hidden">
+                        <div class="bg-red-800 text-white px-3 py-1.5 text-sm font-bold">【表A】水底威脅 (自然 1 大失敗)</div>
+                        <ul class="text-xs p-2 space-y-1 bg-red-50/30 text-gray-700">
+                            <li><b class="text-red-700">1.</b> 暴躁泥魔蝠躍出，敏捷豁免否則致盲。</li>
+                            <li><b class="text-red-700">2.</b> 擬態怪假餌！木盒長出牙齒咬住玩家。</li>
+                            <li><b class="text-red-700">3.</b> 水鬼(Kelpie)將玩家拽入深水區溺水。</li>
+                            <li><b class="text-red-700">4.</b> 巨噬魚群圍攻淺水區的玩家。</li>
+                            <li><b class="text-red-700">5.</b> 魚線卡死反彈，魚竿報銷並受 1d4 穿刺。</li>
+                            <li><b class="text-red-700">6.</b> 巨型變異螯蝦躍上岸夾住腳踝。</li>
+                            <li><b class="text-red-700">7.</b> 毒水母纏繞，體質豁免否則麻痺 1 回合。</li>
+                            <li><b class="text-red-700">8.</b> 釣起生鏽鐵錨與一隻飢餓的鏽蝕怪。</li>
+                            <li><b class="text-red-700">9.</b> 驚醒微型水元素，掀起巨浪捲走隨身小包。</li>
+                            <li><b class="text-red-700">10.</b> 湖底怪力拉扯，被拽入冷水受 1d4 傷害。</li>
+                        </ul>
+                    </div>
+
+                    <!-- 表B: 故事雜物 -->
+                    <div class="border rounded-lg overflow-hidden">
+                        <div class="bg-gray-700 text-white px-3 py-1.5 text-sm font-bold">【表B】故事性雜物 (總值 2 - 10)</div>
+                        <ul class="text-xs p-2 space-y-1 bg-gray-50 text-gray-700">
+                            <li><b class="text-gray-800">1.</b> 斷裂的紅印記幫短劍，沾著洗不掉的黑血。</li>
+                            <li><b class="text-gray-800">2.</b> 發臭的吟遊詩人羽毛帽，內有一首未完情詩。</li>
+                            <li><b class="text-gray-800">3.</b> 漂流瓶中未寄出的情書 (收件人是當地NPC)。</li>
+                            <li><b class="text-gray-800">4.</b> 詭異的多眼生鏽神像，握著會頭暈。</li>
+                            <li><b class="text-gray-800">5.</b> 少一隻眼的木雕熊，刻著失蹤孩童的名字。</li>
+                            <li><b class="text-gray-800">6.</b> 長青苔的銅鏡，鏡中偶爾閃過別人的臉。</li>
+                            <li><b class="text-gray-800">7.</b> 裝著兩顆骨子的小木盒 (永遠只會擲出雙6)。</li>
+                            <li><b class="text-gray-800">8.</b> 卡著粗糙紅鬍鬚的微小矮人鐵頭盔。</li>
+                            <li><b class="text-gray-800">9.</b> 泡爛的 500gp 通緝令，畫像激似某位玩家。</li>
+                            <li><b class="text-gray-800">10.</b> 綁著石頭的精緻銅鑰匙 (不知道開哪扇門)。</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 表C & 表D -->
+                <div class="space-y-4">
+                    <!-- 表C: 奇幻魚類 -->
+                    <div class="border rounded-lg overflow-hidden">
+                        <div class="bg-purple-800 text-white px-3 py-1.5 text-sm font-bold">【表C】奇幻魚類 (總值 > 20 或 無傳奇的自然20)</div>
+                        <ul class="text-xs p-2 space-y-1 bg-purple-50/30 text-gray-700">
+                            <li><b class="text-purple-700">1.</b> 盲眼洞穴魚 (生食獲 1hr 盲視，但短暫畏光)。</li>
+                            <li><b class="text-purple-700">2.</b> 裝甲巨鱘 (鱗片可交鐵匠打造成精良盾牌)。</li>
+                            <li><b class="text-purple-700">3.</b> 發光幽靈鮭 (生食獲 24hr 死靈傷害抗性)。</li>
+                            <li><b class="text-purple-700">4.</b> 火炎斑紋鯰 (生食獲 8hr 無視極寒氣候影響)。</li>
+                            <li><b class="text-purple-700">5.</b> 靜音海馬 (離水釋放 5 呎沉默術結界 1 分鐘)。</li>
+                            <li><b class="text-purple-700">6.</b> 寶石鯉 (剖開魚肚必獲得一顆 50gp 的寶石)。</li>
+                            <li><b class="text-purple-700">7.</b> 變色龍章魚 (交給煉金術士可提煉隱形藥水)。</li>
+                            <li><b class="text-purple-700">8.</b> 毒刺河豚 (處理成功可獲 3 劑塗抹武器用毒藥)。</li>
+                            <li><b class="text-purple-700">9.</b> 低語海螺 (在耳邊播放一個當地任務線索)。</li>
+                            <li><b class="text-purple-700">10.</b> 雷霆鰻 (放水桶裡可做成電擊陷阱，觸碰1d4電傷)。</li>
+                        </ul>
+                    </div>
+
+                    <!-- 表D: 珍奇異寶 -->
+                    <div class="border rounded-lg overflow-hidden">
+                        <div class="bg-pink-700 text-white px-3 py-1.5 text-sm font-bold">【表D】珍奇異寶 (自然 20 + 傳說釣竿)</div>
+                        <ul class="text-xs p-2 space-y-1 bg-pink-50/30 text-gray-700">
+                            <li><b class="text-pink-600">1.</b> 魔法防水骨筒：內含《水下呼吸》法術卷軸。</li>
+                            <li><b class="text-pink-600">2.</b> 水之珍珠：可用於《鑑定術》或賣 100gp。</li>
+                            <li><b class="text-pink-600">3.</b> 波浪匕首：+1 魔法匕首，水下揮舞無阻力。</li>
+                            <li><b class="text-pink-600">4.</b> 耐色瑞爾金幣袋：50 枚古代魔法帝國稀有金幣。</li>
+                            <li><b class="text-pink-600">5.</b> 深水城護盾戒指：殘存魔法，可施放 1d4 次護盾術。</li>
+                            <li><b class="text-pink-600">6.</b> 不滅明焰提燈：裝著發光水底史萊姆，永久照明。</li>
+                            <li><b class="text-pink-600">7.</b> 星銀項鍊：月光下閃爍星芒，價值 150gp。</li>
+                            <li><b class="text-pink-600">8.</b> 遺落的治療藥水：強效治療藥水 (4d4+4)。</li>
+                            <li><b class="text-pink-600">9.</b> 半塊送訊石：偶爾傳出斷斷續續的求救低語。</li>
+                            <li><b class="text-pink-600">10.</b> 秘銀鎖子甲：無鏽的精靈盔甲，極度輕便。</li>
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
 
         <!-- DM 工具 -->
         <div id="tab-tools" class="tab-content active max-w-6xl mx-auto">
@@ -273,38 +464,6 @@
         <div id="dice-hist" class="h-28 overflow-y-auto bg-gray-50 border rounded p-2 text-sm custom-scrollbar"></div>
     </div>
 
-    <!-- 礦坑與釣魚合體區 -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div class="bg-white p-4 rounded-xl shadow border h-full">
-            <h3 class="text-base font-bold mb-2 border-b pb-1"><i class="fa-solid fa-pickaxe mr-1 text-gray-600"></i>礦坑模擬 (強化版)</h3>
-            <select id="mine-tool" class="border rounded p-1.5 text-xs w-full mb-3 outline-none">
-                <option value="-2">徒手 / 破木鎬 (-2)</option>
-                <option value="0">生鏽舊鐵鎬 (0)</option>
-                <option value="2">精鋼鎬 (+2)</option>
-                <option value="3">魔法輕鎬 (+3)</option>
-                <option value="4">矮人碎岩鎬 (+4)</option>
-                <option value="adv">傳奇之鎬 (優勢)</option>
-                <option value="boom" class="text-red-600 font-bold">💣 黑火藥炸藥桶</option>
-            </select>
-            <div class="flex gap-1 mb-3"><input type="number" id="mine-mod" value="0" class="border rounded p-1 w-full text-center text-sm" placeholder="其他加值"><button onclick="rollMining()" class="bg-gray-800 text-white px-3 py-1 rounded font-bold hover:bg-gray-700 w-full">開挖</button></div>
-            <div id="mine-res" class="p-2 bg-gray-50 rounded border min-h-[60px] text-center text-xs flex flex-col justify-center items-center text-gray-400">點擊開挖...</div>
-        </div>
-        <div class="bg-white p-4 rounded-xl shadow border h-full">
-            <h3 class="text-base font-bold mb-2 border-b pb-1"><i class="fa-solid fa-fishing-rod mr-1 text-blue-600"></i>野外垂釣 (強化版)</h3>
-            <select id="fish-tool" class="border rounded p-1.5 text-xs w-full mb-3 outline-none">
-                <option value="-2">簡陋樹枝 (-2)</option>
-                <option value="0">木製釣竿 (0)</option>
-                <option value="1">鐵線魚鉤 (+1)</option>
-                <option value="2">閃光假餌 (+2)</option>
-                <option value="3">夜光蟲魔法餌 (+3)</option>
-                <option value="4">精靈破浪者 (+4)</option>
-                <option value="adv" class="text-blue-600 font-bold">🔱 海神之竿 (優勢)</option>
-            </select>
-            <div class="flex gap-1 mb-3"><input type="number" id="fish-mod" value="0" class="border rounded p-1 w-full text-center text-sm" placeholder="其他加值"><button onclick="rollFishing()" class="bg-blue-600 text-white px-3 py-1 rounded font-bold hover:bg-blue-700 w-full">甩竿</button></div>
-            <div id="fish-res" class="p-2 bg-blue-50 rounded border min-h-[60px] text-center text-xs flex flex-col justify-center items-center text-blue-400">點擊甩竿...</div>
-        </div>
-    </div>
-</div>
 
 <!-- NPC 隨機生成與記錄工具 -->
 <div class="bg-white p-5 rounded-xl shadow border lg:col-span-2">
@@ -1271,7 +1430,6 @@ let pls = [
                 s: { str: 8, dex: 16, con: 14, int: 8, wis: 10, cha: 17 }
             }
         ];
-
 // ==========================================
 // 🎲 野外突發事件庫 (60 種)
 // ==========================================
@@ -1855,54 +2013,6 @@ let cmbs = [];
             setH('drink-res', h); if(dR<=dDCs.length){ setH('drink-round', dR); setH('drink-dc', dDCs[dR-1]); }
         };
 
-window.rollMining = () => {
-    const t = getV('mine-tool'), mod = parseInt(getV('mine-mod'))||0;
-    let d20 = Math.floor(Math.random()*20)+1; 
-    if(t==='adv') d20 = Math.max(d20, Math.floor(Math.random()*20)+1);
-    
-    let tot = d20 + (t==='adv' ? 0 : (t==='boom' ? 0 : parseInt(t))) + mod;
-    let dr = "", cl = "";
-
-    // 炸藥桶特殊玩法
-    if (t === 'boom') {
-        if (d20 <= 8) { dr = "💥 劇烈崩塌！全體受 2d6 鈍擊傷害"; cl = "text-red-700 font-black"; }
-        else if (d20 <= 14) { dr = "💥 炸出大量銅鐵礦 x10，但引來地底怪物！"; cl = "text-orange-600 font-bold"; }
-        else { dr = "💥 完美爆破！獲得 金礦x5, 秘銀原石x2"; cl = "text-blue-600 font-bold"; }
-        tot = "爆破骰(" + d20 + ")";
-    } else {
-        // 一般鎬子挖掘
-        if(tot <= 3){ dr="驚醒地底怪物！(進入遭遇戰)"; cl="text-red-700 font-black";}
-        else if(tot <= 7){ dr="鎬頭滑開砸到腳！受傷 (-1d4 HP)"; cl="text-red-500 font-bold";} 
-        else if(tot <= 12){ dr=`廢渣與銅礦 x ${t==='adv'?5:3}`; cl="text-orange-700";}
-        else if(tot <= 16){ dr=`銀礦 x ${t==='adv'?5:2}, 鐵礦 x 2`; cl="text-gray-600 font-bold";} 
-        else if(tot <= 20){ dr=`金礦 x ${t==='adv'?4:2}, 寶石原石 x 1`; cl="text-yellow-600 font-bold";}
-        else if(tot <= 23){ dr=(t>=3||t==='adv')?`秘銀礦 x ${t==='adv'?3:1}, 精金塊 x 1`:"獲得 金礦 x 3 (工具強度不足以採集秘銀)"; cl="text-blue-500 font-bold";}
-        else if(tot <= 26){ dr=(t>=4||t==='adv')?"✨ 星月寶石 x 1, 古代符文碎片":"獲得 秘銀礦 x 2 (工具強度不足以採集寶石)"; cl="text-purple-600 font-black text-sm";}
-        else { dr="👑 傳說龍脈石 x 1 (價值連城)"; cl="text-yellow-500 font-black text-sm drop-shadow"; }
-    }
-    setH('mine-res', `<div class="text-[10px] text-gray-500 mb-1">D20(${d20}) + 工具加值 = <b class="text-gray-800 text-sm">${tot}</b></div><div class="${cl}">${dr}</div>`);
-};
-
-window.rollFishing = () => {
-    const t = getV('fish-tool'), mod = parseInt(getV('fish-mod'))||0;
-    let d20 = Math.floor(Math.random()*20)+1; 
-    if(t==='adv') d20 = Math.max(d20, Math.floor(Math.random()*20)+1);
-    
-    let tVal = (t==='adv') ? 0 : parseInt(t);
-    let tot = d20 + tVal + mod;
-    let dr="", cl="";
-    
-    if(tot <= 3){ dr="釣到水鬼或泥沼蟹！(進入遭遇戰)"; cl="text-red-700 font-black"; } 
-    else if(tot <= 7){ dr="拉扯過猛斷線！丟失釣餌或受傷 (-1d4 HP)"; cl="text-red-500 font-bold"; } 
-    else if(tot <= 12){ dr=`破舊的靴子 x1, 溪流草魚 x ${Math.floor(Math.random()*3)+1}`; cl="text-gray-600"; }
-    else if(tot <= 16){ dr="肥美鮭魚 x2, 銀鱗鱒魚 x1"; cl="text-blue-400 font-bold"; } 
-    else if(tot <= 20){ dr="炫彩錦鯉 x1, 水下遺失的金幣袋 (2d10 gp)"; cl="text-yellow-600 font-bold"; }
-    else if(tot <= 23){ dr=(tVal>=3||t==='adv')?"深海盲洞魚 x1, 閃爍珍珠 x2":"炫彩錦鯉 x2 (釣竿承受不住更重的深水獲物)"; cl="text-purple-500 font-bold"; }
-    else if(tot <= 26){ dr=(tVal>=4||t==='adv')?"✨ 妖精之淚 (稀有材料), 水下魔法戒指":"閃爍珍珠 x3 (釣竿韌性不足)"; cl="text-pink-500 font-black text-sm"; }
-    else { dr="🔱 海神三叉戟的生鏽碎片 (奇物)"; cl="text-teal-500 font-black text-sm drop-shadow"; }
-    
-    setH('fish-res', `<div class="text-[10px] text-blue-400 mb-1">D20(${d20}) + 釣具加值 = <b class="text-blue-800 text-sm">${tot}</b></div><div class="${cl}">${dr}</div>`);
-};
 
 window.showEncounters = () => {
     const cat = getV('enc-category');
@@ -2240,13 +2350,212 @@ function generateWebDungeon() {
                 }
             }, 50);
         };
-        // 初始化
+
+
+        // Mock Data Fallback
+        const mockData = {
+            entities: [
+                { Entity_ID: "PC_001", Name: "唐 (Tang)", Type: "PC", Current_Status: "存活", Current_Location: "凡戴林", Notes: "尋找聖物與父親的獸人狂戰士" },
+                { Entity_ID: "ITEM_002", Name: "翡翠沃土石", Type: "Item", Current_Status: "被竊", Current_Location: "波浪回音洞", Notes: "唐的部落聖物，具備淨化大地之力" },
+                { Entity_ID: "LOC_002", Name: "波浪回音洞", Type: "Location", Current_Status: "被佔據", Current_Location: "凡戴林周邊", Notes: "法術熔爐遺跡" }
+            ],
+            events: [
+                { Event_ID: "EV_PAST_TAS_01", Timeline_Phase: "過去階段二", Title: "塔莎之吻", Description: "異空間遭遇", Prerequisites: "NONE", Consequence: "NONE" },
+                { Event_ID: "EV_PAST_01", Timeline_Phase: "過去階段一", Title: "米拉巴的危機", Description: "伊琳娜與凱爾解決水源危機。", Prerequisites: "EV_PAST_TAS_01=觸發", Consequence: "獲得ITEM_002；解鎖LOC_002" }
+            ]
+        };
+
+        let appData = mockData;
+
+        function getStatusColor(status) {
+            if (!status) return 'text-gray-400 bg-gray-400/10 border-gray-400/30';
+            const s = String(status);
+            if (s.includes('存活') || s.includes('持有') || s.includes('獲救')) return 'text-emerald-400 bg-emerald-400/10 border-emerald-400/30';
+            if (s.includes('死亡') || s.includes('被竊') || s.includes('消沉') || s.includes('被佔據')) return 'text-rose-400 bg-rose-400/10 border-rose-400/30';
+            if (s.includes('潛伏') || s.includes('被囚禁') || s.includes('真空')) return 'text-amber-400 bg-amber-400/10 border-amber-400/30';
+            return 'text-blue-400 bg-blue-400/10 border-blue-400/30';
+        }
+
+        function getTypeIcon(type) {
+            const t = String(type);
+            if(t === 'PC' || t === 'DMPC') return '👤';
+            if(t === 'NPC') return '🎭';
+            if(t === 'Item') return '🔮';
+            if(t === 'Location') return '🗺️';
+            return '📌';
+        }
+
+        // 修改的輔助函式：現在也支援替換 Event_ID 為事件標題
+        function formatTextWithReferences(text) {
+            if (!text || text === 'NONE') return text;
+            let result = String(text);
+            
+            // 1. 替換實體 (Entities)
+            if (appData && appData.entities) {
+                const sortedEntities = [...appData.entities].sort((a, b) => 
+                    (b.Entity_ID || '').length - (a.Entity_ID || '').length
+                );
+                
+                sortedEntities.forEach(ent => {
+                    if (ent.Entity_ID && ent.Name) {
+                        const regex = new RegExp(ent.Entity_ID, 'g');
+                        const highlightedName = `<span class="px-1.5 py-0.5 mx-0.5 rounded bg-amber-500/20 text-amber-200 border border-amber-500/30 font-bold tracking-wide shadow-sm inline-flex items-center gap-1 cursor-pointer hover:bg-amber-500/40 transition-colors" title="ID: ${ent.Entity_ID}">${getTypeIcon(ent.Type)} ${ent.Name}</span>`;
+                        result = result.replace(regex, highlightedName);
+                    }
+                });
+            }
+            
+            // 2. 替換事件 (Events)
+            if (appData && appData.events) {
+                const sortedEvents = [...appData.events].sort((a, b) => 
+                    (b.Event_ID || '').length - (a.Event_ID || '').length
+                );
+                
+                sortedEvents.forEach(ev => {
+                    if (ev.Event_ID && ev.Title) {
+                        const regex = new RegExp(ev.Event_ID, 'g');
+                        const highlightedEvent = `<span class="px-1.5 py-0.5 mx-0.5 rounded bg-indigo-500/20 text-indigo-200 border border-indigo-500/30 font-bold tracking-wide shadow-sm inline-flex items-center gap-1 cursor-pointer hover:bg-indigo-500/40 transition-colors" title="ID: ${ev.Event_ID}">🏷️ [事件] ${ev.Title}</span>`;
+                        result = result.replace(regex, highlightedEvent);
+                    }
+                });
+            }
+            
+            return result;
+        }
+
+        function renderEntities() {
+            const grid = document.getElementById('entities-grid');
+            grid.innerHTML = '';
+            
+            if (!appData || !appData.entities) return;
+
+            appData.entities.forEach(ent => {
+                const statusColor = getStatusColor(ent.Current_Status);
+                grid.innerHTML += `
+                    <div class="bg-gray-800 border border-gray-700 rounded-xl p-5 hover:border-gray-500 hover:shadow-xl transition-all duration-300">
+                        <div class="flex justify-between items-start mb-4">
+                            <h3 class="text-lg font-bold text-gray-100 flex items-center gap-2">
+                                <span>${getTypeIcon(ent.Type)}</span> ${ent.Name || 'Unknown'}
+                            </h3>
+                            <span class="text-xs px-2.5 py-1 rounded border font-medium tracking-wide ${statusColor}">${ent.Current_Status || 'Unknown'}</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-sm text-gray-400 mb-3">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                            ${ent.Current_Location || 'Unknown'}
+                        </div>
+                        <p class="text-sm text-gray-300 mt-4 pt-4 border-t border-gray-700/50 leading-relaxed min-h-[3rem]">${ent.Notes || ''}</p>
+                        <div class="mt-4 pt-2 text-xs text-gray-600 font-mono tracking-wider flex justify-between items-center">
+                            <span>ID: ${ent.Entity_ID || ''}</span>
+                            <span class="text-gray-500 uppercase tracking-widest text-[10px]">${ent.Type || ''}</span>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function renderTimeline() {
+            const timeline = document.getElementById('view-timeline');
+            timeline.innerHTML = '';
+            
+            if (!appData || !appData.events) return;
+
+            appData.events.forEach((ev, idx) => {
+                timeline.innerHTML += `
+                    <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group mb-8">
+                        <div class="flex items-center justify-center w-10 h-10 rounded-full border-4 border-gray-900 bg-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.5)] shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10 transition-transform group-hover:scale-110">
+                            <span class="text-gray-900 font-bold text-sm">${idx + 1}</span>
+                        </div>
+                        
+                        <div class="w-[calc(100%-3.5rem)] md:w-[calc(50%-2.5rem)] bg-gray-800 p-6 rounded-2xl border border-gray-700 shadow-lg hover:border-amber-500/50 hover:shadow-amber-500/10 transition-all duration-300 transform group-hover:-translate-y-1">
+                            <div class="flex flex-wrap justify-between items-center mb-3 gap-2">
+                                <span class="bg-gray-900 text-amber-500 font-bold text-xs px-3 py-1 rounded-full tracking-wide shadow-inner">${ev.Timeline_Phase || ''}</span>
+                                <span class="text-[10px] text-gray-500 font-mono tracking-widest">${ev.Event_ID || ''}</span>
+                            </div>
+                            <h3 class="text-xl font-bold text-gray-100 mb-3">${ev.Title || ''}</h3>
+                            <p class="text-gray-300 text-sm leading-relaxed mb-5">${ev.Description || ''}</p>
+                            
+                            <div class="bg-gray-900/80 rounded-lg p-4 text-sm space-y-3 border border-gray-700/50">
+                                <div class="flex gap-3 items-center">
+                                    <span class="text-gray-500 font-medium shrink-0 flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg> 前置條件:</span>
+                                    <span class="leading-relaxed ${ev.Prerequisites === 'NONE' ? 'text-gray-600 text-xs' : 'text-amber-100'}">${formatTextWithReferences(ev.Prerequisites)}</span>
+                                </div>
+                                <div class="flex gap-3 pt-3 border-t border-gray-800 items-center">
+                                    <span class="text-gray-500 font-medium shrink-0 flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg> 觸發影響:</span>
+                                    <span class="text-blue-100 leading-relaxed">${formatTextWithReferences(ev.Consequence)}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        async function fetchData() {
+            const urlInput = document.getElementById('apiUrl').value;
+            const targetUrl = urlInput ? urlInput : "https://script.google.com/macros/s/AKfycbwqbd84S0hVmYyQJtx6il4-9rJlLPLzmP4lPfVK7mYicQONtIcKu5IA_SSOva_wB7qA/exec";
+            
+            const btn = document.querySelector('button[onclick="fetchData()"]');
+            
+            try {
+                btn.innerText = '連線中...';
+                btn.classList.replace('bg-amber-600', 'bg-gray-600');
+                
+                const res = await fetch(targetUrl, {
+                    method: 'GET',
+                    mode: 'cors',
+                    redirect: 'follow'
+                });
+                
+                if (!res.ok) {
+                    throw new Error(`HTTP error! status: ${res.status}`);
+                }
+                
+                const data = await res.json();
+                
+                if(data && data.entities && data.events) {
+                    appData = data;
+                    renderTimeline();
+                    renderEntities();
+                    btn.innerText = '載入成功！';
+                    btn.classList.replace('bg-gray-600', 'bg-emerald-600');
+                } else {
+                    throw new Error('回傳的 JSON 缺少 entities 或 events 陣列');
+                }
+            } catch(err) {
+                console.error("Fetch Error:", err);
+                let errorMsg = err.message;
+                if (err.message.includes('fetch')) {
+                    errorMsg = "CORS 跨域阻擋或網路中斷。請確認 Apps Script 部署時「誰可以存取」已設定為「所有人 (Anyone)」。";
+                }
+                
+                alert(`API 讀取失敗：\n${errorMsg}\n\n將退回使用內建測試資料。`);
+                
+                btn.innerText = '連線失敗';
+                btn.classList.replace('bg-gray-600', 'bg-rose-600');
+                renderTimeline();
+            }
+            
+setTimeout(() => {
+    btn.innerText = '連線並載入';
+    // 移除成功(綠)或失敗(紅)的顏色，加回原本的琥珀色
+    btn.classList.remove('bg-emerald-600', 'bg-rose-600');
+    btn.classList.add('bg-amber-600');
+}, 3000);
+}
+
 window.onload = () => {
+    // 來自 DM_index.html 的初始化
     initArena(); genOdds(); 
     renderQuests(); renderLocs(); renderSpells(); renderStore(); renderPlayers(); 
     renderNpcHistory(); 
-    switchTab('tab-story'); // 👈 新增這行，讓網頁載入時預設跳到「任務板」
+    
+    // 來自 index.html 的初始化
+    fetchData(); 
+
+    // 預設開啟任務板
+    switchTab('tab-story'); 
 };
+
     </script>
 </body>
 </html>
