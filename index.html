@@ -2,7 +2,12 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="戰役助手">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon-192.png">
     <title>TRPG 戰役助手</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -18,6 +23,16 @@
         .bg-str { background-color: #ffcccc; } .bg-dex { background-color: #cce5ff; }
         .bg-con { background-color: #ffddcc; } .bg-int { background-color: #ccffcc; }
         .bg-wis { background-color: #ffe5cc; } .bg-cha { background-color: #e5ccff; }
+    
+        /* Ensure long tab content (including House Rules) can scroll */
+        #main-content { flex: 1; min-height: 0; }
+        .tab-content.active { 
+            display: block; 
+            overflow-y: auto; 
+            max-height: 100%;
+        }
+        #tab-houserules { min-height: 0; }
+
     </style>
 </head>
 <body class="text-gray-800 h-screen flex flex-col overflow-hidden">
@@ -83,7 +98,8 @@
 <nav class="container mx-auto px-2 flex space-x-1 overflow-x-auto custom-scrollbar pb-1">
     <button onclick="switchTab('tab-story')" class="tab-btn bg-gray-700 text-gray-300 px-4 py-2 rounded-t-lg whitespace-nowrap"><i class="fa-solid fa-clipboard-list mr-2"></i>任務板</button>
     <button onclick="switchTab('tab-locations')" class="tab-btn bg-gray-700 text-gray-300 px-4 py-2 rounded-t-lg whitespace-nowrap"><i class="fa-solid fa-map-pin mr-2"></i>地點與NPC</button>
-<button onclick="switchTab('tab-timeline')" class="tab-btn bg-gray-700 text-gray-300 px-4 py-2 rounded-t-lg whitespace-nowrap"><i class="fa-solid fa-clock-rotate-left mr-2"></i>時間線</button>
+<button onclick="switchTab('tab-map')" class="tab-btn bg-gray-700 text-gray-300 px-4 py-2 rounded-t-lg whitespace-nowrap"><i class="fa-solid fa-map mr-2"></i>地圖</button>
+    <button onclick="switchTab('tab-timeline')" class="tab-btn bg-gray-700 text-gray-300 px-4 py-2 rounded-t-lg whitespace-nowrap"><i class="fa-solid fa-clock-rotate-left mr-2"></i>時間線</button>
 <button onclick="switchTab('tab-entities')" class="tab-btn bg-gray-700 text-gray-300 px-4 py-2 rounded-t-lg whitespace-nowrap"><i class="fa-solid fa-database mr-2"></i>實體百科</button>
     
     <!-- 🆕 新增的三個獨立功能按鈕 -->
@@ -91,6 +107,7 @@
     <button onclick="switchTab('tab-store')" class="tab-btn bg-gray-700 text-gray-300 px-4 py-2 rounded-t-lg whitespace-nowrap"><i class="fa-solid fa-store mr-2"></i>萬物商店</button>
     <button onclick="switchTab('tab-combat')" class="tab-btn bg-gray-700 text-gray-300 px-4 py-2 rounded-t-lg whitespace-nowrap"><i class="fa-solid fa-swords mr-2"></i>先攻助手</button>
     <button onclick="switchTab('tab-tools')" class="tab-btn active bg-white text-campaign-dark px-4 py-2 rounded-t-lg font-bold whitespace-nowrap"><i class="fa-solid fa-dice-d20 mr-2"></i>DM 工具</button>
+    <button onclick="switchTab('tab-houserules')" class="tab-btn bg-gray-700 text-gray-300 px-4 py-2 rounded-t-lg whitespace-nowrap"><i class="fa-solid fa-scroll mr-2"></i>House Rules</button>
     <button onclick="switchTab('tab-players')" class="tab-btn bg-gray-700 text-gray-300 px-4 py-2 rounded-t-lg whitespace-nowrap"><i class="fa-solid fa-id-card mr-2"></i>玩家面板</button>
     <button onclick="switchTab('tab-ref')" class="tab-btn bg-gray-700 text-gray-300 px-4 py-2 rounded-t-lg whitespace-nowrap"><i class="fa-solid fa-book-bookmark mr-2"></i>5e 規則速查</button>
 	<button onclick="switchTab('tab-minigames')" class="tab-btn bg-gray-700 text-gray-300 px-4 py-2 rounded-t-lg whitespace-nowrap"><i class="fa-solid fa-gamepad mr-2"></i>採集小遊戲</button>
@@ -133,6 +150,7 @@
                     <button onclick="renderQuests('Main')" class="quest-btn px-3 py-1 bg-gray-200 text-gray-700 rounded text-sm font-bold shadow-sm transition">礦坑主線</button>
                     <button onclick="renderQuests('Side')" class="quest-btn px-3 py-1 bg-gray-200 text-gray-700 rounded text-sm font-bold shadow-sm transition">礦坑支線</button>
                     <button onclick="renderQuests('DoIP')" class="quest-btn px-3 py-1 bg-gray-200 text-gray-700 rounded text-sm font-bold shadow-sm transition">冰塔峰擴充</button>
+                    <button onclick="renderQuests('Obelisk')" class="quest-btn px-3 py-1 bg-gray-200 text-gray-700 rounded text-sm font-bold shadow-sm transition">破碎方尖碑</button>
                     <!-- 🆕 新增的清除按鈕 -->
                     <button onclick="clearQuests()" class="px-3 py-1 bg-red-100 text-red-700 border border-red-300 hover:bg-red-200 hover:text-red-800 rounded text-sm font-bold shadow-sm transition">清除所有接取</button>
                 </div>
@@ -648,7 +666,101 @@
 
     </main>
 
-    <script>
+    
+<div id="tab-houserules" class="tab-content max-w-4xl mx-auto pb-10 min-h-0 overflow-y-auto">
+    <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+        <div class="bg-gradient-to-r from-amber-700 to-amber-900 text-white p-6">
+            <h2 class="text-2xl font-bold flex items-center"><i class="fa-solid fa-scroll mr-3"></i>🎲 D&D 5e 戰役專屬 House Rules 總表</h2>
+            <p class="text-amber-100 mt-1 text-sm">本戰役適用的特殊規則。與官方規則衝突時以本表為準。除非特別註明，雙方敵我皆適用。</p>
+        </div>
+        <div class="p-6 space-y-8">
+
+            <!-- 一、戰鬥與走位機制 -->
+            <section>
+                <h3 class="text-xl font-bold text-amber-800 border-b-2 border-amber-200 pb-2 mb-4">一、戰鬥與走位機制</h3>
+                <div class="space-y-5">
+                    <div class="bg-amber-50 p-4 rounded-lg border border-amber-100">
+                        <h4 class="font-bold text-amber-900">1. 遠攻無夾擊，近戰有夾擊</h4>
+                        <p class="mt-2 text-gray-700"><strong>規則：</strong>遠程攻擊（射程 30 尺以上的攻擊，或使用武器的「遠程」屬性）無法從夾擊獲得優勢。近戰攻擊只要攻擊者與至少一名盟友分別站在目標相對兩側（形成夾擊），即可獲得戰術優勢（Advantage）。</p>
+                        <p class="mt-2 text-gray-600 text-sm"><strong>說明與判定：</strong></p>
+                        <ul class="list-disc list-inside text-sm text-gray-600 mt-1 space-y-1">
+                            <li>「相對兩側」以 DM 目視為準，不需要嚴格的 180 度對齊，但雙方需明顯從不同方向威脅目標。</li>
+                            <li>只有近戰攻擊（觸及 5 尺的攻擊）可享受此夾擊優勢。觸及 10 尺的長武器視情況可判定為近戰。</li>
+                            <li>如果目標具有「難以被夾擊」的特性（如特定怪物特性），則此規則不生效。</li>
+                            <li>遠程攻擊即使有盟友在目標旁邊，也不會因此獲得夾擊優勢。</li>
+                        </ul>
+                    </div>
+                    <div class="bg-amber-50 p-4 rounded-lg border border-amber-100">
+                        <h4 class="font-bold text-amber-900">2. 水與電的環境元素反應（含下雨天判定）</h4>
+                        <p class="mt-2 text-gray-700"><strong>規則：</strong>當目標處於潮濕環境（下雨天、站在水中、剛被澆濕、或身上有明顯水分）時，受到雷電傷害會額外承受 <strong>+1d4 雷電傷害</strong>。</p>
+                        <p class="mt-2 text-gray-600 text-sm"><strong>說明與判定：</strong></p>
+                        <ul class="list-disc list-inside text-sm text-gray-600 mt-1 space-y-1">
+                            <li>「潮濕」由 DM 判定。下雨天、淺水、剛被水元素或法術澆濕皆算。單純出汗或輕微潮濕通常不算。</li>
+                            <li>此額外傷害只在受到雷電傷害時觸發，其他傷害類型不受影響。</li>
+                            <li>如果目標具有雷電抗性或免疫，先計算額外 1d4，再套用抗性／免疫。</li>
+                            <li>DM 可根據環境嚴重程度調整（例如大雨或全身浸泡可改為 +1d6）。</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 二、生死與血量風險 -->
+            <section>
+                <h3 class="text-xl font-bold text-red-800 border-b-2 border-red-200 pb-2 mb-4">二、生死與血量風險</h3>
+                <div class="bg-red-50 p-4 rounded-lg border border-red-100">
+                    <h4 class="font-bold text-red-900">1. 即時死亡閾值（Instant Death）</h4>
+                    <p class="mt-2 text-gray-700"><strong>規則：</strong>當角色遭到攻擊後生命值降至 0，且「溢出傷害」（超過將其降至 0 的那部分傷害）達到或超過該角色生命值上限（Max HP）的一半時，該角色立即死亡，無法進行死亡豁免。</p>
+                    <p class="mt-2 text-gray-600 text-sm"><strong>計算方式：</strong></p>
+                    <ul class="list-disc list-inside text-sm text-gray-600 mt-1 space-y-1">
+                        <li>溢出傷害 = 總傷害 − 角色當前生命值（若當前生命值已為 0，則溢出 = 總傷害）。</li>
+                        <li>若溢出傷害 ≥ Max HP ÷ 2（向下取整），則即時死亡。</li>
+                        <li>範例：Max HP 20 的角色（閾值 10），當前 5 HP，受到 18 傷害 → 溢出 13 ≥ 10 → 即時死亡。</li>
+                        <li>此規則僅適用於玩家角色與重要 NPC。普通怪物通常仍依官方規則處理（或直接死亡）。</li>
+                        <li>如果角色具有「堅韌」或類似特性，DM 可酌情調整閾值。</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- 三、資源與獎勵機制 -->
+            <section>
+                <h3 class="text-xl font-bold text-green-800 border-b-2 border-green-200 pb-2 mb-4">三、資源與獎勵機制</h3>
+                <div class="space-y-5">
+                    <div class="bg-green-50 p-4 rounded-lg border border-green-100">
+                        <h4 class="font-bold text-green-900">1. 英雄靈感轉移（Heroic Inspiration）</h4>
+                        <p class="mt-2 text-gray-700"><strong>規則：</strong>每位玩家身上最多只能保留 1 個英雄靈感。長休結束後的第一個早晨，若該靈感仍未使用，玩家必須將其轉贈給另一位隊友（若該隊友身上已有 1 個靈感，則無法接收，需改贈他人或棄置）。</p>
+                        <p class="mt-2 text-gray-600 text-sm"><strong>說明：</strong></p>
+                        <ul class="list-disc list-inside text-sm text-gray-600 mt-1 space-y-1">
+                            <li>轉贈需在長休結束後、當日冒險開始前完成。</li>
+                            <li>無法轉贈給自己。若全隊都已有靈感，則該靈感直接消失。</li>
+                            <li>英雄靈感的使用方式仍依官方規則（可重擲檢定等）。</li>
+                        </ul>
+                    </div>
+                    <div class="bg-green-50 p-4 rounded-lg border border-green-100">
+                        <h4 class="font-bold text-green-900">2. 弓箭彈藥簡化</h4>
+                        <p class="mt-2 text-gray-700"><strong>規則：</strong>普通箭矢（非魔法、非特殊材質）預設為無限供應，不需要逐一計算。特殊箭矢（魔法箭、銀箭、毒箭、爆炸箭等）仍需個別記錄與消耗。</p>
+                        <p class="mt-2 text-gray-600 text-sm"><strong>說明：</strong>此規則旨在減少記錄負擔。若劇情需要限制彈藥（例如被困在地城、補給斷絕），DM 可臨時恢復計算。</p>
+                    </div>
+                    <div class="bg-green-50 p-4 rounded-lg border border-green-100">
+                        <h4 class="font-bold text-green-900">3. 帥氣法則（Rule of Cool）</h4>
+                        <p class="mt-2 text-gray-700"><strong>規則：</strong>當玩家在戰鬥或技能檢定中提出極具創意、結合當前戰場環境、且描述生動的點子時，DM 會優先考慮允許其發生。若該行動特別精彩或成功，DM 可額外給予該玩家 1 個英雄靈感作為獎勵。</p>
+                        <p class="mt-2 text-gray-600 text-sm"><strong>說明：</strong></p>
+                        <ul class="list-disc list-inside text-sm text-gray-600 mt-1 space-y-1">
+                            <li>「帥氣」由 DM 主觀判定，但會盡量鼓勵玩家發揮創意。</li>
+                            <li>即使允許發生，仍可能需要進行相應的檢定（攻擊、技能、豁免等）。</li>
+                            <li>額外靈感獎勵不是保證，僅在特別出色時給予。</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <div class="bg-gray-50 p-4 rounded-lg border text-sm text-gray-600">
+                <p><strong>備註：</strong>以上規則旨在增加戰術深度、降低記錄負擔，並鼓勵創意扮演。DM 保留根據當前場景與劇情需要進行彈性調整的權利。如有疑問，請於遊戲前與 DM 確認。</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
         // =========================================================================
         // 🔴 DATA ZONE (資料區塊) - 請將你的 TXT 陣列資料貼回這裡
         // =========================================================================
@@ -658,139 +770,207 @@
   // ==========================================
     // 🌲 凡戴爾的失落礦坑 (主線任務)
     // ==========================================
-    { id: "m1", ty: "Main", n: "運送物資到凡戴爾", src: "剛德倫·尋岩者", d: "將裝滿補給品的馬車從絕冬城安全護送到凡戴爾的巴森雜貨店。", obj: ["擊退哥布林伏擊", "將馬車送達雜貨店"], rw: "每人 10 gp" },
-    { id: "m2", ty: "Main", n: "營救席爾達", src: "主線劇情", d: "席爾達被耶米克挾持在碎顎據點深處，必須將他活著救出來。", obj: ["潛入碎顎據點", "與耶米克交涉或擊敗他", "護送席爾達回凡戴爾"], rw: "50 gp" },
-    { id: "m3", ty: "Main", n: "解決紅印幫的威脅", src: "哈賓 / 席爾達", d: "紅印幫惡棍在鎮上橫行霸道，必須搗毀他們位於特雷森莊園地下的老巢。", obj: ["找到地下室入口", "擊敗首領玻璃杖(伊阿諾)"], rw: "200 gp" },
-    { id: "m4", ty: "Main", n: "尋找碎顎城堡", src: "席爾達", d: "剛德倫與失落礦坑的地圖被轉移到了碎顎城堡，必須找到城堡位置並營救他。", obj: ["透過偵查或詢問NPC得知城堡位置", "擊敗格羅爾國王", "救出剛德倫"], rw: "情報與礦坑地圖" },
-    { id: "m5", ty: "Main", n: "探索迴音洞穴", src: "剛德倫", d: "直搗失落礦坑的深處，阻止黑蜘蛛掌控星月熔爐的力量。", obj: ["擊敗黑蜘蛛內茲納", "救出努恩卓", "確保星月熔爐安全"], rw: "礦坑 10% 股份" },
+    { id: "m1", ty: "Main", n: "運送物資到凡戴爾", src: "剛德倫·尋岩者", d: "剛德倫·尋岩者在無冬城僱用你們護送一輛裝滿補給品的馬車前往凡戴爾的巴森雜貨店。這是進入主線的開場任務，途中會遭遇碎顎哥布林的伏擊。馬車內有剛德倫預先準備的物資，成功送達後可獲得報酬並與鎮民建立初步聯繫。", obj: ["在三野豬小徑擊退哥布林伏擊", "保護馬車與物資不被搶走", "將馬車安全送達凡戴爾的巴森雜貨店", "向艾爾馬·巴森交付貨物並領取報酬"], rw: "每人 10 gp + 鎮民好感" },
+    { id: "m2", ty: "Main", n: "營救席爾達", src: "主線劇情", d: "伏擊後發現剛德倫與護衛席爾達·哈爾溫特被哥布林俘虜。席爾達被耶米克挾持在碎顎據點深處作為人質。必須潛入洞穴，與耶米克交涉或擊敗他，將席爾達活著救出來。席爾達是獅盟成員，獲救後會提供大量主線情報。", obj: ["潛入碎顎據點（可從正面或秘密入口）", "與耶米克交涉或擊敗他（可利用他與克拉格的矛盾）", "救出受傷的席爾達", "護送席爾達安全返回凡戴爾"], rw: "50 gp + 席爾達的情報與盟友身份" },
+    { id: "m3", ty: "Main", n: "解決紅印幫的威脅", src: "哈賓 / 席爾達", d: "凡戴爾鎮正被紅印幫惡棍橫行霸道。這些匪徒由玻璃杖（伊阿諾·阿爾布雷克）領導，盤踞在特雷森莊園地下。必須找到基地入口（可透過奎林的兒子卡普得知秘密入口），搗毀老巢並擊敗或活捉首領。成功後可大幅改善鎮上安全。", obj: ["調查紅印幫動態並找到基地入口", "潛入特雷森莊園地下室", "擊敗或活捉首領玻璃杖（伊阿諾）", "救出被關押的平民（如米爾娜一家）"], rw: "200 gp + 鎮民感激與安全改善" },
+    { id: "m4", ty: "Main", n: "尋找碎顎城堡", src: "席爾達", d: "剛德倫與失落礦坑的地圖被轉移到了碎顎城堡。必須透過偵查、詢問NPC（如雷道斯）或從紅印幫／哥布林口中得知城堡位置，然後潛入城堡擊敗格羅爾國王，救出剛德倫並奪回地圖。", obj: ["透過偵查或詢問NPC得知城堡位置", "潛入碎顎城堡", "擊敗格羅爾國王與其護衛", "救出剛德倫並取得礦坑地圖"], rw: "情報與礦坑地圖 + 剛德倫的感激" },
+    { id: "m5", ty: "Main", n: "探索迴音洞穴", src: "剛德倫", d: "直搗失落礦坑的深處，阻止黑蜘蛛內茲納掌控星月熔爐的力量。洞穴內有多種怪物、魔法守衛與卓爾勢力。必須擊敗或繞過威脅，救出努恩卓，並確保星月熔爐安全。這是主線的最終任務。", obj: ["進入迴音洞穴並探索關鍵區域", "擊敗黑蜘蛛內茲納（可利用環境與幻象應對）", "救出努恩卓·尋岩者", "確保星月熔爐不被惡勢力掌控"], rw: "礦坑 10% 股份 + 大量寶藏與經驗" },
 
     // ==========================================
     // 🏘️ 凡戴爾的失落礦坑 (支線任務)
     // ==========================================
-    { id: "s1", ty: "Side", n: "老貓頭鷹井的死靈", src: "達蘭·埃德馬斯", d: "有傳言說老貓頭鷹井的廢墟附近有不死生物出沒，前往調查原因。", obj: ["前往廢墟", "與紅袍法師哈蒙交涉或戰鬥"], rw: "魔法物品或情報" },
-    { id: "s2", ty: "Side", n: "說服女妖阿嘉莎", src: "修女 蓋瑞爾", d: "帶著鑲寶石的銀梳子前往康尼貝利，向女妖詢問一本名叫《弓形法師》的法術書下落。", obj: ["找到阿嘉莎的居所", "成功贈禮並問出情報"], rw: "3 瓶治療藥水" },
-    { id: "s3", ty: "Side", n: "錐形塔的半獸人", src: "鎮長 哈賓", d: "一群半獸人佔據了錐形塔的洞穴，威脅著東邊的商道，必須將其剿滅。", obj: ["前往錐形塔", "擊敗頭目布魯格·咬斧"], rw: "100 gp" },
-    { id: "s4", ty: "Side", n: "驅逐雷樹村綠龍", src: "奎林 (農婦)", d: "前往廢棄的雷樹村尋找老德魯伊雷道斯，但他要求你們先趕走村裡的青年綠龍。", obj: ["找到雷道斯", "將綠龍毒牙打至半血逼退"], rw: "碎顎城堡的具體位置" },
-    { id: "s5", ty: "Side", n: "礦業公會的暗盤", src: "哈莉亞", d: "哈莉亞希望你們能活捉紅印幫首領玻璃杖，並將他的私人信件偷來交給她。", obj: ["活捉玻璃杖", "取得信件", "秘密交給哈莉亞"], rw: "100 gp" },
-    { id: "s6", ty: "Side", n: "米爾娜的傳家寶", src: "米爾娜·登德拉", d: "救出被紅印幫綁架的木匠妻兒，她為了報恩，告訴你們雷樹村草藥店廢墟下方藏有一條翡翠項鍊。", obj: ["在特雷森莊園地下室救出米爾娜", "前往雷樹村找到項鍊"], rw: "翡翠項鍊 (價值200gp)" },
+    { id: "s1", ty: "Side", n: "老貓頭鷹井的死靈", src: "達蘭·埃德馬斯", d: "有傳言說老貓頭鷹井的廢墟附近有不死生物出沒。達蘭·埃德馬斯請求你們前往調查原因。實際上是紅袍法師哈蒙·科斯特帶著殭屍在進行考古挖掘。可選擇交涉或戰鬥。", obj: ["前往老貓頭鷹井廢墟", "調查不死生物的來源", "與紅袍法師哈蒙交涉或戰鬥", "帶回調查結果給達蘭"], rw: "魔法物品或有價值的情報" },
+    { id: "s2", ty: "Side", n: "說服女妖阿嘉莎", src: "修女 蓋瑞爾", d: "修女蓋瑞爾需要你們帶著一把鑲寶石的銀梳子前往康尼貝利，向女妖阿嘉莎詢問一本名叫《弓形法師》的法術書下落。阿嘉莎極度虛榮，必須態度恭敬並贈送禮物才能獲得回答。", obj: ["取得銀梳子（蓋瑞爾提供）", "找到阿嘉莎的居所（康尼貝利森林深處）", "成功贈禮並以恭敬態度問出情報", "將情報帶回給蓋瑞爾"], rw: "3 瓶治療藥水" },
+    { id: "s3", ty: "Side", n: "錐形塔的半獸人", src: "鎮長 哈賓", d: "一群半獸人佔據了錐形塔（Wyvern Tor）的洞穴，威脅著東邊的商道。鎮長哈賓懸賞將其剿滅。頭目是布魯格·咬斧，必須擊敗他才能完成任務。", obj: ["前往錐形塔洞穴", "擊敗頭目布魯格·咬斧與其手下", "確認威脅已消除", "向哈賓回報領取懸賞"], rw: "100 gp" },
+    { id: "s4", ty: "Side", n: "驅逐雷樹村綠龍", src: "奎林 / 雷道斯", d: "前往廢棄的雷樹村尋找老德魯伊雷道斯。他知道碎顎城堡與迴音洞穴的位置，但要求你們先趕走村裡的青年綠龍毒牙。毒牙佔領高塔，極度危險，但生命值降至一半會逃跑。", obj: ["找到雷道斯", "探索雷樹村並應對枯枝怪與邪教徒", "將綠龍毒牙打至半血逼退或驅趕", "向雷道斯回報以換取城堡位置情報"], rw: "碎顎城堡的具體位置" },
+    { id: "s5", ty: "Side", n: "礦業公會的暗盤", src: "哈莉亞", d: "哈莉亞希望你們能活捉紅印幫首領玻璃杖，並將他的私人信件偷來交給她。這是散林會的秘密任務，完成後可獲得額外報酬，但需注意保密。", obj: ["活捉玻璃杖（不要殺死）", "取得他的私人信件", "秘密將信件交給哈莉亞", "領取額外報酬"], rw: "100 gp + 哈莉亞的好感與後續合作可能" },
+    { id: "s6", ty: "Side", n: "米爾娜的傳家寶", src: "米爾娜·登德拉", d: "救出被紅印幫綁架的木匠妻兒米爾娜一家後，她為了報恩，告訴你們雷樹村草藥店廢墟下方藏有一條翡翠項鍊。前往雷樹村尋找並取回作為謝禮。", obj: ["在特雷森莊園地下室救出米爾娜一家", "前往雷樹村找到草藥店廢墟", "在地板下挖出翡翠項鍊", "可選擇將項鍊歸還或自己保留"], rw: "翡翠項鍊 (價值200gp)" },
 
     // ==========================================
     // 🐉 冰塔峰之龍 (DoIP 擴充任務)
     // ==========================================
-    { id: "d1", ty: "DoIP", n: "矮人據點挖掘場", src: "鎮長 哈賓", d: "警告兩名正在挖掘古老神廟的矮人勘探者，附近有白龍出沒。", obj: ["找到矮人", "消滅神廟內的赭凍怪"], rw: "50 gp" },
-    { id: "d2", ty: "DoIP", n: "侏儒園 (Gnomengarde)", src: "鎮長 哈賓", d: "前往侏儒谷獲取能對付白龍的魔法發明，並弄清楚為什麼侏儒們會把門鎖起來。", obj: ["揪出偽裝的變形怪", "治癒發瘋的國王"], rw: "魔法物品 (如爆竹魔杖)" },
-    { id: "d3", ty: "DoIP", n: "憤怒山丘 (Umbrage Hill)", src: "鎮長 哈賓", d: "警告草藥師阿德拉有白龍出沒，勸她回鎮上避難。", obj: ["擊退或安撫包圍風車的蠍尾獅", "說服阿德拉 (或購買藥水)"], rw: "25 gp" },
-    { id: "d4", ty: "DoIP", n: "伐木者營地", src: "鎮長 哈賓", d: "送物資給鎮長同父異母的兄弟提博爾，確認營地是否安全。", obj: ["消滅營地底下的掘地蟲", "護送提博爾回鎮上"], rw: "50 gp" },
-    { id: "d5", ty: "DoIP", n: "黃油頭骨牧場", src: "鎮長 哈賓", d: "確認大艾爾的安危，牧場似乎遭到了襲擊。", obj: ["擊敗佔領牧場的半獸人", "在地下室救出大艾爾", "找回母牛佩妮"], rw: "秘銀甲" },
-    { id: "d6", ty: "DoIP", n: "山腳金礦", src: "唐瓊", d: "護送礦業經理去金礦，發現那裡已經被一群鼠人佔領。", obj: ["與鼠人交涉或肅清礦坑"], rw: "100 gp" },
-    { id: "d7", ty: "DoIP", n: "戰隼狩獵小屋", src: "鎮長 哈賓", d: "送一桶葡萄酒給退休戰士戰隼，建立庇護所防線。", obj: ["送達物資", "協助防禦塔洛斯信徒的突襲"], rw: "免費庇護所與情報" },
-    { id: "d8", ty: "DoIP", n: "龍塚 (Dragon Barrow)", src: "戰隼", d: "尋找傳說中埋藏在巨大土丘下的屠龍劍。", obj: ["探索土丘迷宮", "擊敗隱形追蹤者", "取得屠龍劍"], rw: "屠龍長劍" },
-    { id: "d9", ty: "DoIP", n: "薩弗拉斯神廟", src: "情報", d: "被半獸人佔據的預言神廟，據說藏有大量黃金。", obj: ["擊敗半獸人", "解開神廟幻象找到隱藏的黃金"], rw: "黃金與寶石" },
-    { id: "d10", ty: "DoIP", n: "風暴之塔", src: "情報", d: "海邊的燈塔發出不祥的綠光，導致許多船隻觸礁。", obj: ["擊敗海灘的鷹身女妖", "擊敗塔洛斯祭司", "破壞發光的心臟"], rw: "魔法物品" },
-    { id: "d11", ty: "DoIP", n: "阿塞霍姆 (Axeholm)", src: "鎮長 哈賓", d: "清理被廢棄的矮人要塞，作為凡戴爾鎮民躲避白龍的最終避難所。", obj: ["消滅要塞內的食屍鬼", "擊敗女妖"], rw: "250 gp" },
-    { id: "d12", ty: "DoIP", n: "林間宅邸", src: "戰隼", d: "塔洛斯信徒的秘密集會所，半獸人們正在那裡謀劃襲擊。", obj: ["消滅邪教徒與半獸人", "燒毀宅邸 (可選)"], rw: "消除區域威脅" },
-    { id: "d13", ty: "DoIP", n: "雷霆石陣", src: "林間宅邸線索", d: "邪教徒正試圖在山頂的石陣召喚毀滅神獸。", obj: ["干擾召喚儀式", "擊敗毀滅野豬(Gorthok)"], rw: "化解凡戴爾的危機" },
-    { id: "d14", ty: "DoIP", n: "冰塔峰堡壘", src: "主線劇情", d: "做好萬全準備，前往冰山之巔直搗白龍的巢穴！", obj: ["找到隱藏的堡壘通道", "擊敗青年白龍「冰吼」", "活下去"], rw: "巨龍寶藏與無上榮耀" }
+    { id: "d1", ty: "DoIP", n: "矮人據點挖掘場", src: "鎮長 哈賓", d: "兩名矮人勘探者正在挖掘古老神廟，附近有白龍出沒。哈賓請求你們前往警告他們，並協助消滅神廟內的威脅（赭凍怪等）。", obj: ["找到矮人勘探者", "警告他們白龍的威脅", "消滅神廟內的赭凍怪與其他怪物", "確認矮人安全並回報"], rw: "50 gp" },
+    { id: "d2", ty: "DoIP", n: "侏儒園 (Gnomengarde)", src: "鎮長 哈賓", d: "前往侏儒谷獲取能對付白龍的魔法發明，並弄清楚為什麼侏儒們會把門鎖起來。國王科伯茲因擬身怪而發了瘋，需要找出並消滅擬身怪，再說服他恢復理智。", obj: ["前往侏儒園並與岩侏儒接觸", "調查國王發瘋與侏儒失蹤的原因", "揪出並消滅偽裝的擬身怪", "治癒或說服發瘋的國王科伯茲"], rw: "魔法物品 (如爆竹魔杖) + 50 gp（若捐給鎮）" },
+    { id: "d3", ty: "DoIP", n: "憤怒山丘 (Umbrage Hill)", src: "鎮長 哈賓", d: "警告草藥師阿達布拉·格溫有白龍出沒，勸她回鎮上避難。她居住的風車正被刺尾獅（蠍尾獅）包圍，需先處理威脅。", obj: ["前往憤怒山丘風車", "擊退或安撫（賄賂）包圍風車的刺尾獅", "說服阿達布拉回鎮避難", "可向她購買治療藥水"], rw: "25 gp + 治療藥水購買機會" },
+    { id: "d4", ty: "DoIP", n: "伐木者營地", src: "鎮長 哈賓", d: "送物資給鎮長同父異母的兄弟提博爾，確認營地是否安全。營地底下有掘地蟲威脅，需消滅後護送提博爾回鎮。", obj: ["準備並護送物資前往伐木者營地", "消滅營地底下的掘地蟲", "確認提博爾安全", "護送提博爾回鎮上並領取回執"], rw: "50 gp" },
+    { id: "d5", ty: "DoIP", n: "黃油頭骨牧場", src: "鎮長 哈賓", d: "確認大艾爾的安危，牧場似乎遭到了獸人襲擊。大艾爾（阿方斯·卡拉佐）被囚禁在地下室，需擊敗獸人並救出他，同時找回母牛佩妮。", obj: ["前往黃油頭骨牧場", "擊敗佔領牧場的半獸人／獸人", "在地下室救出大艾爾", "找回母牛佩妮"], rw: "秘銀甲（或若死亡則100gp）" },
+    { id: "d6", ty: "DoIP", n: "山腳金礦", src: "東容·拉斯坎 / 哈賓", d: "護送新任礦業監督人東容·拉斯坎前往山腳金礦。抵達後發現那裡已經被一群鼠人佔領，需交涉或肅清礦坑。", obj: ["護送東容安全抵達金礦", "調查鼠人佔領情況", "與鼠人交涉或肅清礦坑", "確保礦坑恢復運作並回報"], rw: "100 gp" },
+    { id: "d7", ty: "DoIP", n: "戰隼狩獵小屋", src: "鎮長 哈賓 / 戰隼", d: "送一桶葡萄酒給退休戰士戰隼，建立庇護所防線。戰隼可提供關於塔洛斯信徒的情報，並協助防禦突襲。", obj: ["送達葡萄酒給戰隼", "與戰隼建立友好關係", "協助防禦塔洛斯信徒的突襲", "獲取關於林間宅邸的情報"], rw: "免費庇護所與有用情報" },
+    { id: "d8", ty: "DoIP", n: "龍塚 (Dragon Barrow)", src: "戰隼 / 情報", d: "尋找傳說中埋藏在巨大土丘下的屠龍劍。探索土丘迷宮，應對隱形追蹤者等威脅，取得屠龍劍以對抗白龍。", obj: ["探索龍塚迷宮", "應對隱形追蹤者與其他威脅", "取得屠龍劍", "安全離開並帶回武器"], rw: "屠龍長劍" },
+    { id: "d9", ty: "DoIP", n: "薩弗拉斯神廟", src: "情報", d: "被半獸人佔據的預言神廟，據說藏有大量黃金。需擊敗佔領者並解開神廟幻象找到隱藏的黃金。", obj: ["前往薩弗拉斯神廟", "擊敗佔領的半獸人", "解開神廟幻象與謎題", "找到隱藏的黃金與寶石"], rw: "黃金與寶石" },
+    { id: "d10", ty: "DoIP", n: "風暴之塔", src: "情報", d: "海邊的燈塔發出不祥的綠光，導致許多船隻觸礁。實為塔洛斯神廟，由莫斯柯守衛。需擊敗海灘鷹身女妖與祭司，並破壞發光的心臟。", obj: ["前往風暴之塔", "擊敗海灘的鷹身女妖", "擊敗塔洛斯祭司莫斯柯", "破壞發光的心臟以停止威脅"], rw: "魔法物品" },
+    { id: "d11", ty: "DoIP", n: "阿塞霍姆 (Axeholm)", src: "鎮長 哈賓", d: "清理被廢棄的矮人要塞，作為凡戴爾鎮民躲避白龍的最終避難所。要塞內有食屍鬼與報喪妖等不死生物需要清理。", obj: ["前往阿塞霍姆要塞", "消滅要塞內的食屍鬼", "擊敗報喪妖", "確保要塞安全可供鎮民避難"], rw: "250 gp" },
+    { id: "d12", ty: "DoIP", n: "林間宅邸", src: "戰隼", d: "塔洛斯信徒的秘密集會所，半獸人們正在那裡謀劃襲擊。戰隼請求你們進行先發制人的打擊，消滅邪教徒與半獸人，可選擇燒毀宅邸。", obj: ["前往林間宅邸", "消滅邪教徒與半獸人", "可選擇燒毀宅邸以消除威脅", "向戰隼回報"], rw: "消除區域威脅 + 戰隼的獎勵" },
+    { id: "d13", ty: "DoIP", n: "雷霆石陣", src: "林間宅邸線索", d: "邪教徒正試圖在山頂的石陣召喚毀滅神獸戈索克。需干擾召喚儀式並擊敗雷霆野豬，化解凡戴爾的危機。", obj: ["前往雷霆石陣", "干擾或擊敗隱士的召喚儀式", "擊敗毀滅野豬戈索克", "阻止對凡戴爾的威脅"], rw: "化解凡戴爾的危機" },
+    { id: "d14", ty: "DoIP", n: "冰塔峰堡壘", src: "主線劇情", d: "做好萬全準備，前往冰山之巔直搗白龍的巢穴！這是DoIP的最終任務。需找到隱藏的堡壘通道，擊敗青年白龍克萊尤溫（冰吼），並生存下來。", obj: ["找到隱藏的堡壘通道", "探索並清理堡壘內的威脅", "擊敗青年白龍「冰吼」（克萊尤溫）", "活下去並帶回勝利的消息"], rw: "巨龍寶藏與無上榮耀" },
 
-        ];
+    // ==========================================
+    // 🔮 Phandelver and Below: The Shattered Obelisk (第5章以後)
+    // ==========================================
+    { id: "o1", ty: "Obelisk", n: "拯救被綁架的鎮民", src: "凡戴爾鎮民 / 主線", d: "在擊敗紅印幫與黑蜘蛛後，凡戴爾開始出現異常：有鎮民被神秘哥布林綁架，並出現奇異的靈能突變。必須調查綁架事件，找到失蹤者，並阻止威脅擴大。", obj: ["調查凡戴爾的綁架事件與異常", "追蹤Sawplee哥布林的線索", "救出部分被綁架的鎮民", "發現與方尖碑碎片有關的線索"], rw: "鎮民感激 + 主線進展" },
+    { id: "o2", ty: "Obelisk", n: "對抗Ruxithid the Chosen", src: "主線劇情", d: "Sawplee哥布林由靈能領袖Ruxithid領導，他正在收集古代方尖碑的碎片，並與更深層的威脅（心靈異怪）有聯繫。必須前往Zorzula's Rest擊敗他，阻止碎片被集齊。", obj: ["找到Zorzula's Rest", "對抗Ruxithid與其靈能哥布林", "獲取方尖碑碎片地圖或情報", "阻止進一步的綁架"], rw: "方尖碑碎片情報 + 經驗" },
+    { id: "o3", ty: "Obelisk", n: "收集方尖碑碎片", src: "Gwyn Oresong / 主線", d: "必須在心靈異怪之前收集剩餘的方尖碑碎片。碎片散落在Talhundereth（古代矮人神廟）、Crypt of the Talhund與Gibbet Crossing等危險地點。Gwyn Oresong可協助解讀地圖。", obj: ["前往Talhundereth取得碎片", "探索Crypt of the Talhund", "前往Gibbet Crossing", "收集所有碎片並防止落入敵手"], rw: "方尖碑碎片 + 大量寶藏" },
+    { id: "o4", ty: "Obelisk", n: "Pip的冒險", src: "Gwyn / 石山旅店", d: "小男孩Pip跟著奇怪的怪物深入山丘失蹤。這是第6章的支線任務，可提供後續行動的基地與線索。", obj: ["追蹤Pip的行蹤", "深入地下遺跡尋找他", "將Pip安全帶回凡戴爾", "獲取遺跡中的額外情報"], rw: "Pip安全 + 基地可能 + 情報" },
+    { id: "o5", ty: "Obelisk", n: "調查靈能突變與Far Realm威脅", src: "主線劇情", d: "凡戴爾開始出現Far Realm的影響：生物突變、現實裂隙。必須深入地底（Underdark）調查，對抗心靈異怪（illithids）與其信徒，阻止他們將凡戴爾轉化為新帝國的中心。", obj: ["調查凡戴爾的突變現象", "前往Underdark相關地點（如Ilthan）", "對抗心靈異怪與相關怪物", "阻止方尖碑被用於開啟更大威脅"], rw: "拯救凡戴爾 + 高階寶藏與經驗" },
+    { id: "o6", ty: "Obelisk", n: "最終對抗：Beyond a Lightless Star", src: "主線結局", d: "面對幕後黑手——心靈異怪勢力與他們的遠界計劃。必須阻止他們完成儀式，拯救凡戴爾免於被轉化為異界帝國的首都。", obj: ["深入最終地城", "對抗心靈異怪領袖與信徒", "破壞或控制方尖碑力量", "確保凡戴爾的未來"], rw: "無上榮耀 + 大量寶藏" },
 
+    // --- 第5章：Paths of Peril 詳細任務 ---
+    { id: "o7", ty: "Obelisk", n: "調查凡戴爾犯罪現場", src: "鎮長哈賓 / 鎮民", d: "返回凡戴爾後發現一連串由奇怪哥布林造成的犯罪：水井被堵、礦業交易所被破壞、幸運神龕被盜、Sleeping Giant被搗亂。必須逐一調查現場，收集關於Sawplee哥布林與方尖碑碎片的線索。", obj: ["調查巴森水井（與Ander對話、進入井下）", "調查礦業交易所（與Halia對話、追蹤哥布林營地）", "調查幸運神龕（與Sister Garaele、Tamara對話）", "調查Sleeping Giant（與Wheel of Fortune、Grista對話）", "收集至少四條關鍵線索以定位Zorzula's Rest"], rw: "線索彙整 + Gwyn的協助" },
+    { id: "o8", ty: "Obelisk", n: "探索Zorzula's Rest", src: "Gwyn Oresong / 線索", d: "根據收集到的線索前往古代杜爾加據點Zorzula's Rest。這是Sawplee哥布林的基地，曾經是杜爾加礦場，後被心靈異怪佔據。需探索整個據點，對抗靈能哥布林，並最終面對Ruxithid。", obj: ["找到並進入Zorzula's Rest", "探索各區域（食堂、兵營、溫泉、礦道等）", "可選擇修復礦車或其他設施", "對抗Ruxithid the Chosen", "救出人質並獲取方尖碑地圖"], rw: "方尖碑碎片地圖 + 人質獲救 + 經驗" },
+
+    // --- 第6章：The Shattered Obelisk 詳細任務 ---
+    { id: "o9", ty: "Obelisk", n: "Pip的冒險（好奇的孩子）", src: "Gwyn / 石山旅店", d: "小男孩Pip跟著奇怪的怪物深入山丘失蹤。這是第6章的支線任務，可在地下矮人遺跡中找到他，並獲得關於後續地城的線索與可能的基地。", obj: ["從石山旅店出發追蹤Pip", "進入地下矮人遺跡", "找到並救出Pip", "探索遺跡獲取額外情報（如聖騎士日誌）"], rw: "Pip安全 + 基地可能 + 遺跡情報" },
+    { id: "o10", ty: "Obelisk", n: "奇怪的牛（The Odd Cow）", src: "鎮民 / 支線", d: "一隻行為異常的牛出現在附近，似乎受到靈能影響。調查後會遭遇靈能灰泥怪（Psionic Gray Oozes），處理後可消除一項鎮上異常。", obj: ["找到異常的牛", "調查其行為異常的原因", "對抗靈能灰泥怪", "確保牛與附近區域安全"], rw: "消除異常 + 小額獎勵" },
+    { id: "o11", ty: "Obelisk", n: "失蹤的礦工", src: "Halia Thornton", d: "Halia請求調查失蹤的礦工。追蹤後會在銀礦遭遇靈能蔓生怪（Psionic Shambling Mound），擊敗後可獲得銀礦相關獎勵。", obj: ["接受Halia的委託", "追蹤失蹤礦工", "對抗靈能蔓生怪", "回報並領取獎勵"], rw: "銀礦獎勵 + Halia好感" },
+    { id: "o12", ty: "Obelisk", n: "Talhundereth（古代矮人神廟）", src: "方尖碑地圖", d: "前往古代矮人神廟Talhundereth收集方尖碑碎片。神廟充滿陷阱、邪教徒、卓爾與最終的腦簇（Encephalon Cluster）Boss。可探索圖書館、軍械庫等區域。", obj: ["進入Talhundereth並應對入口幻象", "探索祭司區、練武場、圖書館等", "對抗邪教徒與卓爾先鋒", "擊敗禮拜堂的腦簇Boss並取得碎片"], rw: "方尖碑碎片 + 大量寶藏" },
+    { id: "o13", ty: "Obelisk", n: "Crypt of the Talhund", src: "方尖碑地圖", d: "探索塔爾洪德的墓穴，收集另一塊方尖碑碎片。墓穴內有鬼怪、需要完成的「家務」式任務，以及各種靈異現象。", obj: ["進入Crypt of the Talhund", "應對墓穴內的鬼怪與靈異", "完成必要的清理或儀式", "取得方尖碑碎片"], rw: "方尖碑碎片 + 墓穴寶藏" },
+    { id: "o14", ty: "Obelisk", n: "Gibbet Crossing", src: "方尖碑地圖", d: "前往Underdark的Gibbet Crossing收集最後一塊方尖碑碎片。此地由Qunbraxel與Grimlocks佔據，並有心靈異怪相關威脅。需與對手競賽取得碎片。", obj: ["前往Gibbet Crossing", "探索並應對Grimlocks與其他怪物", "與Qunbraxel或其手下交鋒", "取得方尖碑碎片並安全離開"], rw: "方尖碑碎片 + Underdark情報" },
+
+    // --- 第7-8章 ---
+    { id: "o15", ty: "Obelisk", n: "返回凡戴爾處理突變", src: "主線", d: "收集碎片後返回凡戴爾，發現鎮民開始出現Far Realm引起的突變與異常。必須處理這些現象，並從Gwyn或Rivy處得知Illithinoch的位置。", obj: ["返回凡戴爾並觀察突變現象", "協助處理受影響的鎮民", "與Gwyn或Rivy討論下一步", "準備前往地底"], rw: "情報 + 鎮民穩定" },
+    { id: "o16", ty: "Obelisk", n: "深入Illithinoch", src: "Gwyn / Rivy", d: "透過凡戴爾地下通道前往Underdark中的心靈異怪據點Illithinoch。必須探索現實裂隙、收集鑰匙，並最終對抗心靈異怪狂熱者，阻止他們完成將凡戴爾轉化的儀式。", obj: ["找到通往Underdark的通道", "探索Illithinoch周邊的Far Realm裂隙", "收集開啟大門的鑰匙", "對抗心靈異怪領袖與信徒", "阻止儀式並拯救凡戴爾"], rw: "拯救凡戴爾 + 高階寶藏與經驗" },
+
+    // --- 更多次要支線 ---
+    { id: "o17", ty: "Obelisk", n: "水井危機（巴森水井）", src: "Ander / 鎮民", d: "巴森雜貨店的水井被堵，鎮民缺水。調查井下可發現哥布林留下的線索與怪物（如Otyugh），並獲得關於Sawplee哥布林的情報。", obj: ["與Ander對話了解情況", "進入水井調查", "清除井下威脅", "修復或確保水源安全"], rw: "鎮民感激 + 線索" },
+    { id: "o18", ty: "Obelisk", n: "礦業交易所修復", src: "Halia Thornton", d: "哥布林從礦業交易所的基石偷走方尖碑碎片，導致建築傾斜。協助Halia修復或調查現場，可獲得額外情報與好感。", obj: ["調查被破壞的基石", "與Halia對話", "可選擇協助修復", "追蹤相關哥布林線索"], rw: "Halia好感 + 可能的散林會合作" },
+    { id: "o19", ty: "Obelisk", n: "幸運神龕事件", src: "Sister Garaele", d: "幸運神龕遭到哥布林破壞，並有碎片被偷。與Sister Garaele或Tamara對話可獲得線索，並幫助修復神龕。", obj: ["調查神龕現場", "與Garaele或Tamara對話", "協助處理後果", "獲取關於哥布林的情報"], rw: "Garaele好感 + 線索" },
+    { id: "o20", ty: "Obelisk", n: "Sleeping Giant騷亂", src: "Wheel of Fortune / Grista", d: "Sleeping Giant酒館被哥布林搗亂，屋頂有藏匿點。調查可找到更多線索，並與酒保或服務員對話。", obj: ["調查酒館現場", "與Wheel of Fortune或Grista對話", "檢查屋頂藏匿點", "收集線索"], rw: "情報 + 可能的小獎勵" },
+    { id: "o21", ty: "Obelisk", n: "救援更多失蹤鎮民", src: "家屬 / 鎮民", d: "除了主要人質外，還有多名鎮民失蹤（如Thawnia Browne、Camber姐妹、Oskar Ninebough、Mildra Merkel等）。在各據點尋找並救出他們可大幅提升鎮民好感。", obj: ["調查失蹤名單", "在Zorzula's Rest或其他地點尋找", "救出失蹤者", "護送他們安全返回"], rw: "鎮民感激 + 可能的個人獎勵" },
+
+    // ==========================================
+    // ✨ 故事聖經高光任務
+    // ==========================================
+    { id: "sb1", ty: "Main", n: "班吉的守護時刻（玻璃杖抉擇）", src: "故事聖經", d: "擊敗玻璃杖後的關鍵抉擇。\n\n【Option 1】手下留情，交給西爾達審判：玻璃杖沉默不語，西爾達決定親自押送回無冬城。\n\n【Option 2】逼問情報：玻璃杖道出黑蜘蛛是卓爾阿爾札克（在迴音洞穴），隨即觸發血脈詛咒自爆。班吉本能召喚藤蔓護盾保護全隊與西爾達。\n\n察覺 DC18 可發現玻璃杖身上的黑色蜘蛛狀血脈印記。", obj: ["選擇是否逼問玻璃杖", "（Option 2）班吉召喚藤蔓護盾", "保護全隊與西爾達", "獲得黑蜘蛛情報或將玻璃杖押送"], rw: "情報解鎖 / 班吉高光 + 西爾達心碎" },
+    { id: "sb2", ty: "Main", n: "唐的復仇與聖物奪回", src: "故事聖經", d: "在波浪回音洞中，唐破解巴倫的傷害轉移鎖鏈機制，擊殺叛徒巴倫，救出被囚禁的父親，並奪回部落聖物「翡翠沃土石」。", obj: ["破解傷害轉移機制", "擊殺巴倫·黑鋼", "救出唐的父親", "奪回翡翠沃土石"], rw: "聖物歸還 + 唐的復仇完成" },
+    { id: "sb3", ty: "Main", n: "茶葉的大家姐時刻 + Droop 的舊帳", src: "故事聖經", d: "茶葉解放 Droop 後，Droop 認定她為「大家姐」。\n\n【後續支線：樹林深處的舊帳】前往雷霆樹途中遭遇紅標幫殘黨熊地精莫斯克（穿鐵甲）挾持 Droop。茶葉以隱匿+偷襲精準破甲救出 Droop，完成高光。", obj: ["解放 Droop", "遭遇莫斯克伏擊", "茶葉精準破甲救援", "鞏固大家姐羈絆"], rw: "Droop 忠誠 + 茶葉高光" },
+];
         let locs = [
-   // ==========================================
+    // ==========================================
     // 🌲 凡戴爾的失落礦坑 (Lost Mine of Phandelver)
     // ==========================================
-    {c:1, n:"三野豬小徑與碎顎據點 (Cragmaw Hideout)", d:"冒險的起點。哥布林在小徑上伏擊商隊，並將俘虜押往隱藏在灌木叢深處的溪流洞穴。", nl:[
-        {n:"克拉格 (Klarg)", r:"熊地精首領", d:"碎顎部落的狂妄頭目，躲在洞穴深處。", b:"bg-red-50 border-red-200", i:"養了一隻名叫『撕裂者(Ripper)』的狼。房間內有獅盾商行被劫的物資。"}, 
-        {n:"耶米克 (Yeemik)", r:"哥布林副官", d:"野心勃勃，想篡奪克拉格的位置。", b:"bg-red-50 border-red-200", i:"挾持席爾達，會嘗試與玩家談判，要求玩家去殺掉克拉格。"},
-        {n:"席爾達·哈爾溫特 (Sildar Hallwinter)", r:"人類老兵", d:"剛德倫的護衛，獅盟成員。", b:"bg-blue-50 border-blue-200", i:"被俘虜受重傷。獲救後會前往凡戴爾，發布尋找伊阿諾與碎顎城堡的任務。"}
+    {c:1, n:"三野豬小徑與碎顎據點 (Cragmaw Hideout)", d:"冒險起點。哥布林伏擊商隊後將俘虜押往溪流洞穴。", nl:[
+        {n:"克拉格 (Klarg)", r:"熊地精首領", d:"碎顎部落據點的狂妄頭目。", b:"bg-red-50 border-red-200", i:"【性格】自大、暴躁、好戰、貪婪。\\n【背景】領導一小隊哥布林與狼，在洞穴深處建立據點。\\n【目標】把持據點並擴張地盤，保護自己的財物。\\n【細節】養了一隻名叫「撕裂者(Ripper)」的狼。房間內藏有獅盾商行被劫的物資。戰鬥時會優先保護財物，受到重傷可能逃跑。"},
+        {n:"耶米克 (Yeemik)", r:"哥布林副官", d:"野心勃勃的哥布林，想篡奪克拉格的位置。", b:"bg-red-50 border-red-200", i:"【性格】狡猾、機會主義、自私。\\n【背景】克拉格的副手，對現狀不滿。\\n【目標】成為據點新首領。\\n【細節】挾持席爾達作為人質。會嘗試與玩家談判：殺掉克拉格換取席爾達，或分贓。談判破裂時會威脅殺掉人質。可被說服或收買。"},
+        {n:"席爾達·哈爾溫特 (Sildar Hallwinter)", r:"人類老兵 / 獅盟成員", d:"剛德倫的護衛，來自無冬城的退役戰士。", b:"bg-blue-50 border-blue-200", i:"【性格】善良、克制、近50歲，前深水城獅鷲騎兵，缺乏自信但樂於助人。\\n【背景】獅盟成員，受雇護送剛德倫前往凡戴爾，同時調查失蹤的同僚伊阿諾。\\n【目標】尋找伊阿諾、協助重開礦坑、振興凡戴爾。\\n【細節】被俘虜時受重傷。獲救後前往凡戴爾鎮長辦公室。知道剛德倫發現了迴音洞穴的地圖，會懸賞玻璃杖並積極尋找碎顎城堡。"}
     ]},
-    {c:2, n:"凡戴爾鎮 (Phandalin) - 核心NPC", d:"曾經繁榮如今正在重建的開拓者小鎮，是冒險者們的樞紐與任務中心。", nl:[
-        {n:"哈賓·維斯特 (Harbin Wester)", r:"人類鎮長", d:"懦弱、貪生怕死的胖子鎮長。", b:"bg-amber-50 border-amber-200", i:"害怕紅印幫。主要負責發布大部份的 DoIP 任務，會躲在門後塞紙條給玩家。"},
-        {n:"哈莉亞·松頓 (Halia Thornton)", r:"礦業公會長", d:"精明幹練，散林會的秘密特務。", b:"bg-amber-50 border-amber-200", i:"想藉玩家的手除掉玻璃杖，並接管紅印幫。開出100gp懸賞要求活捉他。"},
-        {n:"達蘭·埃德馬斯 (Daran Edermath)", r:"半精靈退役戰士", d:"果園主人，鳳凰會成員。", b:"bg-amber-50 border-amber-200", i:"正義感強，鼓勵玩家主動出擊抄掉紅印幫。會給予老貓頭鷹井的調查任務。"},
-        {n:"修女 蓋瑞爾 (Sister Garaele)", r:"精靈牧師", d:"泰摩拉的牧師，豎琴手同盟特工。", b:"bg-amber-50 border-amber-200", i:"受傷休養中。發布女妖阿嘉莎的任務，交給玩家一把銀梳子作為贈禮。"},
-        {n:"席爾達·哈爾溫特 (Sildar Hallwinter)", r:"人類老兵", d:"獲救後駐紮於鎮長辦公室。", b:"bg-blue-50 border-blue-200", i:"懸賞玻璃杖，並積極尋找剛德倫的下落。"}
+    {c:2, n:"凡戴爾鎮 (Phandalin) - 核心NPC", d:"重建中的開拓者小鎮，冒險者的樞紐與任務中心。", nl:[
+        {n:"哈賓·維斯特 (Harbin Wester)", r:"人類鎮長", d:"懦弱、貪生怕死的胖子鎮長。", b:"bg-amber-50 border-amber-200", i:"【性格】膽小、自私、愛推卸責任、愛面子。\\n【背景】凡戴爾鎮長，銀行家出身。\\n【目標】保命並維持表面秩序。\\n【細節】極度害怕紅印幫，會躲在門後透過紙條與人溝通。主要負責發布大部分DoIP任務。對玩家的英雄行為既感激又害怕，可能成為後續政治線的重要角色。"},
+        {n:"哈莉亞·松頓 (Halia Thornton)", r:"礦業公會長 / 散林會特務", d:"精明幹練的女性，凡戴爾礦業交易所負責人。", b:"bg-amber-50 border-amber-200", i:"【性格】精明、野心勃勃、耐心、危險。\\n【背景】散林會秘密特務，經營礦業交易所。\\n【目標】消滅玻璃杖並接管紅印幫，最終讓散林會控制凡戴爾。\\n【細節】開出100gp懸賞活捉玻璃杖並取得他的信件。願意提供情報換取合作，但會在背後算計。可成為強大的盟友或敵人。\n【修正】玻璃杖與散塔林無關。\n【重要】伊琳娜所持散塔林信件的簽名為哈莉亞，顯示她與米拉巴散塔林活動有直接關聯。"},
+        {n:"達蘭·埃德馬斯 (Daran Edermath)", r:"半精靈退役戰士 / 鳳凰會", d:"果園主人，銀髮超過百歲的前冒險者。", b:"bg-amber-50 border-amber-200", i:"【性格】正義感強、謹慎、樂於助人、對陌生人有戒心。\\n【背景】鳳凰會成員，退休後在凡戴爾經營蘋果園，雇用失業礦工。\\n【目標】清除鎮上的邪惡勢力。\\n【細節】鼓勵玩家主動出擊紅印幫，並給予老貓頭鷹井的調查任務。對公正的玩家會提供住宿與情報支持。"},
+        {n:"修女 蓋瑞爾 (Sister Garaele)", r:"精靈牧師 / 豎琴手同盟", d:"泰摩拉的牧師，照料幸運神龕。", b:"bg-amber-50 border-amber-200", i:"【性格】學者型、友善、有點不適應荒野、有點不確定。\\n【背景】豎琴手同盟特工，信仰泰摩拉。\\n【目標】尋找弓形法師的法術書。\\n【細節】剛從康尼貝利回來時受傷休養。發布女妖阿嘉莎任務，提供一把鑲寶石的銀梳子作為贈禮。成功後給予3瓶治療藥水。可提供魔法治療與情報。"},
+        {n:"席爾達·哈爾溫特 (Sildar Hallwinter)", r:"人類老兵", d:"獲救後駐紮於鎮長辦公室。", b:"bg-blue-50 border-blue-200", i:"【性格】善良但說話克制。\\n【目標】找到剛德倫與伊阿諾，重建凡戴爾秩序。\\n【細節】懸賞玻璃杖，積極尋找剛德倫下落。會協助玩家處理鎮上事務，並提供獅盟相關情報。是連接主線的重要盟友。"}
     ]},
-    {c:2, n:"凡戴爾鎮 - 商家與平民", d:"提供冒險者補給、住宿與八卦情報的地方。", nl:[
-        {n:"托布倫·石山 (Toblen Stonehill)", r:"人類旅店老闆", d:"石山旅店的老闆，友善且消息靈通。", b:"bg-green-50 border-green-200", i:"旅店是打聽八卦的好地方，會透露許多鎮民的煩惱。"},
-        {n:"艾爾馬·巴森 (Elmar Barthen)", r:"人類雜貨商", d:"巴森雜貨店老闆，剛德倫的好友與客戶。", b:"bg-green-50 border-green-200", i:"收貨並支付第一筆護送任務的報酬(每人10gp)。"},
-        {n:"萊嫩·灰風 (Linene Graywind)", r:"人類武器商", d:"獅盾商行的負責人，態度嚴厲。", b:"bg-green-50 border-green-200", i:"若玩家找回被哥布林劫走的貨物，會給予50gp獎勵並開放裝備買賣。"},
-        {n:"奎林·榿木葉 (Qelline Alderleaf)", r:"半身人農婦", d:"熱心的農夫，有一個愛探險的兒子卡普。", b:"bg-green-50 border-green-200", i:"提供免費乾草堆長休。兒子卡普知道紅印幫基地的秘密入口。"}
+    {c:2, n:"凡戴爾鎮 - 商家與平民", d:"提供補給、住宿與八卦情報的地方。", nl:[
+        {n:"托布倫·石山 (Toblen Stonehill)", r:"人類旅店老闆", d:"石山旅店的老闆，友善且消息靈通。", b:"bg-green-50 border-green-200", i:"【性格】熱情、健談、消息靈通、家庭觀念強。\\n【背景】從三野豬鎮來的前淘金者，發現自己更適合經營旅店。\\n【目標】經營好旅店，保護家人。\\n【細節】旅店是打聽八卦的好地方，會透露許多鎮民的煩惱與紅印幫動態。妻子特里萊娜負責廚房，兒子皮普常在附近玩耍。"},
+        {n:"艾爾馬·巴森 (Elmar Barthen)", r:"人類雜貨商", d:"巴森雜貨店老闆，剛德倫的好友與客戶。", b:"bg-green-50 border-green-200", i:"【性格】務實、可靠、誠實。\\n【背景】經營雜貨店，與剛德倫有長期生意往來。\\n【目標】生意興隆。\\n【細節】收貨並支付第一筆護送任務的報酬（每人10gp）。店內有安德與西斯爾兩名年輕店員協助。可購買一般冒險用品。"},
+        {n:"萊嫩·灰風 (Linene Graywind)", r:"人類武器商", d:"獅盾商行的負責人，態度嚴厲。", b:"bg-green-50 border-green-200", i:"【性格】嚴厲、不信任陌生人、精明、討厭紅印幫。\\n【背景】獅盾商行凡戴爾分店負責人。\\n【目標】保護商行利益。\\n【細節】若玩家找回被哥布林劫走的貨物，會給予50gp獎勵並開放裝備買賣。對紅印幫極度不滿，可成為可靠的裝備來源。"},
+        {n:"奎林·榿木葉 (Qelline Alderleaf)", r:"半身人農婦", d:"熱心的農夫，有一個愛探險的兒子卡普。", b:"bg-green-50 border-green-200", i:"【性格】熱情、樂於助人、保護孩子。\\n【背景】經營農場，兒子卡普約10歲。\\n【目標】保護兒子與農場。\\n【細節】提供免費乾草堆長休。兒子卡普知道紅印幫基地的秘密入口（透過爬樹發現）。是進入特雷森莊園的重要線索來源。"},
+        {n:"米爾娜·登德拉 (Mirna Dendrar)", r:"人類平民", d:"木匠的遺孀，與兒女一起被紅印幫綁架。", b:"bg-yellow-50 border-yellow-200", i:"【性格】感激、堅強、保護孩子。\\n【背景】丈夫Thel在莊園遇害，與兩個女兒被關押。\\n【目標】保護孩子並報恩。\\n【細節】獲救後會透露雷樹村草藥店廢墟下方藏有傳家寶翡翠項鍊（價值200gp）作為報答。"}
     ]},
     {c:2, n:"特雷森莊園地下 (Tresendar Manor)", d:"被紅印幫惡棍佔據的廢棄莊園地下室。", nl:[
-        {n:"玻璃杖 / 伊阿諾 (Glasstaff / Iarno)", r:"人類法師", d:"紅印幫首領，背叛獅盟的法師。", b:"bg-red-50 border-red-200", i:"遇到危險會毫不猶豫地喝下隱形藥水從密道逃跑。"},
-        {n:"諾斯克 (Nothic)", r:"異怪", d:"獨眼裂隙守衛，曾經是個法師。", b:"bg-purple-50 border-purple-200", i:"會讀心術，可以用魔法物品或鮮肉賄賂牠換取情報，不一定要戰鬥。"}, 
-        {n:"卓普 (Droop)", r:"哥布林", d:"被紅印幫欺凌的可憐蟲。", b:"bg-gray-100 border-gray-300", i:"極度膽小，經常嚇暈。可以被玩家收編為嚮導或吉祥物。"},
-        {n:"米爾娜·登德拉 (Mirna Dendrar)", r:"人類平民", d:"木匠的遺孀，與兒女一起被紅印幫綁架。", b:"bg-yellow-50 border-yellow-200", i:"獲救後會透露雷樹村傳家寶(翡翠項鍊)的下落作為報答。"}
+        {n:"玻璃杖 / 伊阿諾·阿爾布雷克 (Glasstaff / Iarno Albrek)", r:"人類法師", d:"紅印幫首領，背叛獅盟的前法師。", b:"bg-red-50 border-red-200", i:"【性格】傲慢、自私、 cowardly、精於算計。\\n【背景】前獅盟成員，被派往凡戴爾後背叛，成為黑蜘蛛的手下。\\n【目標】為黑蜘蛛服務並擴張勢力。\\n【細節】遇到危險會毫不猶豫地喝下隱形藥水從密道逃跑。持有玻璃法杖。與黑蜘蛛有書信往來。可被活捉以完成哈莉亞的任務。"},
+        {n:"諾斯克 (Nothic)", r:"異怪", d:"獨眼裂隙守衛，曾經是個法師。", b:"bg-purple-50 border-purple-200", i:"【性格】神經質、貪婪、好奇。\\n【背景】曾經是法師，被轉化為諾斯克。\\n【目標】收集魔法物品與知識。\\n【細節】會讀心術。可以用魔法物品或鮮肉賄賂牠換取情報（包括玻璃杖的身份），不一定要戰鬥。"},
+        {n:"卓普 (Droop)", r:"哥布林", d:"被紅印幫欺凌的可憐蟲。", b:"bg-gray-100 border-gray-300", i:"【性格】極度膽小、可憐、可被感化。\\n【背景】被紅印幫抓來當苦力與笑柄。\\n【目標】生存。\\n【細節】經常嚇暈。可以被玩家收編為嚮導或吉祥物。知道基地內部一些秘密，可提供有用情報。"}
     ]},
     {c:3, n:"雷樹村 (Thundertree)", d:"被火山灰摧毀的廢墟村莊，如今被枯枝怪、巨蛛與邪教徒盤據。", nl:[
-        {n:"雷道斯 (Reidoth)", r:"人類德魯伊", d:"警惕的隱居者，翠綠會成員。", b:"bg-green-50 border-green-200", i:"知道碎顎城堡與迴音洞穴的位置，但要求玩家先趕走綠龍才肯說。"}, 
-        {n:"毒牙 (Venomfang)", r:"青年綠龍", d:"傲慢且口蜜腹劍，佔據了村莊的高塔。", b:"bg-red-50 border-red-200", i:"極度危險。若生命值降至一半會飛走逃跑，不會死戰。"},
-        {n:"法夫里克 (Favric)", r:"人類邪教徒", d:"龍之邪教的基層人員。", b:"bg-purple-50 border-purple-200", i:"試圖拉攏玩家一起討好綠龍，但綠龍根本不理他，甚至會連他一起吃。"}
+        {n:"雷道斯 (Reidoth)", r:"人類德魯伊", d:"警惕的隱居者，翠綠會成員。", b:"bg-green-50 border-green-200", i:"【性格】警惕、直接、務實。\\n【背景】翠綠會德魯伊，調查雷樹村的異常。\\n【目標】了解並處理綠龍與邪教的威脅。\\n【細節】知道碎顎城堡與迴音洞穴的位置，但要求玩家先趕走青年綠龍毒牙才肯透露。可提供關於自然與綠龍的情報。"},
+        {n:"毒牙 (Venomfang)", r:"青年綠龍", d:"傲慢且口蜜腹劍，佔據了村莊的高塔。", b:"bg-red-50 border-red-200", i:"【性格】傲慢、狡詐、愛聽奉承。\\n【背景】青年綠龍，佔據雷樹村高塔作為巢穴。\\n【目標】建立自己的領地。\\n【細節】極度危險。若生命值降至一半會飛走逃跑，不會死戰。可被話術或賄賂影響，是強力但可談判的對手。"},
+        {n:"法夫里克 (Favric)", r:"人類邪教徒", d:"龍之邪教的基層人員。", b:"bg-purple-50 border-purple-200", i:"【性格】狂熱、盲目、愚忠。\\n【背景】龍之邪教成員，試圖與毒牙建立聯繫。\\n【目標】討好綠龍。\\n【細節】試圖拉攏玩家一起討好綠龍，但綠龍根本不理他，甚至會連他一起吃。"}
     ]},
     {c:3, n:"荒野：老貓頭鷹井、康尼貝利與錐形塔", d:"位於凡戴爾東方與北方的荒野遺跡與怪物營地。", nl:[
-        {n:"哈蒙·科斯特 (Hamun Kost)", r:"紅袍法師", d:"帶著一群殭屍在老貓頭鷹井進行考古挖掘。", b:"bg-purple-50 border-purple-200", i:"不主動攻擊。可用情報(女妖或半獸人)交換他離開。"},
-        {n:"阿嘉莎 (Agatha)", r:"精靈女妖", d:"居住在康尼貝利森林深處的預言幽靈。", b:"bg-purple-50 border-purple-200", i:"極度虛榮。若玩家贈送銀梳子並態度恭敬，她會回答一個問題。"},
-        {n:"布魯格·咬斧 (Brughor Axe-Biter)", r:"半獸人頭目", d:"帶領掠奪者駐紮在錐形塔(Wyvern Tor)。", b:"bg-red-50 border-red-200", i:"野蠻且充滿攻擊性，必須將其剿滅才能領取鎮長懸賞。"}
+        {n:"哈蒙·科斯特 (Hamun Kost)", r:"紅袍法師", d:"帶著一群殭屍在老貓頭鷹井進行考古挖掘。", b:"bg-purple-50 border-purple-200", i:"【性格】學者型、不主動敵對、務實。\\n【背景】紅袍法師，在老貓頭鷹井進行考古。\\n【目標】挖掘古代遺跡。\\n【細節】不主動攻擊。可用情報（女妖位置或半獸人動態）交換他離開或提供協助。"},
+        {n:"阿嘉莎 (Agatha)", r:"精靈女妖", d:"居住在康尼貝利森林深處的預言幽靈。", b:"bg-purple-50 border-purple-200", i:"【性格】極度虛榮、傲慢、危險。\\n【背景】曾經美麗的精靈，如今化為女妖。\\n【目標】收集美麗事物。\\n【細節】若玩家贈送銀梳子並態度恭敬，她會回答一個問題（通常關於弓形法師的法術書）。無禮則會攻擊。"},
+        {n:"布魯格·咬斧 (Brughor Axe-Biter)", r:"半獸人頭目", d:"帶領掠奪者駐紮在錐形塔(Wyvern Tor)。", b:"bg-red-50 border-red-200", i:"【性格】野蠻、充滿攻擊性、好戰。\\n【背景】半獸人掠奪者頭目。\\n【目標】掠奪商隊。\\n【細節】必須將其剿滅才能領取鎮長懸賞（100gp）。"}
     ]},
     {c:3, n:"碎顎城堡 (Cragmaw Castle)", d:"隱藏在無冬森林中的哥布林要塞。剛德倫被關押於此。", nl:[
-        {n:"格羅爾國王 (King Grol)", r:"熊地精", d:"年老但依然強壯的部落酋長。", b:"bg-red-50 border-red-200", i:"持有剛德倫與礦坑地圖，正在與卓爾精靈使者交涉。"}, 
-        {n:"塔戈爾 (Targor)", r:"大地精隊長", d:"野心勃勃，帶領著一支巡邏隊剛回營。", b:"bg-purple-50 border-purple-200", i:"若國王遇襲，他可能會選擇袖手旁觀以趁機篡權。"},
-        {n:"薇葉麗絲 (Vyerith)", r:"卓爾精靈/變形怪", d:"黑蜘蛛的使者，其實是幻形怪偽裝的。", b:"bg-red-50 border-red-200", i:"來收取地圖，若戰況不利會變形成其他模樣逃跑。"},
-        {n:"剛德倫·尋岩者 (Gundren Rockseeker)", r:"矮人礦工", d:"僱傭玩家的雇主，被拷問得奄奄一息。", b:"bg-yellow-50 border-yellow-200", i:"獲救後懇求玩家前往迴音洞穴救他兩個兄弟。"}
+        {n:"格羅爾國王 (King Grol)", r:"熊地精", d:"年老但依然強壯的部落酋長。", b:"bg-red-50 border-red-200", i:"【性格】狡猾、殘暴、精於談判。\\n【背景】碎顎部落國王，與黑蜘蛛合作。\\n【目標】與黑蜘蛛合作獲取利益。\\n【細節】持有剛德倫與礦坑地圖，正在與卓爾精靈使者交涉。房間內有陷阱與護衛。"},
+        {n:"塔戈爾 (Targor)", r:"大地精隊長", d:"野心勃勃，帶領著一支巡邏隊剛回營。", b:"bg-purple-50 border-purple-200", i:"【性格】機會主義者、野心勃勃。\\n【背景】大地精隊長。\\n【目標】篡權。\\n【細節】若國王遇襲，他可能會選擇袖手旁觀以趁機篡權。"},
+        {n:"薇葉麗絲 (Vyerith)", r:"卓爾精靈/變形怪", d:"黑蜘蛛的使者，其實是幻形怪偽裝的。", b:"bg-red-50 border-red-200", i:"【性格】狡詐、忠誠於黑蜘蛛。\\n【背景】黑蜘蛛派來的使者。\\n【目標】取得礦坑地圖。\\n【細節】來收取地圖。若戰況不利會變形成其他模樣逃跑。"},
+        {n:"剛德倫·尋岩者 (Gundren Rockseeker)", r:"矮人礦工", d:"僱傭玩家的雇主，被拷問得奄奄一息。", b:"bg-yellow-50 border-yellow-200", i:"【性格】堅韌、樂觀、重情義。\\n【背景】三兄弟中的大哥，發現了迴音洞穴的入口。\\n【目標】重開迴音洞穴礦坑。\\n【細節】獲救後懇求玩家前往迴音洞穴救他兩個兄弟（其中一人已死）。持有重要地圖情報。"}
     ]},
-    {c:4, n:"迴音洞穴 (Wave Echo Cave)", d:"傳說中的失落礦坑，蘊含強大的星月熔爐，如今是怪物與卓爾精靈的戰場。", nl:[
-        {n:"內茲納 (Nezznar)", r:"卓爾法師 (黑蜘蛛)", d:"幕後黑手，極度傲慢。", b:"bg-gray-800 text-white border-gray-900", i:"最終Boss。會召喚巨大蜘蛛，並利用幻象與隱形作戰。"},
-        {n:"努恩卓·尋岩者 (Nundro Rockseeker)", r:"矮人礦工", d:"剛德倫的三弟，唯一存活的兄弟。", b:"bg-yellow-50 border-yellow-200", i:"被黑蜘蛛囚禁拷問中。救出他代表主線任務圓滿完成。"},
-        {n:"觀察者 (Spectator)", r:"眼魔變體", d:"星月熔爐的魔法守衛。", b:"bg-purple-50 border-purple-200", i:"神經質且忠於職守，可以被玩家用話術說服契約已過期而離開。"},
-        {n:"莫爾門 (Mormesk)", r:"怨靈", d:"生前是法師，如今在地圖室徘徊。", b:"bg-purple-50 border-purple-200", i:"極度貪婪。可以被賄賂或恐嚇交出寶物，並非一定要戰鬥。"}
+    {c:4, n:"迴音洞穴 (Wave Echo Cave)", d:"傳說中的失落礦坑，蘊含強大的星月熔爐。", nl:[
+        {n:"內茲納 (Nezznar the Black Spider)", r:"卓爾法師 (黑蜘蛛)", d:"幕後黑手，極度傲慢的卓爾。", b:"bg-gray-800 text-white border-gray-900", i:"【性格】傲慢、狡詐、崇拜羅絲。\\n【背景】卓爾法師，控制紅印幫與碎顎部落。\\n【目標】掌控星月熔爐的力量。\\n【細節】最終Boss。會召喚巨大蜘蛛，並利用幻象與隱形作戰。身邊有巨蜘蛛護衛。可被話術暫時拖延。"},
+        {n:"努恩卓·尋岩者 (Nundro Rockseeker)", r:"矮人礦工", d:"剛德倫的三弟，唯一存活的兄弟。", b:"bg-yellow-50 border-yellow-200", i:"【性格】堅強、樂觀。\\n【背景】尋岩者三兄弟中最年輕的一位。\\n【目標】生存並重開礦坑。\\n【細節】被黑蜘蛛囚禁拷問中。救出他代表主線任務圓滿完成，並可獲得礦坑股份。"},
+        {n:"觀察者 (Spectator)", r:"眼魔變體", d:"星月熔爐的魔法守衛。", b:"bg-purple-50 border-purple-200", i:"【性格】神經質且忠於職守。\\n【背景】被創造來守護熔爐的魔法生物。\\n【目標】守護熔爐。\\n【細節】可以被玩家用話術說服契約已過期而離開，或用特定物品安撫。"},
+        {n:"莫爾門 (Mormesk)", r:"怨靈", d:"生前是法師，如今在地圖室徘徊。", b:"bg-purple-50 border-purple-200", i:"【性格】極度貪婪、怨恨。\\n【背景】生前是法師，死後化為怨靈守護自己的寶藏。\\n【目標】保護自己的寶藏。\\n【細節】可以被賄賂或恐嚇交出寶物，並非一定要戰鬥。持有關於熔爐的知識。"}
     ]},
 
     // ==========================================
-    // 🐉 冰塔峰之龍 (Dragon of Icespire Peak 擴充)
+    // 🐉 冰塔峰之龍 (Dragon of Icespire Peak)
     // ==========================================
-    {c:5, n:"侏儒園 (Gnomengarde)", d:"瀑布後的奇妙洞穴，住著一群熱愛發明的岩儒。", nl:[
-        {n:"柯博茲 & 蓋納克里 (Korboz & Gnerkli)", r:"岩儒國王", d:"兩位共同統治的國王。", b:"bg-yellow-50 border-yellow-200", i:"柯博茲因為害怕變形怪而發瘋，把蓋納克里綁在椅子上並將兩人鎖在房裡。"},
-        {n:"變形怪 (Mimic)", r:"潛伏怪物", d:"偽裝成酒桶的殺手。", b:"bg-red-50 border-red-200", i:"已經吃掉了兩個侏儒，是導致國王發瘋的原因。"},
-        {n:"法克托蕾 (Facktore)", r:"發明家/守衛", d:"操縱著一台危險的連發弩機。", b:"bg-red-50 border-red-200", i:"瘋狂且無差別攻擊任何靠近的生物。"},
-        {n:"菲布斯提 & 達布多 (Fibblestib & Dabbledob)", r:"岩儒發明家", d:"想治好國王的瘋病。", b:"bg-blue-50 border-blue-200", i:"若玩家解決變形怪，會給予魔法物品(如爆竹魔杖、發條護身符)作為獎勵。"}
+    {c:5, n:"侏儒園 (Gnomengarde)", d:"瀑布後的奇妙洞穴，住著一群熱愛發明的岩侏儒。", nl:[
+        {n:"國王科伯茲 (King Korboz)", r:"岩侏儒國王", d:"一對成婚國王之一，因遭遇擬身怪而發了瘋。", b:"bg-green-50 border-green-200", i:"【性格】原本穩重，現在神經質且偏執。\\n【背景】與格娜克里共同統治侏儒園。\\n【目標】保護自己與格娜克里，消滅「變形怪物」。\\n【細節】把格娜克里用膠黏在椅子上囚禁在臥室。只有確認擬身怪被消滅後才會恢復理智（需要DC12魅力說服）。持有溶解膠的溶劑。"},
+        {n:"國王格娜克里 (King Gnerkli)", r:"岩侏儒國王", d:"科伯茲的配偶，被囚禁在椅子上。", b:"bg-green-50 border-green-200", i:"【性格】冷靜、理性。\\n【背景】與科伯茲成婚，共同統治。\\n【目標】讓科伯茲恢復正常。\\n【細節】被膠黏住無法行動。成功拯救後會與科伯茲一起贈送魔法物品（如爆竹魔杖或其他發明）。"},
+        {n:"擬身怪 (Mimic)", r:"變形怪物", d:"潛入侏儒園並捕食侏儒的怪物。", b:"bg-red-50 border-red-200", i:"【細節】偽裝成家具或侏儒，造成兩名侏儒失蹤。科伯茲差點被它殺害。需要調查線索才能找到並消滅。"},
+        {n:"菲柏迪普 (Fibblestib) 等岩侏儒", r:"岩侏儒隱士", d:"熱愛發明的隱居侏儒。", b:"bg-green-50 border-green-200", i:"【細節】約20名岩侏儒居住於此。他們不希望國王受傷，會請求玩家幫忙解決問題。成功後可獲得魔法小發明。"}
     ]},
-    {c:5, n:"矮人據點挖掘場 (Dwarven Excavation)", d:"新發現的古代矮人神廟遺跡。", nl:[
-        {n:"達茲 & 諾貝 (Dazlyn & Norbus)", r:"矮人勘探者", d:"合夥挖掘這座神廟。", b:"bg-blue-50 border-blue-200", i:"被神廟內的赭凍怪嚇得不敢進去，會花錢請玩家清理神廟。"}
+    {c:5, n:"憤怒山丘 (Umbrage Hill)", d:"石製風車，草藥師與助產士的居所。", nl:[
+        {n:"阿達布拉·格溫 (Adabra Gwynn)", r:"人類助產士／裳緹亞信徒", d:"居住在風車中的藥劑師與助產士。", b:"bg-green-50 border-green-200", i:"【性格】務實、獨立、有點固執。\\n【背景】信仰裳緹亞的助產士與藥劑師。\\n【目標】繼續自己的工作。\\n【細節】被白龍趕出的刺尾獅（蠍尾獅）包圍風車。可戰鬥或用25gp以上財寶／肉類賄賂刺尾獅使其離開。說服她回鎮可獲得25gp獎勵，也可向她購買治療藥水。"}
     ]},
-    {c:5, n:"憤怒山丘 (Umbrage Hill)", d:"一座古老的風車，如今是草藥師的住所。", nl:[
-        {n:"阿德拉 (Adabra Gwynn)", r:"人類草藥師", d:"泰摩拉的信徒，拒絕離開她的風車。", b:"bg-green-50 border-green-200", i:"可向她購買治療藥水，並需要說服她回鎮上避難。"},
-        {n:"蠍尾獅 (Manticore)", r:"怪獸", d:"被白龍趕出領地，飢腸轆轆。", b:"bg-purple-50 border-purple-200", i:"正在攻擊風車。玩家可以用肉類食物安撫牠，避免戰鬥。"}
+    {c:5, n:"戰隼狩獵小屋 (Falcon's Hunting Lodge)", d:"無冬森林中的狩獵小屋，可作為避難所。", nl:[
+        {n:"戰隼 / 古斯塔夫·史特倫 (Falcon / Gustav Stellern)", r:"人類獵人", d:"身高6呎6吋、黑髮藍眼的退休戰士與嚮導。", b:"bg-blue-50 border-blue-200", i:"【性格】自信、冷淡、公正、喜歡美酒。\\n【背景】本名古斯塔夫·史特倫，為無冬城貴族提供狩獵嚮導服務。\\n【目標】過簡單的森林生活。\\n【細節】有兩名僕人：年長廚師科溫（Corwin）與12歲啞巴馬夫佩爾（Pell）。送葡萄酒可建立友好關係，並協助防禦塔洛斯信徒突襲。可提供關於林間宅邸與區域威脅的情報。"}
     ]},
-    {c:5, n:"黃油頭骨牧場 (Butterskull Ranch)", d:"位於凡戴爾東邊的農場，遭到了半獸人的洗劫。", nl:[
-        {n:"大艾爾·卡拉卓恩 (Big Al Kalazorn)", r:"人類牧場主人", d:"前任絕冬城警長，被半獸人關在地下室。", b:"bg-blue-50 border-blue-200", i:"非常珍視他的母牛佩妮(Petunia)。獲救後贈予玩家一套秘銀甲。"}
+    {c:5, n:"黃油頭骨牧場 (Butterskull Ranch)", d:"位於三野豬小徑上的牧場，已被獸人佔領。", nl:[
+        {n:"阿方斯·「大艾爾」·卡拉佐 (Alfonse \"Big Al\" Kalazorn)", r:"人類退休治安官", d:"牧場主人，前凡戴爾治安官。", b:"bg-yellow-50 border-yellow-200", i:"【性格】堅強、保護家人與財產。\\n【背景】退休治安官，經營黃油頭骨牧場。\\n【目標】奪回牧場。\\n【細節】被獸人囚禁在地下室。救出後會給予秘銀甲作為獎勵。牧場有母牛佩妮（Petunia）需要找回。若他死亡，帶回死亡證據可向哈賓領取100gp。"}
     ]},
-    {c:5, n:"伐木者營地 (Loggers' Camp)", d:"無冬森林深處的伐木營地，遭到掘地蟲的襲擊。", nl:[
-        {n:"提博爾·維斯特 (Tibor Wester)", r:"人類經理", d:"鎮長哈賓同父異母的兄弟。", b:"bg-yellow-50 border-yellow-200", i:"懦弱膽小，躲在營地的辦公室裡，需要玩家護送回凡戴爾。"}
+    {c:5, n:"山腳金礦 (Mountain's Toe Gold Mine)", d:"凡戴爾東北15里的金礦，已被鼠人佔領。", nl:[
+        {n:"東容·拉斯坎 (Don-Jon Raskin)", r:"人類礦業監督人", d:"來自無冬城的新任工頭，無畏的問題解決者。", b:"bg-blue-50 border-blue-200", i:"【性格】務實、經驗豐富、不怕麻煩。\\n【背景】被無冬城商業聯盟派來擔任新工頭。\\n【目標】恢復金礦運作。\\n【細節】需要玩家護送前往礦坑。礦坑已被鼠人（wererats）佔領，可交涉或戰鬥。成功護送可獲得100gp。"}
     ]},
-    {c:5, n:"山腳金礦 (Mountain's Toe Gold Mine)", d:"被一群鼠人佔領的運作中礦坑。", nl:[
-        {n:"唐瓊·拉斯金 (Don-Jon Raskin)", r:"人類礦業經理", d:"被雇來重新整頓礦坑的倒楣鬼。", b:"bg-yellow-50 border-yellow-200", i:"需要玩家護送並幫他解決礦坑的鼠人威脅。"},
-        {n:"鼠人首領 (Zeleen Varnaster)", r:"鼠人", d:"帶領家族佔據了礦坑。", b:"bg-red-50 border-red-200", i:"如果玩家實力強大，她可能會同意談判，而非直接開戰。"}
+    {c:5, n:"伐木者營地 (Logger's Camp)", d:"無冬森林深處的伐木營地。", nl:[
+        {n:"提博爾·維斯特 (Tibor Wester)", r:"人類伐木者", d:"鎮長哈賓的同父異母兄弟，營地負責人。", b:"bg-green-50 border-green-200", i:"【性格】勤勞、務實。\\n【背景】哈賓的同父異母兄弟。\\n【目標】維持營地運作。\\n【細節】營地底下有掘地蟲威脅。送達物資並消滅掘地蟲後，可護送他回鎮，領取50gp。"}
     ]},
-    {c:5, n:"風暴之塔 (Tower of Storms)", d:"海邊發出不祥綠光的燈塔，祭祀塔洛斯的邪惡神廟。", nl:[
-        {n:"莫埃斯可 (Moesko)", r:"半獸人祭司", d:"塔洛斯的狂熱信徒。", b:"bg-red-50 border-red-200", i:"即使被殺，只要燈塔頂端的心臟還在跳動，他就會不斷復活。必須破壞心臟。"}
+    {c:5, n:"阿塞霍姆 (Axeholm)", d:"廢棄的矮人要塞，可作為避難所。", nl:[
+        {n:"食屍鬼與報喪妖", r:"不死生物", d:"佔據要塞的怪物。", b:"bg-red-50 border-red-200", i:"【細節】需要清理食屍鬼與報喪妖，確保要塞安全後可作為凡戴爾居民躲避白龍的避難所。完成可獲得250gp。"}
     ]},
-    {c:5, n:"戰隼狩獵小屋 (Falcon's Hunting Lodge)", d:"位於無冬森林中的安全木屋，有堅固的防禦工事。", nl:[
-        {n:"戰隼 (Falcon the Hunter)", r:"人類退休騎士", d:"強悍且好客的獵人，喜歡喝葡萄酒。", b:"bg-green-50 border-green-200", i:"提供免費的安全庇護所，並會協助玩家對抗塔洛斯信徒與半獸人的襲擊。"}
+    {c:5, n:"林間宅邸 (Woodland Manse)", d:"塔洛斯信徒的秘密基地。", nl:[
+        {n:"塔洛斯隱士與獸人", r:"半獸人邪教徒", d:"崇拜風暴之神塔洛斯的隱士與獸人。", b:"bg-red-50 border-red-200", i:"【細節】隱士們（半獸人）與獸人在此謀劃。可先發制人打擊並燒毀宅邸。成功後戰隼會給予獎勵與情報。"}
     ]},
-    {c:5, n:"林間宅邸 & 雷霆石陣 (Woodland Manse & Circle of Thunder)", d:"塔洛斯信徒的秘密集會所與召喚儀式場地。", nl:[
-        {n:"格蘭諾克 (Grannoc)", r:"半獸人祭司", d:"帶領邪教徒在宅邸培育枯枝怪。", b:"bg-red-50 border-red-200", i:"正在策劃對凡戴爾與狩獵小屋的總攻擊。"},
-        {n:"毀滅野豬 (Gorthok the Thunder Boar)", r:"塔洛斯神獸", d:"在雷霆石陣被召喚出的巨型魔法野豬。", b:"bg-purple-50 border-purple-200", i:"極具破壞力的王級怪物。"}
+    {c:5, n:"雷霆石陣 (Circle of Thunder)", d:"山頂石陣，用於召喚毀滅性生物。", nl:[
+        {n:"弗倫茨、奈拉克斯、亞迦絲 (Flenz, Narux, Yargath)", r:"塔洛斯隱士", d:"三名防守石陣的隱士。", b:"bg-purple-50 border-purple-200", i:"【細節】在暴風雨中可召喚雷霆野豬戈索克（Gorthok）。干擾儀式或擊敗隱士可阻止召喚。戈索克是強大的毀滅性生物。"}
     ]},
-    {c:5, n:"阿塞霍姆 (Axeholm) & 龍塚 (Dragon Barrow)", d:"廢棄的矮人要塞與古代屠龍者的墳墓。", nl:[
-        {n:"薇爾達拉 (Vyldara)", r:"精靈女妖", d:"生前是精靈大使，死於阿塞霍姆的背叛。", b:"bg-purple-50 border-purple-200", i:"充滿怨恨，在要塞深處徘徊。"},
-        {n:"隱形追蹤者 (Invisible Stalker)", r:"元素生物", d:"守護龍塚的隱形衛兵。", b:"bg-gray-100 border-gray-300", i:"在土丘迷宮中巡邏，玩家必須擊敗牠才能取得『屠龍長劍』。"}
+    {c:5, n:"風暴之塔 (Tower of Storms)", d:"海邊燈塔，實為塔洛斯神廟。", nl:[
+        {n:"莫斯柯 (Moesko)", r:"半獸人塔洛斯祭司", d:"守衛燈塔的隱士，心臟被取出作為燈塔光源。", b:"bg-red-50 border-red-200", i:"【細節】燈塔綠光會引誘船隻觸礁。擊敗海灘鷹身女妖與莫斯柯，並破壞其發光的心臟可停止威脅。可獲得魔法物品。"}
     ]},
-    {c:5, n:"冰塔峰堡壘 (Icespire Hold)", d:"隱藏在冰雪之巔的古老要塞，如今是白龍的巢穴。", nl:[
-        {n:"冰吼 (Cryovain)", r:"青年白龍", d:"極具攻擊性，四處劫掠的惡龍。", b:"bg-cyan-50 border-cyan-300", i:"最終 Boss。戰鬥非常致命，會利用地形與冰雪吐息，建議玩家做好抗寒準備與攜帶屠龍劍。"}
+    {c:5, n:"冰塔峰堡壘 (Icespire Hold)", d:"白龍的巢穴，最終威脅所在。", nl:[
+        {n:"克萊尤溫 / 冰吼 (Cryovain)", r:"青年白龍", d:"殘忍、貪婪的青年白龍，冰塔峰的主要威脅。", b:"bg-red-50 border-red-200", i:"【性格】兇猛、殘忍、受飢餓與貪婪驅使。\\n【背景】青年白龍，佔據冰塔峰堡壘。\\n【目標】建立領地並捕食。\\n【細節】會在區域內隨機出現攻擊。生命值損失超過10點會撤退回巢穴長休。擊敗它是冒險的最終目標。堡壘內還有其他威脅。"},
+        {n:"石冷掠奪者 (Stone-Cold Reavers)", r:"人類掠奪者", d:"佔據堡壘部分區域的掠奪者團伙。", b:"bg-gray-100 border-gray-300", i:"【細節】包括西琳·冬月（Syleen Wintermoon）等人。可交涉或戰鬥。"}
+    ]},
+
+    // ==========================================
+    // 🔮 Phandelver and Below: The Shattered Obelisk
+    // ==========================================
+    {c:6, n:"凡戴爾鎮 - 新登場NPC (Shattered Obelisk)", d:"第5章以後新增或重要性提升的鎮民與關鍵人物。", nl:[
+        {n:"格溫·奧雷松 (Gwyn Oresong)", r:"矮人學者 / 助祭", d:"來自無冬城的矮人學者，Elsa的姐妹。", b:"bg-blue-50 border-blue-200", i:"【性格】理性、好奇、樂於助人。\\n【背景】在無冬城研究，來凡戴爾探望姐妹並進行田野調查。\\n【目標】了解區域異常與方尖碑相關威脅。\\n【細節】第5章以後的重要盟友，可協助解讀地圖與提供情報。未遭綁架，是玩家的可靠聯絡人。"},
+        {n:"魯克西斯·天選者 (Ruxithid the Chosen)", r:"靈能哥布林領袖", d:"Sawplee哥布林的領袖，擁有靈能能力。", b:"bg-red-50 border-red-200", i:"【性格】冷靜、詭異、有歌唱般的語氣。\\n【背景】透過特殊水晶接收「神明」（實為心靈異怪）的指令。\\n【目標】收集方尖碑碎片以完成儀式。\\n【細節】在Zorzula's Rest中對抗玩家。擁有基礎預知能力，是第5章的主要對手。"},
+        {n:"里維·比德爾 (Rivy Biddle / Indiana Gnomes)", r:"侏儒考古學家", d:"活躍的侏儒探險家。", b:"bg-green-50 border-green-200", i:"【性格】冒險精神、好奇。\\n【背景】研究古代遺跡。\\n【目標】探索並記錄發現。\\n【細節】可在後續章節中作為嚮導或情報來源，協助玩家理解地底與古代威脅。"},
+        {n:"命運之輪 (Wheel of Fortune)", r:"提夫林酒保", d:"Sleeping Giant酒館的酒保。", b:"bg-amber-50 border-amber-200", i:"【細節】可提供鎮上八卦與關於異常活動的情報。在調查綁架事件時有用。"},
+        {n:"失蹤鎮民群", r:"各種平民", d:"被Sawplee哥布林綁架的多名鎮民。", b:"bg-yellow-50 border-yellow-200", i:"【細節】包括Thawnia Browne（花店老闆）、Aida與Cathlette Camber姐妹、Oskar Ninebough、Mildra Merkel等。救出他們可提升鎮民好感並提供線索。Gwyn、Grista、Sister Garaele、Ander、Halia等未遭綁架。"}
+    ]},
+    {c:6, n:"佐祖拉安息地與相關地點 (Zorzula's Rest)", d:"Sawplee哥布林的據點與方尖碑相關場所。", nl:[
+        {n:"索普利哥布林 (Sawplee Goblins)", r:"靈能哥布林", d:"受Ruxithid領導的哥布林部落。", b:"bg-red-50 border-red-200", i:"【細節】擁有部分靈能能力，負責綁架鎮民與收集碎片。在Zorzula's Rest有據點。"},
+        {n:"方尖碑碎片相關地點", r:"地城", d:"Talhundereth、Crypt of the Talhund、Gibbet Crossing。", b:"bg-purple-50 border-purple-200", i:"【細節】三個主要地城，各藏有方尖碑碎片。充滿古代矮人遺跡、邪教徒、心靈異怪相關怪物與陷阱。"}
+    ]},
+    {c:7, n:"地底與Far Realm威脅", d:"第7-8章的Underdark與最終威脅。", nl:[
+        {n:"心靈異怪 (Illithids) 與信徒", r:"遠界威脅", d:"幕後黑手，試圖將凡戴爾轉化為新帝國中心。", b:"bg-gray-800 text-white border-gray-900", i:"【性格】冷酷、有計劃、視凡人為工具。\\n【目標】收集方尖碑力量並開啟更大的Far Realm影響。\\n【細節】在Underdark有基地（如Ilthan相關區域）。最終章節的主要敵人，伴隨各種突變生物與現實裂隙。"},
+        {n:"突變生物與Far Realm影響", r:"異常現象", d:"受遠界能量影響而突變的生物與環境。", b:"bg-purple-50 border-purple-200", i:"【細節】包括各種新怪物（如Oculorbs等）。凡戴爾鎮本身也會出現突變現象，需玩家處理以保護鎮民。"}
+    ]},
+
+    // --- 次要NPC補充 ---
+    {c:6, n:"凡戴爾鎮 - 次要鎮民與配角", d:"第5章以後出現或重要性提升的次要人物。", nl:[
+        {n:"艾爾莎·奧雷松 (Elsa Oresong)", r:"矮人酒保", d:"石山旅店的酒保，Gwyn的姐妹。", b:"bg-blue-50 border-blue-200", i:"【細節】Gwyn的姐妹，可提供關於Gwyn的情報與鎮上八卦。"},
+        {n:"格里斯塔·凱托科普 (Grista Kettlecopp)", r:"服務員", d:"Sleeping Giant的服務員。", b:"bg-amber-50 border-amber-200", i:"【細節】可提供關於哥布林騷亂的目擊情報。"},
+        {n:"安德·榿木葉 (Ander Alderleaf)", r:"半身人店員", d:"巴森雜貨店的年輕店員。", b:"bg-green-50 border-green-200", i:"【細節】水井事件的重要證人，可引導玩家調查井下。"},
+        {n:"皮普·石山 (Pip Stonehill)", r:"小孩", d:"石山旅店老闆的兒子，約10歲。", b:"bg-yellow-50 border-yellow-200", i:"【細節】第6章支線「Pip的冒險」主角，跟著怪物跑進山丘。"},
+        {n:"塔瑪拉·石山 (Tamara Stonehill)", r:"鎮民", d:"石山旅店相關人物。", b:"bg-yellow-50 border-yellow-200", i:"【細節】可在幸運神龕事件中提供目擊情報。"},
+        {n:"索妮亞·布朗 (Thawnia Browne)", r:"花店老闆", d:"人類花店老闆，Shansa的妻子。", b:"bg-pink-50 border-pink-200", i:"【細節】失蹤鎮民之一，被哥布林綁架。"},
+        {n:"艾達·卡姆伯與卡瑟萊特·卡姆伯 (Aida & Cathlette Camber)", r:"姐妹", d:"木匠與石匠姐妹。", b:"bg-yellow-50 border-yellow-200", i:"【細節】失蹤鎮民，Cathlette是Oskar的未婚妻。"},
+        {n:"奧斯卡·奈恩博 (Oskar Ninebough)", r:"鋸木工", d:"人類鋸木工，Cathlette的未婚夫。", b:"bg-yellow-50 border-yellow-200", i:"【細節】失蹤鎮民之一。"},
+        {n:"米爾德拉·默克爾 (Mildra Merkel)", r:"獸人農婦", d:"獸人農婦，丈夫在鎮上尋找她。", b:"bg-yellow-50 border-yellow-200", i:"【細節】失蹤鎮民之一。"},
+        {n:"黛西（那頭牛）(Daisy the Cow)", r:"異常的牛", d:"受Far Realm影響而行為異常的牛。", b:"bg-green-50 border-green-200", i:"【細節】第6章支線「奇怪的牛」主角，吃了受污染的三葉草後出現異常。"},
+        {n:"昆布拉克塞爾 (Qunbraxel)", r:"心靈異怪相關", d:"在Gibbet Crossing活動的角色。", b:"bg-purple-50 border-purple-200", i:"【細節】試圖建立自己的勢力，與玩家競賽收集碎片。"},
+        {n:"里維·比德爾 (Rivy Biddle)", r:"侏儒考古學家", d:"活躍的探險家，可作為嚮導。", b:"bg-green-50 border-green-200", i:"【細節】在後續章節可協助玩家理解地底與古代威脅。"}
     ]}
-
-        ];
-
+];
         let spls = [
 {l:0, n:"酸液飛濺 (Acid Splash)", r:"60呎", c:"V,S", d:"【2024改版】產生5呎半徑酸液爆裂，範圍內生物敏捷豁免，失敗受酸傷。", dmg:"1d6酸"},
     {l:0, n:"防刃術 (Blade Ward)", r:"自身", c:"V,S", d:"【2024改為反應】受到近戰傷害時施放，對該次物理傷害獲得抗性。", dmg:"物理抗性"},
@@ -1790,7 +1970,7 @@ let savedQuests = JSON.parse(localStorage.getItem('dm_saved_quests') || '{}');
             
             const arr = quests.filter(x => (f==='All'||x.ty===f) && (x.n.toLowerCase().includes(q) || x.d.toLowerCase().includes(q)));
             setH('quests-container', arr.map(x => {
-                const bc = x.ty==='DoIP'?'border-blue-500':x.ty==='Main'?'border-amber-500':'border-green-500';
+                const bc = x.ty==='DoIP'?'border-blue-500':x.ty==='Obelisk'?'border-purple-500':x.ty==='Main'?'border-amber-500':'border-green-500';
                 const isCompleted = !!x.completed;
                 const cardBg = isCompleted ? 'bg-gray-200 grayscale opacity-80' : 'bg-white';
                 
@@ -1810,7 +1990,10 @@ let savedQuests = JSON.parse(localStorage.getItem('dm_saved_quests') || '{}');
             const q = getV('loc-search')?.toLowerCase() || '';
             setH('locations-container', locs.filter(l => l.n.toLowerCase().includes(q) || l.nl?.some(n=>n.n.toLowerCase().includes(q))).map(l => {
                 const bc = l.c===5?'border-blue-500 text-blue-900':(l.c===1?'border-green-400':l.c===2?'border-amber-400':'border-purple-400');
-                const npcsH = `<div class="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3">${l.nl?.map(n=>`<div class="p-3 rounded-lg border shadow-sm ${n.b||'bg-gray-50'} text-sm hover:shadow transition"><div class="font-bold flex justify-between items-center text-gray-800 border-b border-gray-200/50 pb-1 mb-1"><span>${n.n}</span><span class="text-[10px] font-bold bg-white/60 px-1.5 py-0.5 rounded shadow-sm text-gray-600">${n.r}</span></div><p class="text-gray-700 text-xs mb-2 leading-relaxed">${n.d}</p><div class="text-[10px] text-gray-600 font-bold bg-white/80 p-1.5 rounded border border-gray-200/50 shadow-inner"><i class="fa-solid fa-comment-dots text-gray-400 mr-1"></i>DM: ${n.i}</div></div>`).join('') || ''}</div>`;
+                const npcsH = `<div class="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3">${l.nl?.map(n=>{
+    const detail = (n.i || '').replace(/\\n/g, '<br>').replace(/\n/g, '<br>');
+    return `<div class="p-3 rounded-lg border shadow-sm ${n.b||'bg-gray-50'} text-sm hover:shadow transition"><div class="font-bold flex justify-between items-center text-gray-800 border-b border-gray-200/50 pb-1 mb-1"><span>${n.n}</span><span class="text-[10px] font-bold bg-white/60 px-1.5 py-0.5 rounded shadow-sm text-gray-600">${n.r}</span></div><p class="text-gray-700 text-xs mb-2 leading-relaxed">${n.d}</p><div class="text-[10px] text-gray-600 font-bold bg-white/80 p-1.5 rounded border border-gray-200/50 shadow-inner leading-relaxed"><i class="fa-solid fa-comment-dots text-gray-400 mr-1"></i>DM 詳細資料：<br>${detail}</div></div>`;
+}).join('') || ''}</div>`;
                 return `<div class="bg-white rounded-xl shadow-sm p-5 border-l-4 ${bc} hover:shadow-md transition"><div class="flex justify-between items-baseline mb-2"><h4 class="font-bold text-xl text-gray-800"><i class="fa-solid fa-map-location-dot mr-2 opacity-50"></i>${l.n}</h4><span class="text-[10px] font-black text-gray-500 bg-gray-100 px-2 py-1 rounded shadow-inner border">${l.c===5?'DoIP 擴充':`Chapter ${l.c}`}</span></div><p class="text-sm text-gray-600 mb-2 leading-relaxed bg-gray-50 p-2 rounded">${l.d}</p>${npcsH}</div>`;
             }).join(''));
         }
@@ -2231,7 +2414,19 @@ function generateWebDungeon() {
     // 入口/出口樓梯
     if (rooms.length > 0) {
         let startRoom = rooms[0];
-        let endRoom = rooms[rooms.length - 1];
+        let endRoom = rooms[rooms.length - 1
+    ,{c:99, n:"故事聖經角色 (Story Bible)", d:"跨團主角與關鍵夥伴的詳細設定。", nl:[
+        {n:"唐 (Tang)", r:"純血獸人狂戰士 (Lv3)", d:"混亂善良，原苔爪氏族農夫。", b:"bg-green-50 border-green-200", i:"【動機】奪回被巴倫騙走的聖物「翡翠沃土石」、營救父親、向巴倫復仇。\n【背景】在塔莎之吻之前被巴倫欺騙，為了救父與找回神石而離開部落旅行，中途遭遇塔莎之吻。\n【父親被賣原因】父親曾是苔爪氏族的戰士，對地脈有特殊感應。灰矮人需要這種「活體陣眼」來穩定他們在幽暗地域的腐化儀式。\n【性格】心智如孩童般純真。"},
+        {n:"漢克 (Hank)", r:"歌利亞月亮圈德魯伊 (Lv3)", d:"中立善良，溫和農夫。", b:"bg-green-50 border-green-200", i:"【動機】追查塔莎之吻引發的農田枯萎，淨化被毒化的地脈。\n【背景】放棄高山傳統，滿月下覺醒大地神力。"},
+        {n:"伊琳娜 (Elexa)", r:"人類神聖之魂術士 (Lv3)", d:"中立善良，具備警覺專長。", b:"bg-green-50 border-green-200", i:"【動機】調查凡戴林散塔林陰謀。\n【關鍵線索】信件簽名為哈莉亞·松頓。\n【身世迷團】不知魔法血脈源自何處（遠古巨龍眷顧？狂野魔法誤擊？）。\n【12歲事件】冬天暴風雪中為救凍僵流浪狗，雙掌爆發金紅色火焰，差點燒毀村莊。因村民恐懼而在大雪夜離開。\n【流浪歲月】學會像狼一樣睡覺，極度警覺。曾在矮人礦道與要塞周邊徘徊，學會矮人語。矮人們稱她為「被幸運女神吻過的孩子」（多次奇蹟生還）。\n【轉折】在地精襲擊農莊時第一次主動使用火焰救人，找到生命意義。\n【現況】攜帶散塔林信件南下凡戴林繼續調查。"},
+        {n:"凱爾 (Yelwork)", r:"人類法師 (暗線DMPC)", d:"左眼為木製義眼。", b:"bg-green-50 border-green-200", i:"【狀態】看破鬼婆部分幻象後脫隊潛入幽暗地域。\n【背景】與蕾歐娜交易復活（木義眼）。「師傅在環遊世界」是蕾歐娜的謊言，真師傅正被囚禁。\n【揭示節點3】木義眼可讓蕾歐娜在特定條件下短暫控制凱爾（將製作被操縱時刻）。\n【揭示節點4】某NPC協助修復懷錶，使其能抵抗詛咒並保護玩家。"},
+        {n:"茶葉·布妮 (Tea Leaf Bunny)", r:"半身人遊蕩者", d:"凡戴爾英雄。", b:"bg-green-50 border-green-200", i:"【角色】剿滅紅標幫的英雄，Droop 的「大家姐」。目前擔任新團擔保人。\n【高光】樹林舊帳中精準破甲救出 Droop。\n【目標】保護 Droop 與凡戴林的弱小者，追查仍可能威脅小鎮的紅標幫殘黨與黑蜘蛛餘黨。\n【長期】在凡戴林建立一個能讓像 Droop 這樣的人安心生活的地方。"},
+        {n:"施琳·伊菲凱爾 (Céline Ifikael)", r:"高等精靈法師", d:"茶葉的搭檔。", b:"bg-green-50 border-green-200", i:"【角色】經歷礦坑前期章節，提供戰力與情報支援。歐格馬信徒。\n【目標】記錄並理解凡戴林周邊的魔法異變（地脈腐化、黑蜘蛛詛咒、鬼婆魔法），防止知識被濫用。\n【長期】尋找能安全封印或淨化異界魔法的方法，同時守護茶葉與隊伍的秘密。"},
+        {n:"班吉 (Benji)", r:"覺醒德魯伊 (18歲)", d:"無冬城馬廄少年。", b:"bg-green-50 border-green-200", i:"【外貌】亂蓬蓬稻草色短髮、滿臉雀斑、過大厚皮圍裙、大草叉。\n【高光】玻璃杖自爆時召喚藤蔓護盾拯救全隊與西爾達。\n【師傅】拜了西樹鎮（Thundertree）的德魯伊為師傅。\n【未來目標】學習控制自然之力，成為能保護同伴的真正守護者；同時協助淨化被腐化的地脈。"},
+        {n:"Droop (督督)", r:"地精", d:"茶葉的小弟。", b:"bg-green-50 border-green-200", i:"【背景】被黑蜘蛛手下轉賣至紅標幫地下室當奴隸。\n【轉折】被茶葉解放後認定她為大家姐。\n【後續】樹林舊帳中被莫斯克挾持，被茶葉救出。"}
+    ]}
+
+];
         grid[startRoom.x + 1][startRoom.y + 1] = 3; // 上樓梯
         if (rooms.length > 1) {
             grid[endRoom.x + 1][endRoom.y + 1] = 4; // 下樓梯
@@ -2468,6 +2663,7 @@ function generateWebDungeon() {
                         
                         <div class="w-[calc(100%-3.5rem)] md:w-[calc(50%-2.5rem)] bg-gray-800 p-6 rounded-2xl border border-gray-700 shadow-lg hover:border-amber-500/50 hover:shadow-amber-500/10 transition-all duration-300 transform group-hover:-translate-y-1">
                             <div class="flex flex-wrap justify-between items-center mb-3 gap-2">
+                                <span class="bg-amber-600 text-white font-bold text-xs px-3 py-1 rounded-full tracking-wide shadow-inner">${ev.Year_DR || '—'}</span>
                                 <span class="bg-gray-900 text-amber-500 font-bold text-xs px-3 py-1 rounded-full tracking-wide shadow-inner">${ev.Timeline_Phase || ''}</span>
                                 <span class="text-[10px] text-gray-500 font-mono tracking-widest">${ev.Event_ID || ''}</span>
                             </div>
@@ -2557,5 +2753,156 @@ window.onload = () => {
 };
 
     </script>
+
+    <!-- 地圖 Tab (DM 端) -->
+    <div id="tab-map" class="tab-content p-4">
+        <div class="bg-white rounded-lg shadow p-4 mb-4">
+            <h2 class="text-xl font-bold mb-2">地圖管理（DM）</h2>
+            <p class="text-sm text-gray-600 mb-4">靜態原型 · 假資料</p>
+            
+            <div class="flex flex-col lg:flex-row gap-4">
+                <!-- 地圖區域 -->
+                <div class="flex-1">
+                    <div id="dm-map-container" class="relative bg-gray-800 rounded overflow-hidden" style="height: 500px;">
+                        <div id="dm-map" class="absolute inset-0 bg-cover bg-center" style="background-image: url('https://via.placeholder.com/800x600/1a1a2e/eee?text=Phandalin+Map');"></div>
+                        <div id="dm-zones" class="absolute inset-0"></div>
+                        <div id="dm-tokens" class="absolute inset-0 pointer-events-none"></div>
+                    </div>
+                    <div class="mt-2 flex gap-2">
+                        <button onclick="addZone()" class="bg-blue-600 text-white px-3 py-1 rounded text-sm">新增區域</button>
+                        <button onclick="toggleFogMode()" class="bg-gray-600 text-white px-3 py-1 rounded text-sm">切換迷霧模式</button>
+                    </div>
+                </div>
+                
+                <!-- 側邊資訊 -->
+                <div class="w-full lg:w-80">
+                    <div class="bg-gray-50 rounded p-3 mb-3">
+                        <h3 class="font-bold mb-2">區域列表</h3>
+                        <div id="zone-list" class="text-sm space-y-1"></div>
+                    </div>
+                    <div class="bg-gray-50 rounded p-3">
+                        <h3 class="font-bold mb-2">目前角色位置</h3>
+                        <div id="token-list" class="text-sm space-y-1"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then(reg => console.log('SW registered'))
+      .catch(err => console.log('SW failed', err));
+  });
+}
+</script>
+
+<script>
+// === DM 地圖原型 (假資料) ===
+const dmZones = [
+    { id: 'z1', name: '石山客棧', x: 30, y: 40, explored: true },
+    { id: 'z2', name: '礦業交易所', x: 55, y: 35, explored: true },
+    { id: 'z3', name: '鎮長宅', x: 70, y: 60, explored: false },
+    { id: 'z4', name: '神殿', x: 25, y: 70, explored: true },
+    { id: 'z5', name: '郊外', x: 80, y: 25, explored: false }
+];
+
+const dmTokens = [
+    { id: 't1', name: '茶葉·布妮', zoneId: 'z1', color: '#f59e0b' },
+    { id: 't2', name: '班吉', zoneId: 'z4', color: '#22c55e' }
+];
+
+let fogMode = false;
+
+function renderDMMap() {
+    const zonesEl = document.getElementById('dm-zones');
+    const tokensEl = document.getElementById('dm-tokens');
+    const zoneList = document.getElementById('zone-list');
+    const tokenList = document.getElementById('token-list');
+    if (!zonesEl) return;
+
+    zonesEl.innerHTML = '';
+    tokensEl.innerHTML = '';
+    zoneList.innerHTML = '';
+    tokenList.innerHTML = '';
+
+    dmZones.forEach(z => {
+        const el = document.createElement('div');
+        el.className = 'absolute w-6 h-6 rounded-full border-2 border-white cursor-pointer flex items-center justify-center text-xs font-bold';
+        el.style.left = z.x + '%';
+        el.style.top = z.y + '%';
+        el.style.transform = 'translate(-50%, -50%)';
+        el.style.background = z.explored ? '#22c55e' : '#6b7280';
+        el.title = z.name + (z.explored ? ' (已探索)' : ' (未探索)');
+        el.onclick = () => toggleZone(z.id);
+        zonesEl.appendChild(el);
+
+        const item = document.createElement('div');
+        item.className = 'flex justify-between items-center py-1 border-b';
+        item.innerHTML = `<span>${z.name}</span><button onclick="toggleZone('${z.id}')" class="text-xs px-2 py-0.5 rounded ${z.explored ? 'bg-green-200' : 'bg-gray-300'}">${z.explored ? '已探索' : '未探索'}</button>`;
+        zoneList.appendChild(item);
+    });
+
+    dmTokens.forEach(t => {
+        const zone = dmZones.find(z => z.id === t.zoneId);
+        if (!zone) return;
+        const el = document.createElement('div');
+        el.className = 'absolute w-8 h-8 rounded-full border-2 border-white flex items-center justify-center text-xs font-bold text-white';
+        el.style.left = zone.x + '%';
+        el.style.top = zone.y + '%';
+        el.style.transform = 'translate(-50%, -50%)';
+        el.style.background = t.color;
+        el.textContent = t.name[0];
+        el.title = t.name;
+        tokensEl.appendChild(el);
+
+        const item = document.createElement('div');
+        item.className = 'py-1';
+        item.textContent = `${t.name} → ${zone.name}`;
+        tokenList.appendChild(item);
+    });
+}
+
+function toggleZone(id) {
+    const z = dmZones.find(z => z.id === id);
+    if (z) {
+        z.explored = !z.explored;
+        renderDMMap();
+    }
+}
+
+function addZone() {
+    const name = prompt('區域名稱：');
+    if (!name) return;
+    const x = Math.floor(Math.random() * 60) + 20;
+    const y = Math.floor(Math.random() * 50) + 20;
+    dmZones.push({ id: 'z' + Date.now(), name, x, y, explored: false });
+    renderDMMap();
+}
+
+function toggleFogMode() {
+    fogMode = !fogMode;
+    alert(fogMode ? '迷霧模式：開啟（未探索區域會被遮蓋）' : '迷霧模式：關閉');
+}
+
+// 當切換到地圖 tab 時渲染
+const originalSwitchTab = window.switchTab;
+window.switchTab = function(tabId) {
+    if (originalSwitchTab) originalSwitchTab(tabId);
+    if (tabId === 'tab-map') {
+        setTimeout(renderDMMap, 100);
+    }
+};
+
+// 初始化
+document.addEventListener('DOMContentLoaded', () => {
+    if (document.getElementById('tab-map')?.classList.contains('active')) {
+        renderDMMap();
+    }
+});
+</script>
+
 </body>
 </html>
