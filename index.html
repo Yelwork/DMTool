@@ -2758,6 +2758,7 @@ window.onload = () => {
     <div id="tab-map" class="tab-content p-4">
         <div class="bg-white rounded-lg shadow p-4 mb-4">
             <h2 class="text-xl font-bold mb-2">地圖管理（DM）</h2>
+            <div id="fb-status" class="text-sm mb-2">連線狀態：檢查中...</div>
             <p class="text-sm text-gray-600 mb-4">靜態原型 · 假資料</p>
             
             <div class="flex flex-col lg:flex-row gap-4">
@@ -2799,22 +2800,28 @@ if ('serviceWorker' in navigator) {
 }
 </script>
 
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 <script>
-// === DM 地圖原型 (假資料) ===
-const dmZones = [
-    { id: 'z1', name: '石山客棧', x: 30, y: 40, explored: true },
-    { id: 'z2', name: '礦業交易所', x: 55, y: 35, explored: true },
-    { id: 'z3', name: '鎮長宅', x: 70, y: 60, explored: false },
-    { id: 'z4', name: '神殿', x: 25, y: 70, explored: true },
-    { id: 'z5', name: '郊外', x: 80, y: 25, explored: false }
-];
+const firebaseConfig = {
+  apiKey: "AIzaSyDJcXYO2uj6OrFbi99THRcgeDLEWfJxEXI",
+  authDomain: "dmtool-map.firebaseapp.com",
+  databaseURL: "https://dmtool-map-default-rtdb.firebaseio.com",
+  projectId: "dmtool-map",
+  storageBucket: "dmtool-map.firebasestorage.app",
+  messagingSenderId: "7240565044",
+  appId: "1:7240565044:web:0089ad4813c5ec6ec92561"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+</script>
 
-const dmTokens = [
-    { id: 't1', name: '茶葉·布妮', zoneId: 'z1', color: '#f59e0b' },
-    { id: 't2', name: '班吉', zoneId: 'z4', color: '#22c55e' }
-];
-
-let fogMode = false;
+<script>
+// === DM 地圖 (Firebase) ===
+let dmZones = [];
+let dmTokens = [];
 
 function renderDMMap() {
     const zonesEl = document.getElementById('dm-zones');
@@ -2853,14 +2860,14 @@ function renderDMMap() {
         el.style.left = zone.x + '%';
         el.style.top = zone.y + '%';
         el.style.transform = 'translate(-50%, -50%)';
-        el.style.background = t.color;
-        el.textContent = t.name[0];
-        el.title = t.name;
+        el.style.background = t.color || '#3b82f6';
+        el.textContent = (t.characterName || t.name || '?')[0];
+        el.title = t.characterName || t.name;
         tokensEl.appendChild(el);
 
         const item = document.createElement('div');
         item.className = 'py-1';
-        item.textContent = `${t.name} → ${zone.name}`;
+        item.textContent = `${t.characterName || t.name} → ${zone.name}`;
         tokenList.appendChild(item);
     });
 }
@@ -2868,8 +2875,7 @@ function renderDMMap() {
 function toggleZone(id) {
     const z = dmZones.find(z => z.id === id);
     if (z) {
-        z.explored = !z.explored;
-        renderDMMap();
+        db.ref('zones/' + id).update({ explored: !z.explored });
     }
 }
 
@@ -2878,14 +2884,32 @@ function addZone() {
     if (!name) return;
     const x = Math.floor(Math.random() * 60) + 20;
     const y = Math.floor(Math.random() * 50) + 20;
-    dmZones.push({ id: 'z' + Date.now(), name, x, y, explored: false });
-    renderDMMap();
+    const newRef = db.ref('zones').push();
+    newRef.set({ name, x, y, explored: false, mapId: 'phandalin' });
 }
 
-function toggleFogMode() {
-    fogMode = !fogMode;
-    alert(fogMode ? '迷霧模式：開啟（未探索區域會被遮蓋）' : '迷霧模式：關閉');
-}
+// Firebase 監聽
+db.ref('.info/connected').on('value', snap => {
+    const el = document.getElementById('fb-status');
+    if (el) el.textContent = snap.val() ? '🟢 Firebase 已連線' : '🔴 Firebase 未連線';
+    if (el) el.style.color = snap.val() ? '#22c55e' : '#ef4444';
+});
+
+db.ref('zones').on('value', snap => {
+    dmZones = [];
+    snap.forEach(child => {
+        dmZones.push({ id: child.key, ...child.val() });
+    });
+    renderDMMap();
+});
+
+db.ref('tokens').on('value', snap => {
+    dmTokens = [];
+    snap.forEach(child => {
+        dmTokens.push({ id: child.key, ...child.val() });
+    });
+    renderDMMap();
+});
 
 // 當切換到地圖 tab 時渲染
 const originalSwitchTab = window.switchTab;
@@ -2895,13 +2919,6 @@ window.switchTab = function(tabId) {
         setTimeout(renderDMMap, 100);
     }
 };
-
-// 初始化
-document.addEventListener('DOMContentLoaded', () => {
-    if (document.getElementById('tab-map')?.classList.contains('active')) {
-        renderDMMap();
-    }
-});
 </script>
 
 </body>
