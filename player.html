@@ -4,27 +4,290 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>玩家地圖</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    <script src="https://cdn.tailwindcss.com">
+        // 點在多邊形內判斷
+        function isPointInPolygon(x, y, points) {
+            if (!points || points.length < 3) return false;
+            let inside = false;
+            for (let i = 0, j = points.length - 1; i < points.length; j = i++) {
+                const xi = points[i].x, yi = points[i].y;
+                const xj = points[j].x, yj = points[j].y;
+                if (((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi)) {
+                    inside = !inside;
+                }
+            }
+            return inside;
+        }
+
+        // 地圖移動
+        const mapEl = document.getElementById('player-map');
+        
+        function updatePlayerMapTransform() {
+            if (mapEl) {
+                mapEl.style.transform = `translate(${mapPanX}px, ${mapPanY}px)`;
+            }
+        }
+        
+        mapContainer.addEventListener('mousedown', e => {
+            if (e.button === 1 || e.altKey) {
+                isPanning = true;
+                panStartX = e.clientX - mapPanX;
+                panStartY = e.clientY - mapPanY;
+                e.preventDefault();
+            }
+        });
+        
+        mapContainer.addEventListener('mousemove', e => {
+            if (isPanning) {
+                mapPanX = e.clientX - panStartX;
+                mapPanY = e.clientY - panStartY;
+                updatePlayerMapTransform();
+            }
+        });
+        
+        mapContainer.addEventListener('mouseup', () => { isPanning = false; });
+        mapContainer.addEventListener('mouseleave', () => { isPanning = false; });
+
+        // 自由移動拖曳
+        const mapContainer = document.getElementById('player-map-container');
+        
+        mapContainer.addEventListener('mousedown', startDrag);
+        mapContainer.addEventListener('mousemove', onDrag);
+        mapContainer.addEventListener('mouseup', endDrag);
+        mapContainer.addEventListener('mouseleave', endDrag);
+
+        function startDrag(e) {
+            if (!currentChar || !currentZone) return;
+            const token = document.querySelector('.token');
+            if (!token) return;
+            const rect = token.getBoundingClientRect();
+            if (e.clientX >= rect.left && e.clientX <= rect.right &&
+                e.clientY >= rect.top && e.clientY <= rect.bottom) {
+                isDragging = true;
+            }
+        }
+
+        function onDrag(e) {
+            if (!isDragging || !currentChar) return;
+            const container = mapContainer.getBoundingClientRect();
+            const x = ((e.clientX - container.left) / container.width * 100);
+            const y = ((e.clientY - container.top) / container.height * 100);
+            
+            // 檢查是否在任一自由區域內
+            const inArea = areas.some(a => isPointInPolygon(x, y, a.points));
+            
+            if (inArea) {
+                currentZone = { ...currentZone, x, y, isFree: true };
+                render();
+            }
+        }
+
+        function endDrag() {
+            if (isDragging && currentZone && currentZone.isFree && myTokenId) {
+                db.ref('tokens/' + myTokenId).update({ 
+                    freeX: currentZone.x, 
+                    freeY: currentZone.y 
+                });
+            }
+            isDragging = false;
+        }
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js">
+        // 點在多邊形內判斷
+        function isPointInPolygon(x, y, points) {
+            if (!points || points.length < 3) return false;
+            let inside = false;
+            for (let i = 0, j = points.length - 1; i < points.length; j = i++) {
+                const xi = points[i].x, yi = points[i].y;
+                const xj = points[j].x, yj = points[j].y;
+                if (((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi)) {
+                    inside = !inside;
+                }
+            }
+            return inside;
+        }
+
+        // 地圖移動
+        const mapEl = document.getElementById('player-map');
+        
+        function updatePlayerMapTransform() {
+            if (mapEl) {
+                mapEl.style.transform = `translate(${mapPanX}px, ${mapPanY}px)`;
+            }
+        }
+        
+        mapContainer.addEventListener('mousedown', e => {
+            if (e.button === 1 || e.altKey) {
+                isPanning = true;
+                panStartX = e.clientX - mapPanX;
+                panStartY = e.clientY - mapPanY;
+                e.preventDefault();
+            }
+        });
+        
+        mapContainer.addEventListener('mousemove', e => {
+            if (isPanning) {
+                mapPanX = e.clientX - panStartX;
+                mapPanY = e.clientY - panStartY;
+                updatePlayerMapTransform();
+            }
+        });
+        
+        mapContainer.addEventListener('mouseup', () => { isPanning = false; });
+        mapContainer.addEventListener('mouseleave', () => { isPanning = false; });
+
+        // 自由移動拖曳
+        const mapContainer = document.getElementById('player-map-container');
+        
+        mapContainer.addEventListener('mousedown', startDrag);
+        mapContainer.addEventListener('mousemove', onDrag);
+        mapContainer.addEventListener('mouseup', endDrag);
+        mapContainer.addEventListener('mouseleave', endDrag);
+
+        function startDrag(e) {
+            if (!currentChar || !currentZone) return;
+            const token = document.querySelector('.token');
+            if (!token) return;
+            const rect = token.getBoundingClientRect();
+            if (e.clientX >= rect.left && e.clientX <= rect.right &&
+                e.clientY >= rect.top && e.clientY <= rect.bottom) {
+                isDragging = true;
+            }
+        }
+
+        function onDrag(e) {
+            if (!isDragging || !currentChar) return;
+            const container = mapContainer.getBoundingClientRect();
+            const x = ((e.clientX - container.left) / container.width * 100);
+            const y = ((e.clientY - container.top) / container.height * 100);
+            
+            // 檢查是否在任一自由區域內
+            const inArea = areas.some(a => isPointInPolygon(x, y, a.points));
+            
+            if (inArea) {
+                currentZone = { ...currentZone, x, y, isFree: true };
+                render();
+            }
+        }
+
+        function endDrag() {
+            if (isDragging && currentZone && currentZone.isFree && myTokenId) {
+                db.ref('tokens/' + myTokenId).update({ 
+                    freeX: currentZone.x, 
+                    freeY: currentZone.y 
+                });
+            }
+            isDragging = false;
+        }
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js">
+        // 點在多邊形內判斷
+        function isPointInPolygon(x, y, points) {
+            if (!points || points.length < 3) return false;
+            let inside = false;
+            for (let i = 0, j = points.length - 1; i < points.length; j = i++) {
+                const xi = points[i].x, yi = points[i].y;
+                const xj = points[j].x, yj = points[j].y;
+                if (((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi)) {
+                    inside = !inside;
+                }
+            }
+            return inside;
+        }
+
+        // 地圖移動
+        const mapEl = document.getElementById('player-map');
+        
+        function updatePlayerMapTransform() {
+            if (mapEl) {
+                mapEl.style.transform = `translate(${mapPanX}px, ${mapPanY}px)`;
+            }
+        }
+        
+        mapContainer.addEventListener('mousedown', e => {
+            if (e.button === 1 || e.altKey) {
+                isPanning = true;
+                panStartX = e.clientX - mapPanX;
+                panStartY = e.clientY - mapPanY;
+                e.preventDefault();
+            }
+        });
+        
+        mapContainer.addEventListener('mousemove', e => {
+            if (isPanning) {
+                mapPanX = e.clientX - panStartX;
+                mapPanY = e.clientY - panStartY;
+                updatePlayerMapTransform();
+            }
+        });
+        
+        mapContainer.addEventListener('mouseup', () => { isPanning = false; });
+        mapContainer.addEventListener('mouseleave', () => { isPanning = false; });
+
+        // 自由移動拖曳
+        const mapContainer = document.getElementById('player-map-container');
+        
+        mapContainer.addEventListener('mousedown', startDrag);
+        mapContainer.addEventListener('mousemove', onDrag);
+        mapContainer.addEventListener('mouseup', endDrag);
+        mapContainer.addEventListener('mouseleave', endDrag);
+
+        function startDrag(e) {
+            if (!currentChar || !currentZone) return;
+            const token = document.querySelector('.token');
+            if (!token) return;
+            const rect = token.getBoundingClientRect();
+            if (e.clientX >= rect.left && e.clientX <= rect.right &&
+                e.clientY >= rect.top && e.clientY <= rect.bottom) {
+                isDragging = true;
+            }
+        }
+
+        function onDrag(e) {
+            if (!isDragging || !currentChar) return;
+            const container = mapContainer.getBoundingClientRect();
+            const x = ((e.clientX - container.left) / container.width * 100);
+            const y = ((e.clientY - container.top) / container.height * 100);
+            
+            // 檢查是否在任一自由區域內
+            const inArea = areas.some(a => isPointInPolygon(x, y, a.points));
+            
+            if (inArea) {
+                currentZone = { ...currentZone, x, y, isFree: true };
+                render();
+            }
+        }
+
+        function endDrag() {
+            if (isDragging && currentZone && currentZone.isFree && myTokenId) {
+                db.ref('tokens/' + myTokenId).update({ 
+                    freeX: currentZone.x, 
+                    freeY: currentZone.y 
+                });
+            }
+            isDragging = false;
+        }
+    </script>
     <style>
         body { background: #1a1a2e; color: #eee; }
         .vision-circle { 
             position: absolute; 
             border-radius: 50%; 
-            background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.05) 70%, transparent 100%);
+            background: radial-gradient(circle, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.1) 60%, transparent 100%);
+            border: 2px dashed rgba(255,255,255,0.3);
             pointer-events: none;
             transform: translate(-50%, -50%);
+            z-index: 5;
         }
         .fog { 
             position: absolute; 
             inset: 0; 
-            background: rgba(0,0,0,0.75); 
+            background: #000; 
             pointer-events: none;
         }
         .zone-marker {
             position: absolute;
-            width: 24px; height: 24px;
+            width: 17px; height: 17px;
             background: #22c55e;
             border: 2px solid white;
             border-radius: 50%;
@@ -33,7 +296,7 @@
         }
         .token {
             position: absolute;
-            width: 32px; height: 32px;
+            width: 22px; height: 22px;
             border-radius: 50%;
             border: 3px solid white;
             transform: translate(-50%, -50%);
@@ -60,11 +323,15 @@
         </div>
 
         <div id="player-map-container" class="relative bg-gray-900 rounded overflow-hidden" style="height: 500px;">
-            <div id="player-map" class="absolute inset-0 bg-cover bg-center" style="background-image: url('https://via.placeholder.com/800x600/1a1a2e/eee?text=Phandalin+Map');"></div>
-            <div id="fog-layer" class="fog"></div>
-            <div id="vision-layer"></div>
-            <div id="zones-layer"></div>
-            <div id="tokens-layer"></div>
+            <div id="fog-overlay" class="absolute inset-0 pointer-events-none" style="z-index: 10; background: #000;"></div>
+            <div id="vision-layer" class="absolute inset-0" style="z-index: 5; pointer-events: none;"></div>
+            <div id="map-transform-layer" class="absolute inset-0" style="transform-origin: center center;">
+                <div id="player-map" class="absolute inset-0 bg-cover bg-center" style="background-color: #1a1a2e;"></div>
+                <div id="areas-layer" class="absolute inset-0"></div>
+                <div id="zones-layer" class="absolute inset-0" style="z-index: 20;"></div>
+                <div id="entities-layer" class="absolute inset-0" style="z-index: 15;"></div>
+                <div id="tokens-layer" class="absolute inset-0"></div>
+            </div>
         </div>
 
         <div class="mt-4 text-sm text-gray-400">
@@ -93,6 +360,15 @@
         };
 
         let zones = [];
+        let areas = [];
+        let entities = [];
+        let pixelsPerFiveFeet = 50;
+        let isDragging = false;
+        let isPanning = false;
+        let mapPanX = 0;
+        let mapPanY = 0;
+        let panStartX = 0;
+        let panStartY = 0;
         let currentChar = null;
         let currentZone = null;
         let myTokenId = null;
@@ -117,6 +393,40 @@
             render();
         }
 
+        function renderFog() {
+            const fog = document.getElementById('fog-overlay');
+            if (!fog) return;
+            if (!currentChar || !currentZone) {
+                fog.style.background = '#000';
+                return;
+            }
+            
+            const container = document.getElementById('player-map-container');
+            const zoom = window.currentZoom || 1;
+            const panX = window.currentPanX || 0;
+            const panY = window.currentPanY || 0;
+            
+            // Calculate vision radius in pixels (scaled)
+            const radius = (currentChar.vision / 5) * pixelsPerFiveFeet * zoom / 2;
+            
+            // Character position in container (percentage to pixels)
+            const charX = currentZone.x / 100 * container.offsetWidth;
+            const charY = currentZone.y / 100 * container.offsetHeight;
+            
+            // Apply transform: scale from center, then translate
+            const centerX = container.offsetWidth / 2;
+            const centerY = container.offsetHeight / 2;
+            const screenX = centerX + (charX - centerX) * zoom + panX;
+            const screenY = centerY + (charY - centerY) * zoom + panY;
+            
+            // Convert to percentage for CSS
+            const centerXPct = (screenX / container.offsetWidth) * 100;
+            const centerYPct = (screenY / container.offsetHeight) * 100;
+            
+            fog.style.background = `radial-gradient(circle at ${centerXPct}% ${centerYPct}%, transparent 0px, transparent ${radius}px, black ${radius}px)`;
+        }
+
+        
         function render() {
             const container = document.getElementById('player-map-container');
             const zonesLayer = document.getElementById('zones-layer');
@@ -127,7 +437,49 @@
             tokensLayer.innerHTML = '';
             visionLayer.innerHTML = '';
 
+            // 繪製自由區域
+            const areasLayer = document.getElementById('areas-layer');
+            areasLayer.innerHTML = '';
+            areas.forEach(a => {
+                if (!a.points || a.points.length < 3) return;
+                const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                svg.setAttribute('class', 'absolute inset-0 w-full h-full');
+                svg.style.pointerEvents = 'none';
+                const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+                const container = document.getElementById('player-map-container');
+                const w = container.offsetWidth;
+                const h = container.offsetHeight;
+                const pts = a.points.map(p => (p.x / 100 * w) + ',' + (p.y / 100 * h)).join(' ');
+                polygon.setAttribute('points', pts);
+                polygon.setAttribute('fill', 'rgba(34, 197, 94, 0.15)');
+                polygon.setAttribute('stroke', '#22c55e');
+                polygon.setAttribute('stroke-width', '2');
+                svg.appendChild(polygon);
+                areasLayer.appendChild(svg);
+            });
+
+            // 繪製怪物/NPC
+            const entitiesLayer = document.getElementById('entities-layer');
+            if (entitiesLayer) {
+                entitiesLayer.innerHTML = '';
+                entities.forEach(e => {
+                    const el = document.createElement('div');
+                    el.className = 'absolute rounded-full border-2 border-white flex items-center justify-center text-xs font-bold text-white';
+                    el.style.width = '14px';
+                    el.style.height = '14px';
+                    el.style.left = e.x + '%';
+                    el.style.top = e.y + '%';
+                    el.style.transform = 'translate(-50%, -50%)';
+                    el.style.background = e.type === 'monster' ? '#dc2626' : '#ca8a04';
+                    el.style.zIndex = '15';
+                    el.textContent = e.name ? e.name[0] : '?';
+                    el.title = e.name;
+                    entitiesLayer.appendChild(el);
+                });
+            }
+
             zones.forEach(z => {
+                if (z.playerVisible === false) return;
                 if (!z.explored && (!currentChar || !isInVision(z))) return;
                 const el = document.createElement('div');
                 el.className = 'zone-marker';
@@ -146,16 +498,29 @@
                 token.style.background = currentChar.color;
                 token.textContent = currentChar.name[0];
                 tokensLayer.appendChild(token);
+                renderFog();
 
-                const radiusPx = (currentChar.vision / 5) * (container.offsetWidth / 16);
+                const radiusPx = (currentChar.vision / 5) * pixelsPerFiveFeet / 2;
                 const circle = document.createElement('div');
                 circle.className = 'vision-circle';
-                circle.style.left = currentZone.x + '%';
-                circle.style.top = currentZone.y + '%';
-                circle.style.width = radiusPx * 2 + 'px';
-                circle.style.height = radiusPx * 2 + 'px';
+                // Use same calculation as fog
+                const zoom = window.currentZoom || 1;
+                const panX = window.currentPanX || 0;
+                const panY = window.currentPanY || 0;
+                const charX = currentZone.x / 100 * container.offsetWidth;
+                const charY = currentZone.y / 100 * container.offsetHeight;
+                const centerX = container.offsetWidth / 2;
+                const centerY = container.offsetHeight / 2;
+                const screenX = centerX + (charX - centerX) * zoom + panX;
+                const screenY = centerY + (charY - centerY) * zoom + panY;
+                circle.style.left = screenX + 'px';
+                circle.style.top = screenY + 'px';
+                circle.style.width = radiusPx * 2 * zoom + 'px';
+                circle.style.height = radiusPx * 2 * zoom + 'px';
                 visionLayer.appendChild(circle);
             }
+        
+            renderFog();
         }
 
         function isInVision(zone) {
@@ -168,6 +533,7 @@
         }
 
         function moveTo(zone) {
+            console.log('moveTo called', zone, currentChar, myTokenId);
             if (!currentChar || !myTokenId) {
                 alert('請先選擇角色');
                 return;
@@ -186,6 +552,26 @@
             }
         });
 
+        db.ref('maps/phandalin').on('value', snap => {
+            const data = snap.val();
+            if (!data) return;
+            
+            if (data.pixelsPerFiveFeet) {
+                pixelsPerFiveFeet = data.pixelsPerFiveFeet;
+            }
+            if (data.imageUrl) {
+                document.getElementById('player-map').style.backgroundImage = "url('" + data.imageUrl + "')";
+            }
+            window.currentZoom = data.zoom || 1;
+            window.currentPanX = data.panX || 0;
+            window.currentPanY = data.panY || 0;
+            const transformLayer = document.getElementById('map-transform-layer');
+            if (transformLayer) {
+                transformLayer.style.transform = 'scale(' + window.currentZoom + ') translate(' + window.currentPanX + 'px, ' + window.currentPanY + 'px)';
+            }
+            render();
+        });
+
         db.ref('zones').on('value', snap => {
             zones = [];
             snap.forEach(child => {
@@ -196,6 +582,93 @@
             }
             render();
         });
+    
+        // 點在多邊形內判斷
+        function isPointInPolygon(x, y, points) {
+            if (!points || points.length < 3) return false;
+            let inside = false;
+            for (let i = 0, j = points.length - 1; i < points.length; j = i++) {
+                const xi = points[i].x, yi = points[i].y;
+                const xj = points[j].x, yj = points[j].y;
+                if (((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi)) {
+                    inside = !inside;
+                }
+            }
+            return inside;
+        }
+
+        // 地圖移動
+        const mapEl = document.getElementById('player-map');
+        
+        function updatePlayerMapTransform() {
+            if (mapEl) {
+                mapEl.style.transform = `translate(${mapPanX}px, ${mapPanY}px)`;
+            }
+        }
+        
+        mapContainer.addEventListener('mousedown', e => {
+            if (e.button === 1 || e.altKey) {
+                isPanning = true;
+                panStartX = e.clientX - mapPanX;
+                panStartY = e.clientY - mapPanY;
+                e.preventDefault();
+            }
+        });
+        
+        mapContainer.addEventListener('mousemove', e => {
+            if (isPanning) {
+                mapPanX = e.clientX - panStartX;
+                mapPanY = e.clientY - panStartY;
+                updatePlayerMapTransform();
+            }
+        });
+        
+        mapContainer.addEventListener('mouseup', () => { isPanning = false; });
+        mapContainer.addEventListener('mouseleave', () => { isPanning = false; });
+
+        // 自由移動拖曳
+        const mapContainer = document.getElementById('player-map-container');
+        
+        mapContainer.addEventListener('mousedown', startDrag);
+        mapContainer.addEventListener('mousemove', onDrag);
+        mapContainer.addEventListener('mouseup', endDrag);
+        mapContainer.addEventListener('mouseleave', endDrag);
+
+        function startDrag(e) {
+            if (!currentChar || !currentZone) return;
+            const token = document.querySelector('.token');
+            if (!token) return;
+            const rect = token.getBoundingClientRect();
+            if (e.clientX >= rect.left && e.clientX <= rect.right &&
+                e.clientY >= rect.top && e.clientY <= rect.bottom) {
+                isDragging = true;
+            }
+        }
+
+        function onDrag(e) {
+            if (!isDragging || !currentChar) return;
+            const container = mapContainer.getBoundingClientRect();
+            const x = ((e.clientX - container.left) / container.width * 100);
+            const y = ((e.clientY - container.top) / container.height * 100);
+            
+            // 檢查是否在任一自由區域內
+            const inArea = areas.some(a => isPointInPolygon(x, y, a.points));
+            
+            if (inArea) {
+                currentZone = { ...currentZone, x, y, isFree: true };
+                render();
+            }
+        }
+
+        function endDrag() {
+            if (isDragging && currentZone && currentZone.isFree && myTokenId) {
+                db.ref('tokens/' + myTokenId).update({ 
+                    freeX: currentZone.x, 
+                    freeY: currentZone.y 
+                });
+            }
+            isDragging = false;
+        }
     </script>
 </body>
 </html>

@@ -105,7 +105,7 @@
     <!-- 🆕 新增的三個獨立功能按鈕 -->
     <button onclick="switchTab('tab-spells')" class="tab-btn bg-gray-700 text-gray-300 px-4 py-2 rounded-t-lg whitespace-nowrap"><i class="fa-solid fa-wand-magic-sparkles mr-2"></i>法術庫</button>
     <button onclick="switchTab('tab-store')" class="tab-btn bg-gray-700 text-gray-300 px-4 py-2 rounded-t-lg whitespace-nowrap"><i class="fa-solid fa-store mr-2"></i>萬物商店</button>
-    <button onclick="switchTab('tab-combat')" class="tab-btn bg-gray-700 text-gray-300 px-4 py-2 rounded-t-lg whitespace-nowrap"><i class="fa-solid fa-swords mr-2"></i>先攻助手</button>
+    
     <button onclick="switchTab('tab-tools')" class="tab-btn active bg-white text-campaign-dark px-4 py-2 rounded-t-lg font-bold whitespace-nowrap"><i class="fa-solid fa-dice-d20 mr-2"></i>DM 工具</button>
     <button onclick="switchTab('tab-houserules')" class="tab-btn bg-gray-700 text-gray-300 px-4 py-2 rounded-t-lg whitespace-nowrap"><i class="fa-solid fa-scroll mr-2"></i>House Rules</button>
     <button onclick="switchTab('tab-players')" class="tab-btn bg-gray-700 text-gray-300 px-4 py-2 rounded-t-lg whitespace-nowrap"><i class="fa-solid fa-id-card mr-2"></i>玩家面板</button>
@@ -209,36 +209,6 @@
         </div>
 
 <!-- 🆕 戰鬥先攻助手 (獨立分頁) -->
-<div id="tab-combat" class="tab-content max-w-6xl mx-auto pb-10">
-    <div class="bg-white p-5 rounded-xl shadow border flex flex-col min-h-[35rem]">
-        <h3 class="text-xl font-bold mb-3 border-b pb-2 flex justify-between items-center">
-            <span><i class="fa-solid fa-swords mr-2 text-red-600"></i>戰鬥先攻助手</span>
-            <button onclick="cmbs=[];cmbLog=[];renderCmb();renderCmbLog();" class="text-sm bg-red-100 text-red-700 px-3 py-1 rounded hover:bg-red-200 font-bold transition">清空列表與紀錄</button>
-        </h3>
-        <div class="flex gap-2 mb-4 bg-gray-50 p-2.5 rounded border">
-            <input type="number" id="c-init" placeholder="先攻" class="w-1/6 px-2 py-1.5 border rounded text-center font-bold outline-none focus:border-blue-500">
-            <input type="text" id="c-name" placeholder="角色 / 怪物名稱" class="w-1/3 px-3 py-1.5 border rounded font-bold outline-none focus:border-blue-500">
-            <input type="number" id="c-ac" placeholder="AC" class="w-1/6 px-2 py-1.5 border rounded text-center text-blue-800 font-bold outline-none">
-            <input type="number" id="c-hp" placeholder="HP" class="w-1/6 px-2 py-1.5 border rounded text-center text-red-600 font-bold outline-none">
-            <select id="c-fac" class="w-1/6 px-2 py-1.5 border rounded text-sm outline-none font-bold">
-                <option value="e">敵方</option>
-                <option value="p">友方</option>
-            </select>
-            <button onclick="addCmb()" class="bg-green-600 text-white px-5 py-1.5 rounded font-black hover:bg-green-700 transition shadow"><i class="fa-solid fa-plus"></i></button>
-        </div>
-        
-        <!-- 🆕 戰鬥操作紀錄區 -->
-        <div class="mb-3 bg-gray-800 text-gray-300 rounded-lg p-2 text-xs font-mono h-24 overflow-y-auto custom-scrollbar shadow-inner border border-gray-900" id="combat-log">
-            <div class="text-gray-500 italic">系統：戰鬥紀錄已準備就緒...</div>
-        </div>
-
-        <div class="text-xs text-gray-500 mb-2 border-b pb-2">💡 提示：點擊列表中的數字可直接修改，修改「先攻」後系統會自動重新排序。輸入負數傷害可作為「治療」。</div>
-        
-        <div class="flex-grow overflow-y-auto custom-scrollbar space-y-2 h-[350px] pr-2" id="combat-list"></div>
-    </div>
-</div>
-
-<!-- 🆕 採集小遊戲 (DM 判定速查表) -->
 <div id="tab-minigames" class="tab-content max-w-6xl mx-auto pb-10">
     <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start">
         
@@ -663,8 +633,6 @@
 </div>
 
 
-
-    </main>
 
     
 <div id="tab-houserules" class="tab-content max-w-4xl mx-auto pb-10 min-h-0 overflow-y-auto">
@@ -2038,7 +2006,7 @@ let savedQuests = JSON.parse(localStorage.getItem('dm_saved_quests') || '{}');
                 const am = gm(p.s[p.m]) + pb;
                 const dc = 8 + am;
                 return `<div class="bg-excel-bg p-3 rounded-xl shadow-md border-2 border-gray-800 relative group hover:shadow-lg transition">
-                    <button onclick="delP(${i})" class="absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center shadow opacity-0 group-hover:opacity-100 transition z-10"><i class="fa-solid fa-times text-xs"></i></button>
+                    <button onclick="delP(${i})" class="absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-4 h-4 flex items-center justify-center shadow opacity-0 group-hover:opacity-100 transition z-10"><i class="fa-solid fa-times text-xs"></i></button>
                     <div class="flex gap-2 mb-3">
                         <input value="${p.n}" onchange="updateP(${i},'n',this.value)" class="font-black text-xl bg-transparent border-b-2 border-gray-400 w-1/2 outline-none text-gray-800 px-1 focus:border-blue-500">
                         <input value="${p.r}" onchange="updateP(${i},'r',this.value)" class="text-sm font-bold bg-transparent border-b border-gray-400 w-1/2 outline-none text-right text-gray-600 px-1 focus:border-blue-500">
@@ -2138,7 +2106,7 @@ let cmbs = [];
             cmbs.sort((a,b)=>b.i-a.i);
             setH('combat-list', cmbs.map(c => 
                 `<div class="flex items-center justify-between p-3 mb-2 rounded-lg border-2 ${c.f==='p'?'bg-blue-50 border-blue-200':'bg-red-50 border-red-200'} shadow-sm relative group">
-                    <button onclick="addCombatLog('<span class=\\'text-gray-400 font-bold\\'>移除</span> ${c.n}'); cmbs=cmbs.filter(x=>x.id!==${c.id}); renderCmb();" class="absolute -top-2 -right-2 bg-gray-800 hover:bg-red-600 text-white rounded-full w-6 h-6 text-xs z-10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition shadow"><i class="fa-solid fa-times"></i></button>
+                    <button onclick="addCombatLog('<span class=\\'text-gray-400 font-bold\\'>移除</span> ${c.n}'); cmbs=cmbs.filter(x=>x.id!==${c.id}); renderCmb();" class="absolute -top-2 -right-2 bg-gray-800 hover:bg-red-600 text-white rounded-full w-4 h-4 text-xs z-10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition shadow"><i class="fa-solid fa-times"></i></button>
                     
                     <div class="flex flex-col items-center justify-center bg-white rounded border px-2 py-1 mr-2">
                         <span class="text-[10px] text-gray-400 font-bold uppercase">Init</span>
@@ -2755,24 +2723,46 @@ window.onload = () => {
     </script>
 
     <!-- 地圖 Tab (DM 端) -->
-    <div id="tab-map" class="tab-content p-4">
+    
+<div id="tab-map" class="tab-content p-4">
         <div class="bg-white rounded-lg shadow p-4 mb-4">
-            <h2 class="text-xl font-bold mb-2">地圖管理（DM）</h2>
+            <h2 class="text-xl font-bold mb-2">地圖管理</h2>
             <div id="fb-status" class="text-sm mb-2">連線狀態：檢查中...</div>
-            <p class="text-sm text-gray-600 mb-4">靜態原型 · 假資料</p>
+            <p class="text-sm text-gray-600 mb-4">即時同步</p>
             
             <div class="flex flex-col lg:flex-row gap-4">
                 <!-- 地圖區域 -->
                 <div class="flex-1">
-                    <div id="dm-map-container" class="relative bg-gray-800 rounded overflow-hidden" style="height: 500px;">
-                        <div id="dm-map" class="absolute inset-0 bg-cover bg-center" style="background-image: url('https://via.placeholder.com/800x600/1a1a2e/eee?text=Phandalin+Map');"></div>
-                        <div id="dm-zones" class="absolute inset-0"></div>
-                        <div id="dm-tokens" class="absolute inset-0 pointer-events-none"></div>
+                    <div id="dm-map-container" class="relative bg-gray-900 rounded overflow-hidden cursor-crosshair" style="height: 500px;" onclick="onMapClick(event)">
+                        <div id="dm-transform-layer" class="absolute inset-0" style="transform-origin: center center;">
+                            <div id="dm-map" class="absolute inset-0 bg-cover bg-center" style="background-color: #1a1a2e;"></div>
+                            <div id="dm-zones" class="absolute inset-0"></div>
+                            <div id="dm-tokens" class="absolute inset-0 pointer-events-none"></div>
+                        </div>
                     </div>
-                    <div class="mt-2 flex gap-2">
-                        <button onclick="addZone()" class="bg-blue-600 text-white px-3 py-1 rounded text-sm">新增區域</button>
-                        <button onclick="toggleFogMode()" class="bg-gray-600 text-white px-3 py-1 rounded text-sm">切換迷霧模式</button>
+                    <div class="mt-2 flex flex-wrap gap-2 items-center">
+                        <button onclick="addZone()" class="bg-blue-600 text-white px-3 py-1 rounded text-sm">玩家重生地點</button>
+                        <button onclick="startAddArea()" id="add-area-btn" class="bg-green-600 text-white px-3 py-1 rounded text-sm">新增自由區域</button>
+                        <button onclick="removeAllMonsters()" class="bg-red-800 text-white px-3 py-1 rounded text-sm">清除所有怪物</button>
+                        <button onclick="setPlaceMode('monster')" id="btn-monster" class="bg-red-600 text-white px-3 py-1 rounded text-sm">放置怪物</button>
+                        <button onclick="startCalibrate()" id="btn-calibrate" class="bg-orange-600 text-white px-3 py-1 rounded text-sm">校準5尺</button>
+                        <button onclick="setPlaceMode('pan')" id="btn-pan" class="bg-gray-600 text-white px-3 py-1 rounded text-sm">移動地圖</button>
+                        <button onclick="setPlaceMode('npc')" id="btn-npc" class="bg-yellow-600 text-white px-3 py-1 rounded text-sm">放置NPC</button>
+                        <select id="map-select" onchange="selectMapImage()" class="border px-2 py-1 rounded text-sm">
+                            <option value="">-- 選擇地圖 --</option>
+                        </select>
+                        <button onclick="loadDriveMaps()" class="bg-gray-500 text-white px-3 py-1 rounded text-sm">重新載入</button>
+                        <button onclick="addMapImage()" class="bg-purple-600 text-white px-3 py-1 rounded text-sm">新增地圖</button>
                     </div>
+                    <div class="mt-2 flex items-center gap-2">
+                        <span class="text-sm">縮放：</span>
+                        <button onclick="zoomMap(-0.1)" class="bg-gray-600 text-white px-2 py-1 rounded text-sm">-</button>
+                        <input type="number" id="zoom-input" value="100" min="50" max="300" class="w-16 px-1 py-1 border rounded text-center text-sm" onchange="setZoom(this.value)">
+                        <span class="text-sm">%</span>
+                        <button onclick="zoomMap(0.1)" class="bg-gray-600 text-white px-2 py-1 rounded text-sm">+</button>
+                        <button onclick="resetZoom()" class="bg-gray-500 text-white px-2 py-1 rounded text-sm">重置</button>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1">地圖圖片請上傳至 Google Drive「DMTool Maps」資料夾</p>
                 </div>
                 
                 <!-- 側邊資訊 -->
@@ -2780,6 +2770,10 @@ window.onload = () => {
                     <div class="bg-gray-50 rounded p-3 mb-3">
                         <h3 class="font-bold mb-2">區域列表</h3>
                         <div id="zone-list" class="text-sm space-y-1"></div>
+                    </div>
+                    <div class="bg-gray-50 rounded p-3 mb-3">
+                        <h3 class="font-bold mb-2">自由區域</h3>
+                        <div id="area-list" class="text-sm space-y-1"></div>
                     </div>
                     <div class="bg-gray-50 rounded p-3">
                         <h3 class="font-bold mb-2">目前角色位置</h3>
@@ -2789,6 +2783,33 @@ window.onload = () => {
             </div>
         </div>
     </div>
+
+
+
+    <!-- 先攻助手（地圖下方） -->
+    <div class="bg-white rounded-lg shadow p-4 mt-4">
+        <h3 class="text-xl font-bold mb-3 border-b pb-2 flex justify-between items-center">
+            <span><i class="fa-solid fa-swords mr-2 text-red-600"></i>戰鬥先攻助手</span>
+            <button onclick="cmbs=[];cmbLog=[];renderCmb();renderCmbLog();" class="text-sm bg-red-100 text-red-700 px-3 py-1 rounded hover:bg-red-200 font-bold transition">清空列表與紀錄</button>
+        </h3>
+        <div class="flex gap-2 mb-4 bg-gray-50 p-2.5 rounded border flex-wrap">
+            <input type="number" id="c-init" placeholder="先攻" class="w-16 px-2 py-1.5 border rounded text-center font-bold">
+            <input type="text" id="c-name" placeholder="名稱" class="flex-1 min-w-[120px] px-3 py-1.5 border rounded font-bold">
+            <input type="number" id="c-ac" placeholder="AC" class="w-16 px-2 py-1.5 border rounded text-center text-blue-800 font-bold">
+            <input type="number" id="c-hp" placeholder="HP" class="w-16 px-2 py-1.5 border rounded text-center text-red-600 font-bold">
+            <select id="c-fac" class="px-2 py-1.5 border rounded text-sm font-bold">
+                <option value="e">敵方</option>
+                <option value="p">友方</option>
+            </select>
+            <button onclick="addCmb()" class="bg-green-600 text-white px-4 py-1.5 rounded font-bold hover:bg-green-700">+ 新增</button>
+        </div>
+        <div class="mb-3 bg-gray-800 text-gray-300 rounded-lg p-2 text-xs font-mono h-20 overflow-y-auto" id="combat-log">
+            <div class="text-gray-500 italic">系統：戰鬥紀錄已準備就緒...</div>
+        </div>
+        <div class="text-xs text-gray-500 mb-2">💡 點擊數字可修改，負數傷害 = 治療</div>
+        <div class="space-y-2 max-h-64 overflow-y-auto" id="combat-list"></div>
+    </div>
+
 
 <script>
 if ('serviceWorker' in navigator) {
@@ -2801,6 +2822,11 @@ if ('serviceWorker' in navigator) {
 </script>
 
 
+
+    
+</main>
+
+    
 <!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
@@ -2818,10 +2844,182 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 </script>
 
+
+    
 <script>
 // === DM 地圖 (Firebase) ===
 let dmZones = [];
 let dmTokens = [];
+
+let dmAreas = [];
+
+
+function renderAreas() {
+    const container = document.getElementById('dm-transform-layer') || document.getElementById('dm-map-container');
+    let areaLayer = document.getElementById('dm-areas');
+    if (!areaLayer) {
+        areaLayer = document.createElement('div');
+        areaLayer.id = 'dm-areas';
+        areaLayer.className = 'absolute inset-0 pointer-events-none';
+        areaLayer.style.zIndex = '1';
+        container.appendChild(areaLayer);
+    }
+    areaLayer.innerHTML = '';
+    const w = container.offsetWidth;
+    const h = container.offsetHeight;
+    dmAreas.forEach(a => {
+        if (!a.points || a.points.length < 3) return;
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('class', 'absolute inset-0 w-full h-full');
+        svg.style.pointerEvents = 'none';
+        const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+        const points = a.points.map(p => (p.x / 100 * w) + ',' + (p.y / 100 * h)).join(' ');
+        polygon.setAttribute('points', points);
+        polygon.setAttribute('fill', 'rgba(34, 197, 94, 0.2)');
+        polygon.setAttribute('stroke', '#22c55e');
+        polygon.setAttribute('stroke-width', '2');
+        svg.appendChild(polygon);
+        areaLayer.appendChild(svg);
+    });
+}
+
+function renderMapEntities() {
+    const container = document.getElementById('dm-transform-layer') || document.getElementById('dm-map-container');
+    let entityLayer = document.getElementById('dm-entities');
+    if (!entityLayer) {
+        entityLayer = document.createElement('div');
+        entityLayer.id = 'dm-entities';
+        entityLayer.className = 'absolute inset-0 pointer-events-none';
+        entityLayer.style.zIndex = '10';
+        container.appendChild(entityLayer);
+    }
+    entityLayer.innerHTML = '';
+    dmEntities.forEach(e => {
+        const el = document.createElement('div');
+        el.className = 'entity-marker absolute w-5 h-5 rounded-full border-2 border-white flex items-center justify-center text-xs font-bold text-white cursor-pointer';
+        el.style.left = e.x + '%';
+        el.style.top = e.y + '%';
+        el.style.transform = 'translate(-50%, -50%)';
+        el.style.background = e.type === 'monster' ? '#dc2626' : '#ca8a04';
+        el.style.pointerEvents = 'auto';
+        el.textContent = e.name ? e.name[0] : '?';
+        el.title = e.name + ' (' + (e.type === 'monster' ? '怪物' : 'NPC') + ')';
+        el.onclick = (ev) => { ev.stopPropagation(); if (confirm('刪除 ' + e.name + '？')) db.ref('entities/' + e.id).remove(); };
+        entityLayer.appendChild(el);
+    });
+}
+
+function renderAreaPreview() {
+    let preview = document.getElementById('area-preview');
+    if (!preview) {
+        preview = document.createElement('div');
+        preview.id = 'area-preview';
+        preview.className = 'absolute inset-0 pointer-events-none';
+        preview.style.zIndex = '2';
+        (document.getElementById('dm-transform-layer') || document.getElementById('dm-map-container')).appendChild(preview);
+    }
+    preview.innerHTML = '';
+    if (areaPoints.length === 0) return;
+    
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('class', 'absolute inset-0 w-full h-full');
+    
+    // 畫線
+    if (areaPoints.length > 1) {
+        const polyline = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+        const w = document.getElementById('dm-map-container').offsetWidth;
+        const h = document.getElementById('dm-map-container').offsetHeight;
+        const pts = areaPoints.map(p => (p.x / 100 * w) + ',' + (p.y / 100 * h)).join(' ');
+        polyline.setAttribute('points', pts);
+        polyline.setAttribute('fill', 'none');
+        polyline.setAttribute('stroke', '#fbbf24');
+        polyline.setAttribute('stroke-width', '2');
+        polyline.setAttribute('stroke-dasharray', '5,5');
+        svg.appendChild(polyline);
+    }
+    
+    // 畫點
+    areaPoints.forEach((p, i) => {
+        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        const cw = document.getElementById('dm-map-container').offsetWidth;
+        const ch = document.getElementById('dm-map-container').offsetHeight;
+        circle.setAttribute('cx', p.x / 100 * cw);
+        circle.setAttribute('cy', p.y / 100 * ch);
+        circle.setAttribute('r', i === 0 ? '8' : '5');
+        circle.setAttribute('fill', i === 0 ? '#ef4444' : '#fbbf24');
+        svg.appendChild(circle);
+    });
+    
+    preview.appendChild(svg);
+}
+
+function addMapInit() {
+    const init = parseInt(document.getElementById('map-init').value) || 0;
+    const name = document.getElementById('map-name').value.trim();
+    if (!name) return;
+    cmbs.push({ i: init, n: name, id: Date.now(), f: 'p' });
+    cmbs.sort((a, b) => b.i - a.i);
+    document.getElementById('map-init').value = '';
+    document.getElementById('map-name').value = '';
+    renderCmb();
+    renderMapInit();
+}
+
+function renderMapInit() {
+    const list = document.getElementById('map-init-list');
+    if (!list) return;
+    list.innerHTML = '';
+    cmbs.forEach((c, i) => {
+        const el = document.createElement('div');
+        el.className = 'flex justify-between items-center py-1 border-b';
+        el.innerHTML = `<span class="font-bold text-blue-600 w-8">${c.i}</span><span class="flex-1">${c.n}</span><button onclick="cmbs.splice(${i},1);renderCmb();" class="text-red-500 text-xs">✕</button>`;
+        list.appendChild(el);
+    });
+}
+
+function removeMapInit(idx) {
+    cmbs.splice(idx, 1);
+    renderCmb();
+    renderMapInit();
+}
+
+function initMapPan() {
+    const container = document.getElementById('dm-map-container');
+    if (!container) return;
+    
+    container.addEventListener('mousedown', e => {
+        if (e.button === 1 || e.altKey || placeMode === 'pan') {
+            isPanning = true;
+            panStartX = e.clientX - mapPanX;
+            panStartY = e.clientY - mapPanY;
+            container.style.cursor = 'grabbing';
+            e.preventDefault();
+        }
+    });
+    
+    container.addEventListener('mousemove', e => {
+        if (!isPanning) return;
+        mapPanX = e.clientX - panStartX;
+        mapPanY = e.clientY - panStartY;
+        updateMapTransform();
+    });
+    
+    container.addEventListener('mouseup', () => {
+        isPanning = false;
+        container.style.cursor = placeMode ? 'crosshair' : 'default';
+    });
+    
+    container.addEventListener('mouseleave', () => {
+        isPanning = false;
+    });
+    
+    // Scroll to zoom
+    container.addEventListener('wheel', e => {
+        e.preventDefault();
+        const delta = e.deltaY > 0 ? -0.1 : 0.1;
+        zoomMap(delta);
+    });
+}
 
 function renderDMMap() {
     const zonesEl = document.getElementById('dm-zones');
@@ -2837,7 +3035,7 @@ function renderDMMap() {
 
     dmZones.forEach(z => {
         const el = document.createElement('div');
-        el.className = 'absolute w-6 h-6 rounded-full border-2 border-white cursor-pointer flex items-center justify-center text-xs font-bold';
+        el.className = 'zone-marker absolute w-4 h-4 rounded-full border-2 border-white cursor-pointer flex items-center justify-center text-xs font-bold';
         el.style.left = z.x + '%';
         el.style.top = z.y + '%';
         el.style.transform = 'translate(-50%, -50%)';
@@ -2848,9 +3046,21 @@ function renderDMMap() {
 
         const item = document.createElement('div');
         item.className = 'flex justify-between items-center py-1 border-b';
-        item.innerHTML = `<span>${z.name}</span><button onclick="toggleZone('${z.id}')" class="text-xs px-2 py-0.5 rounded ${z.explored ? 'bg-green-200' : 'bg-gray-300'}">${z.explored ? '已探索' : '未探索'}</button>`;
+        item.innerHTML = `<span>${z.name}</span><div class="flex gap-1 flex-wrap"><button onclick="toggleZone('${z.id}')" class="text-xs px-2 py-0.5 rounded ${z.explored ? 'bg-green-200' : 'bg-gray-300'}">${z.explored ? '已探索' : '未探索'}</button><button onclick="togglePlayerVisible('${z.id}')" class="text-xs px-2 py-0.5 rounded ${z.playerVisible !== false ? 'bg-blue-200' : 'bg-gray-300'}">${z.playerVisible !== false ? '玩家可見' : '玩家隱藏'}</button><button onclick="deleteZone('${z.id}')" class="text-xs px-2 py-0.5 rounded bg-red-200 text-red-700">刪除</button></div>`;
         zoneList.appendChild(item);
     });
+
+    // 渲染自由區域列表
+    const areaList = document.getElementById('area-list');
+    if (areaList) {
+        areaList.innerHTML = '';
+        dmAreas.forEach(a => {
+            const item = document.createElement('div');
+            item.className = 'flex justify-between items-center py-1 border-b';
+            item.innerHTML = `<span>${a.name || '未命名'}</span><button onclick="deleteArea('${a.id}')" class="text-xs px-2 py-0.5 rounded bg-red-200 text-red-700">刪除</button>`;
+            areaList.appendChild(item);
+        });
+    }
 
     dmTokens.forEach(t => {
         const zone = dmZones.find(z => z.id === t.zoneId);
@@ -2872,6 +3082,26 @@ function renderDMMap() {
     });
 }
 
+function deleteArea(id) {
+    if (confirm('確定刪除此自由區域？')) {
+        db.ref('areas/' + id).remove();
+    }
+}
+
+function togglePlayerVisible(id) {
+    const z = dmZones.find(z => z.id === id);
+    if (z) {
+        const newVal = z.playerVisible === false ? true : false;
+        db.ref('zones/' + id).update({ playerVisible: newVal });
+    }
+}
+
+function deleteZone(id) {
+    if (confirm('確定刪除此區域？')) {
+        db.ref('zones/' + id).remove();
+    }
+}
+
 function toggleZone(id) {
     const z = dmZones.find(z => z.id === id);
     if (z) {
@@ -2889,10 +3119,289 @@ function addZone() {
 }
 
 // Firebase 監聽
+let areaMode = false;
+let placeMode = null;
+let mapZoom = 1;
+let calibrateMode = false;
+let calibrateStart = null;
+let pixelsPerFiveFeet = 50;
+let mapPanX = 0;
+let mapPanY = 0;
+let isPanning = false;
+let panStartX = 0;
+let panStartY = 0;
+let dmEntities = [];
+let areaPoints = [];
+
+function startAddArea() {
+    areaMode = !areaMode;
+    const btn = document.getElementById('add-area-btn');
+    if (areaMode) {
+        btn.textContent = '畫點中... (ESC 完成)';
+        btn.classList.add('bg-yellow-500');
+        areaPoints = [];
+    } else {
+        finishArea();
+    }
+}
+
+function finishArea() {
+    if (areaPoints.length >= 3) {
+        const name = prompt('自由區域名稱：', '自由區域');
+        if (name) {
+            const newRef = db.ref('areas').push();
+            newRef.set({ name, points: areaPoints, mapId: 'phandalin' });
+        }
+    }
+    areaMode = false;
+    areaPoints = [];
+    const btn = document.getElementById('add-area-btn');
+    if (btn) {
+        btn.textContent = '新增自由區域';
+        btn.classList.remove('bg-yellow-500');
+    }
+    renderAreaPreview();
+}
+
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && areaMode) {
+        finishArea();
+    }
+});
+
+function setZoom(val) {
+    mapZoom = Math.max(0.5, Math.min(3, parseInt(val) / 100));
+    updateMapTransform();
+    document.getElementById('dm-map').style.transformOrigin = 'center center';
+}
+
+function zoomMap(delta) {
+    mapZoom = Math.max(0.5, Math.min(3, mapZoom + delta));
+    const input = document.getElementById('zoom-input');
+    if (input) input.value = Math.round(mapZoom * 100);
+    const mapEl = document.getElementById('dm-map');
+    updateMapTransform();
+    mapEl.style.transformOrigin = 'center center';
+}
+
+function updateMapTransform() {
+    const transformLayer = document.getElementById('dm-transform-layer');
+    if (transformLayer) {
+        transformLayer.style.transform = `scale(${mapZoom}) translate(${mapPanX}px, ${mapPanY}px)`;
+    }
+    // 同步到 Firebase
+    db.ref('maps/phandalin').update({ zoom: mapZoom, panX: mapPanX, panY: mapPanY });
+}
+
+function resetZoom() {
+    mapZoom = 1;
+    document.getElementById('zoom-level').textContent = '100%';
+    document.getElementById('dm-map').style.transform = 'scale(1)';
+}
+
+function removeAllMonsters() {
+    if (!confirm('確定清除所有怪物？')) return;
+    dmEntities.filter(e => e.type === 'monster').forEach(e => {
+        db.ref('entities/' + e.id).remove();
+    });
+}
+
+function startCalibrate() {
+    calibrateMode = !calibrateMode;
+    calibrateStart = null;
+    const btn = document.getElementById('btn-calibrate');
+    if (calibrateMode) {
+        btn.textContent = '點擊兩點設定5尺...';
+        btn.classList.add('bg-yellow-500');
+        document.getElementById('dm-map-container').style.cursor = 'crosshair';
+    } else {
+        btn.textContent = '校準5尺';
+        btn.classList.remove('bg-yellow-500');
+    }
+}
+
+function setPlaceMode(mode) {
+    if (mode === 'pan') {
+        placeMode = placeMode === 'pan' ? null : 'pan';
+        document.getElementById('dm-map-container').style.cursor = placeMode === 'pan' ? 'grab' : 'default';
+        return;
+    }
+    placeMode = placeMode === mode ? null : mode;
+    document.getElementById('btn-monster').classList.toggle('ring-2', placeMode === 'monster');
+    document.getElementById('btn-npc').classList.toggle('ring-2', placeMode === 'npc');
+    document.getElementById('dm-map-container').style.cursor = placeMode ? 'crosshair' : 'default';
+}
+
+function onMapClick(e) {
+    if (e.target.closest('.zone-marker, .entity-marker, button, input')) return;
+    const container = document.getElementById('dm-map-container');
+    const transformLayer = document.getElementById('dm-transform-layer');
+    const rect = container.getBoundingClientRect();
+    // 計算相對於容器的位置
+    let relX = e.clientX - rect.left;
+    let relY = e.clientY - rect.top;
+    // 反向計算縮放與位移的影響
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    relX = (relX - centerX - mapPanX * mapZoom) / mapZoom + centerX;
+    relY = (relY - centerY - mapPanY * mapZoom) / mapZoom + centerY;
+    const x = parseFloat((relX / rect.width * 100).toFixed(1));
+    const y = parseFloat((relY / rect.height * 100).toFixed(1));
+    
+    if (calibrateMode) {
+        const container = document.getElementById('dm-map-container');
+        const rect = container.getBoundingClientRect();
+        const cx = e.clientX - rect.left;
+        const cy = e.clientY - rect.top;
+        if (!calibrateStart) {
+            calibrateStart = { x: cx, y: cy };
+            document.getElementById('btn-calibrate').textContent = '點擊第二點...';
+        } else {
+            const dx = cx - calibrateStart.x;
+            const dy = cy - calibrateStart.y;
+            pixelsPerFiveFeet = Math.sqrt(dx*dx + dy*dy);
+            db.ref('maps/phandalin').update({ pixelsPerFiveFeet });
+            alert('已設定 5尺 = ' + Math.round(pixelsPerFiveFeet) + ' 像素');
+            calibrateMode = false;
+            calibrateStart = null;
+            document.getElementById('btn-calibrate').textContent = '校準5尺';
+            document.getElementById('btn-calibrate').classList.remove('bg-yellow-500');
+        }
+        return;
+    }
+    
+    if (placeMode) {
+        const name = prompt(placeMode === 'monster' ? '怪物名稱：' : 'NPC名稱：');
+        if (!name) return;
+        const newRef = db.ref('entities').push();
+        newRef.set({ name, type: placeMode, x, y, mapId: 'phandalin' })
+            .then(() => console.log('Entity saved:', name))
+            .catch(err => alert('儲存失敗: ' + err.message));
+        // 只有怪物加入先攻
+        if (placeMode === 'monster') {
+            const init = parseInt(prompt('先攻值：', '10')) || 10;
+            const hp = parseInt(prompt('HP：', '10')) || 10;
+            cmbs.push({ i: init, n: name, id: Date.now(), f: 'e', hp: hp, mhp: hp, ac: 10 });
+            cmbs.sort((a, b) => b.i - a.i);
+            if (typeof renderCmb === 'function') renderCmb();
+        }
+        return;
+    }
+    
+    if (areaMode) {
+        // 檢查是否點擊靠近第一個點（封閉）
+        if (areaPoints.length >= 3) {
+            const first = areaPoints[0];
+            const dx = x - first.x;
+            const dy = y - first.y;
+            if (Math.sqrt(dx*dx + dy*dy) < 3) {
+                finishArea();
+                return;
+            }
+        }
+        areaPoints.push({ x, y });
+        renderAreaPreview();
+        return;
+    }
+    
+    const name = prompt('區域名稱：', '新區域');
+    if (!name) return;
+    const newRef = db.ref('zones').push();
+    newRef.set({ name, x, y, explored: true, mapId: 'phandalin' });
+}
+
+const MAP_FOLDER_ID = '1V_hEezu0SRAvSckVtX5pQefWdKHp_F6-';
+
+function loadDriveMaps() {
+    // 從 Firebase 讀取已同步的地圖列表
+    db.ref('mapImages').once('value').then(snap => {
+        const select = document.getElementById('map-select');
+        select.innerHTML = '<option value="">-- 選擇地圖 --</option>';
+        const data = snap.val();
+        if (data) {
+            Object.entries(data).forEach(([id, map]) => {
+                const opt = document.createElement('option');
+                opt.value = map.url;
+                opt.textContent = map.name;
+                select.appendChild(opt);
+            });
+        }
+    });
+}
+
+function selectMapImage() {
+    const url = document.getElementById('map-select').value;
+    if (!url) return;
+    db.ref('maps/phandalin').update({ imageUrl: url });
+    const mapEl = document.getElementById('dm-map');
+    mapEl.style.backgroundImage = "url('" + url + "')";
+    mapEl.style.backgroundColor = '#1a1a2e';
+    mapEl.style.backgroundSize = 'contain';
+    mapEl.style.backgroundRepeat = 'no-repeat';
+    mapEl.style.backgroundPosition = 'center';
+    // 清除舊的區域預覽
+    const preview = document.getElementById('area-preview');
+    if (preview) preview.innerHTML = '';
+    // 強制重繪區域
+    renderAreas();
+    renderEntities();
+}
+
+function addMapImage() {
+    const name = prompt('地圖名稱：');
+    const url = prompt('圖片網址（Google Drive 分享連結）：');
+    if (!name || !url) return;
+    // 轉換 Drive 分享連結為直接連結
+    let directUrl = url;
+    const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+    if (match) {
+        directUrl = 'https://drive.google.com/uc?export=view&id=' + match[1];
+    }
+    const newRef = db.ref('mapImages').push();
+    newRef.set({ name, url: directUrl });
+    loadDriveMaps();
+}
+
+function setMapImage() {
+    const url = document.getElementById('map-url-input').value.trim();
+    if (!url) { alert('請輸入圖片網址'); return; }
+    db.ref('maps/phandalin').update({ imageUrl: url, name: '凡戴林' });
+}
+
+db.ref('maps/phandalin').on('value', snap => {
+    const data = snap.val();
+    if (data && data.imageUrl) {
+        const mapEl = document.getElementById('dm-map');
+        if (mapEl) mapEl.style.backgroundImage = "url('" + data.imageUrl + "')";
+        const input = document.getElementById('map-url-input');
+        if (input && !input.value) input.value = data.imageUrl;
+    }
+});
+
+loadDriveMaps();
+
+initMapPan();
+
 db.ref('.info/connected').on('value', snap => {
     const el = document.getElementById('fb-status');
     if (el) el.textContent = snap.val() ? '🟢 Firebase 已連線' : '🔴 Firebase 未連線';
     if (el) el.style.color = snap.val() ? '#22c55e' : '#ef4444';
+});
+
+db.ref('entities').on('value', snap => {
+    dmEntities = [];
+    snap.forEach(child => {
+        dmEntities.push({ id: child.key, ...child.val() });
+    });
+    renderMapEntities();
+});
+
+db.ref('areas').on('value', snap => {
+    dmAreas = [];
+    snap.forEach(child => {
+        dmAreas.push({ id: child.key, ...child.val() });
+    });
+    renderAreas();
 });
 
 db.ref('zones').on('value', snap => {
