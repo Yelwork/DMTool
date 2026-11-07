@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>玩家地圖</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    <style>
+        body { background: #1a1a2e; color: #eee; }
+        .vision-circle { 
+            position: absolute; 
+            border-radius: 50%; 
+            background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.05) 70%, transparent 100%);
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+        }
+        .fog { 
+            position: absolute; 
+            inset: 0; 
+            background: rgba(0,0,0,0.75); 
+            pointer-events: none;
+        }
+        .zone-marker {
+            position: absolute;
+            width: 24px; height: 24px;
+            background: #22c55e;
+            border: 2px solid white;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            cursor: pointer;
+        }
+        .token {
+            position: absolute;
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            border: 3px solid white;
+            transform: translate(-50%, -50%);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 12px; font-weight: bold;
+            color: white;
+        }
+    </style>
+</head>
+<body class="p-4">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-2xl font-bold mb-4">玩家地圖</h1>
+        <div id="fb-status" class="text-sm mb-2">連線狀態：檢查中...</div>
+        
+        <div class="bg-gray-800 rounded p-4 mb-4">
+            <label class="block mb-2">選擇角色：</label>
+            <select id="char-select" class="bg-gray-700 text-white px-3 py-2 rounded w-full max-w-xs" onchange="selectCharacter()">
+                <option value="">-- 選擇 --</option>
+                <option value="tea">茶葉·布妮 (視覺 30呎)</option>
+                <option value="celine">施琳·伊菲凱爾 (視覺 60呎)</option>
+                <option value="benji">班吉 (視覺 30呎)</option>
+                <option value="hank">漢克 (視覺 60呎)</option>
+            </select>
+        </div>
+
+        <div id="player-map-container" class="relative bg-gray-900 rounded overflow-hidden" style="height: 500px;">
+            <div id="player-map" class="absolute inset-0 bg-cover bg-center" style="background-image: url('https://via.placeholder.com/800x600/1a1a2e/eee?text=Phandalin+Map');"></div>
+            <div id="fog-layer" class="fog"></div>
+            <div id="vision-layer"></div>
+            <div id="zones-layer"></div>
+            <div id="tokens-layer"></div>
+        </div>
+
+        <div class="mt-4 text-sm text-gray-400">
+            <p>點擊綠色標記移動角色 · 圓形範圍為你的視覺</p>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDJcXYO2uj6OrFbi99THRcgeDLEWfJxEXI",
+            authDomain: "dmtool-map.firebaseapp.com",
+            databaseURL: "https://dmtool-map-default-rtdb.firebaseio.com",
+            projectId: "dmtool-map",
+            storageBucket: "dmtool-map.firebasestorage.app",
+            messagingSenderId: "7240565044",
+            appId: "1:7240565044:web:0089ad4813c5ec6ec92561"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        const characters = {
+            tea: { name: '茶葉·布妮', vision: 30, color: '#f59e0b' },
+            celine: { name: '施琳·伊菲凱爾', vision: 60, color: '#8b5cf6' },
+            benji: { name: '班吉', vision: 30, color: '#22c55e' },
+            hank: { name: '漢克', vision: 60, color: '#3b82f6' }
+        };
+
+        let zones = [];
+        let currentChar = null;
+        let currentZone = null;
+        let myTokenId = null;
+
+        function selectCharacter() {
+            const id = document.getElementById('char-select').value;
+            currentChar = id ? characters[id] : null;
+            if (currentChar) {
+                // 建立或更新自己的 token
+                if (!myTokenId) {
+                    const ref = db.ref('tokens').push();
+                    myTokenId = ref.key;
+                    ref.set({
+                        characterId: id,
+                        characterName: currentChar.name,
+                        color: currentChar.color,
+                        visionRange: currentChar.vision,
+                        zoneId: null
+                    });
+                }
+            }
+            render();
+        }
+
+        function render() {
+            const container = document.getElementById('player-map-container');
+            const zonesLayer = document.getElementById('zones-layer');
+            const tokensLayer = document.getElementById('tokens-layer');
+            const visionLayer = document.getElementById('vision-layer');
+            
+            zonesLayer.innerHTML = '';
+            tokensLayer.innerHTML = '';
+            visionLayer.innerHTML = '';
+
+            zones.forEach(z => {
+                if (!z.explored && (!currentChar || !isInVision(z))) return;
+                const el = document.createElement('div');
+                el.className = 'zone-marker';
+                el.style.left = z.x + '%';
+                el.style.top = z.y + '%';
+                el.title = z.name;
+                el.onclick = () => moveTo(z);
+                zonesLayer.appendChild(el);
+            });
+
+            if (currentChar && currentZone) {
+                const token = document.createElement('div');
+                token.className = 'token';
+                token.style.left = currentZone.x + '%';
+                token.style.top = currentZone.y + '%';
+                token.style.background = currentChar.color;
+                token.textContent = currentChar.name[0];
+                tokensLayer.appendChild(token);
+
+                const radiusPx = (currentChar.vision / 5) * (container.offsetWidth / 16);
+                const circle = document.createElement('div');
+                circle.className = 'vision-circle';
+                circle.style.left = currentZone.x + '%';
+                circle.style.top = currentZone.y + '%';
+                circle.style.width = radiusPx * 2 + 'px';
+                circle.style.height = radiusPx * 2 + 'px';
+                visionLayer.appendChild(circle);
+            }
+        }
+
+        function isInVision(zone) {
+            if (!currentZone || !currentChar) return false;
+            const dx = (zone.x - currentZone.x) / 100 * 800;
+            const dy = (zone.y - currentZone.y) / 100 * 600;
+            const dist = Math.sqrt(dx*dx + dy*dy);
+            const radius = (currentChar.vision / 5) * 50;
+            return dist <= radius;
+        }
+
+        function moveTo(zone) {
+            if (!currentChar || !myTokenId) {
+                alert('請先選擇角色');
+                return;
+            }
+            currentZone = zone;
+            db.ref('tokens/' + myTokenId).update({ zoneId: zone.id });
+            render();
+        }
+
+        // 監聽 zones
+        db.ref('.info/connected').on('value', snap => {
+            const el = document.getElementById('fb-status');
+            if (el) {
+                el.textContent = snap.val() ? '🟢 Firebase 已連線' : '🔴 Firebase 未連線';
+                el.style.color = snap.val() ? '#22c55e' : '#ef4444';
+            }
+        });
+
+        db.ref('zones').on('value', snap => {
+            zones = [];
+            snap.forEach(child => {
+                zones.push({ id: child.key, ...child.val() });
+            });
+            if (currentZone) {
+                currentZone = zones.find(z => z.id === currentZone.id) || currentZone;
+            }
+            render();
+        });
+    </script>
+</body>
+</html>
