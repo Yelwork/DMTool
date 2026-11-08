@@ -3384,9 +3384,9 @@ function selectMapImage() {
     // 清除舊的區域預覽
     const preview = document.getElementById('area-preview');
     if (preview) preview.innerHTML = '';
-    // 強制重繪區域
+    // 強制重繪區域與地圖實體
     renderAreas();
-    renderEntities();
+    renderMapEntities();
 }
 
 function addMapImage() {
