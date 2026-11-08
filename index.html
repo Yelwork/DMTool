@@ -2745,11 +2745,15 @@ window.onload = () => {
             <div class="flex flex-col lg:flex-row gap-4">
                 <!-- 地圖區域 -->
                 <div class="flex-1">
-                    <div id="dm-map-container" class="relative bg-gray-900 rounded overflow-hidden cursor-crosshair" style="height: 500px;" onclick="onMapClick(event)">
+                    <div id="dm-map-container" class="relative bg-gray-900 rounded overflow-hidden cursor-crosshair w-full" style="aspect-ratio: 16 / 10;" onclick="onMapClick(event)">
                         <div id="dm-transform-layer" class="absolute inset-0" style="transform-origin: center center;">
-                            <div id="dm-map" class="absolute inset-0" style="background-color: #1a1a2e; background-size: contain; background-repeat: no-repeat; background-position: center;"></div>
-                            <div id="dm-zones" class="absolute inset-0"></div>
-                            <div id="dm-tokens" class="absolute inset-0 pointer-events-none"></div>
+                            <div id="dm-map" class="absolute inset-0" style="background-color: #1a1a2e; background-size: contain; background-repeat: no-repeat; background-position: center center;"></div>
+                            <div id="dm-content-layer" class="absolute inset-0">
+                                <div id="dm-areas" class="absolute inset-0 pointer-events-none" style="z-index: 1;"></div>
+                                <div id="dm-zones" class="absolute inset-0" style="z-index: 5;"></div>
+                                <div id="dm-entities" class="absolute inset-0 pointer-events-none" style="z-index: 10;"></div>
+                                <div id="dm-tokens" class="absolute inset-0 pointer-events-none" style="z-index: 15;"></div>
+                            </div>
                         </div>
                     </div>
                     <div class="mt-2 flex flex-wrap gap-2 items-center">
@@ -2769,10 +2773,10 @@ window.onload = () => {
                     <div class="mt-2 flex items-center gap-2">
                         <span class="text-sm">縮放：</span>
                         <button onclick="zoomMap(-0.1)" class="bg-gray-600 text-white px-2 py-1 rounded text-sm">-</button>
-                        <input type="number" id="zoom-input" value="100" min="50" max="300" class="w-16 px-1 py-1 border rounded text-center text-sm" onchange="setZoom(this.value)">
+                        <input type="number" id="zoom-input" value="200" min="50" max="300" class="w-16 px-1 py-1 border rounded text-center text-sm" onchange="setZoom(this.value)">
                         <span class="text-sm">%</span>
                         <button onclick="zoomMap(0.1)" class="bg-gray-600 text-white px-2 py-1 rounded text-sm">+</button>
-                        <button onclick="resetZoom()" class="bg-gray-500 text-white px-2 py-1 rounded text-sm">重置</button>
+                        <button onclick="resetZoom()" class="bg-gray-500 text-white px-2 py-1 rounded text-sm">重置 200%</button>
                     </div>
                     <p class="text-xs text-gray-500 mt-1">地圖圖片請上傳至 Google Drive「DMTool Maps」資料夾</p>
                 </div>
@@ -2872,18 +2876,12 @@ let dmAreas = [];
 
 
 function renderAreas() {
-    const container = document.getElementById('dm-transform-layer') || document.getElementById('dm-map-container');
-    let areaLayer = document.getElementById('dm-areas');
-    if (!areaLayer) {
-        areaLayer = document.createElement('div');
-        areaLayer.id = 'dm-areas';
-        areaLayer.className = 'absolute inset-0 pointer-events-none';
-        areaLayer.style.zIndex = '1';
-        container.appendChild(areaLayer);
-    }
+    const areaLayer = document.getElementById('dm-areas');
+    const container = document.getElementById('dm-map-container');
+    if (!areaLayer || !container) return;
     areaLayer.innerHTML = '';
-    const w = container.offsetWidth;
-    const h = container.offsetHeight;
+    const w = container.clientWidth;
+    const h = container.clientHeight;
     dmAreas.forEach(a => {
         if (!a.points || a.points.length < 3) return;
         const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -2901,15 +2899,8 @@ function renderAreas() {
 }
 
 function renderMapEntities() {
-    const container = document.getElementById('dm-transform-layer') || document.getElementById('dm-map-container');
-    let entityLayer = document.getElementById('dm-entities');
-    if (!entityLayer) {
-        entityLayer = document.createElement('div');
-        entityLayer.id = 'dm-entities';
-        entityLayer.className = 'absolute inset-0 pointer-events-none';
-        entityLayer.style.zIndex = '10';
-        container.appendChild(entityLayer);
-    }
+    const entityLayer = document.getElementById('dm-entities');
+    if (!entityLayer) return;
     entityLayer.innerHTML = '';
     dmEntities.forEach(e => {
         const el = document.createElement('div');
@@ -2927,25 +2918,27 @@ function renderMapEntities() {
 }
 
 function renderAreaPreview() {
+    const content = document.getElementById('dm-content-layer') || document.getElementById('dm-transform-layer');
     let preview = document.getElementById('area-preview');
     if (!preview) {
         preview = document.createElement('div');
         preview.id = 'area-preview';
         preview.className = 'absolute inset-0 pointer-events-none';
         preview.style.zIndex = '2';
-        (document.getElementById('dm-transform-layer') || document.getElementById('dm-map-container')).appendChild(preview);
+        content.appendChild(preview);
     }
     preview.innerHTML = '';
     if (areaPoints.length === 0) return;
     
+    const container = document.getElementById('dm-map-container');
+    const w = container.clientWidth;
+    const h = container.clientHeight;
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     svg.setAttribute('class', 'absolute inset-0 w-full h-full');
     
     // 畫線
     if (areaPoints.length > 1) {
         const polyline = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
-        const w = document.getElementById('dm-map-container').offsetWidth;
-        const h = document.getElementById('dm-map-container').offsetHeight;
         const pts = areaPoints.map(p => (p.x / 100 * w) + ',' + (p.y / 100 * h)).join(' ');
         polyline.setAttribute('points', pts);
         polyline.setAttribute('fill', 'none');
@@ -2958,10 +2951,8 @@ function renderAreaPreview() {
     // 畫點
     areaPoints.forEach((p, i) => {
         const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-        const cw = document.getElementById('dm-map-container').offsetWidth;
-        const ch = document.getElementById('dm-map-container').offsetHeight;
-        circle.setAttribute('cx', p.x / 100 * cw);
-        circle.setAttribute('cy', p.y / 100 * ch);
+        circle.setAttribute('cx', p.x / 100 * w);
+        circle.setAttribute('cy', p.y / 100 * h);
         circle.setAttribute('r', i === 0 ? '8' : '5');
         circle.setAttribute('fill', i === 0 ? '#ef4444' : '#fbbf24');
         svg.appendChild(circle);
@@ -3002,9 +2993,10 @@ function removeMapInit(idx) {
 
 function getMapContainerSize() {
     const container = document.getElementById('dm-map-container');
+    // clientWidth/Height exclude scrollbar and match % positioning box more closely
     return {
-        w: container ? container.offsetWidth : 1,
-        h: container ? container.offsetHeight : 1
+        w: container ? container.clientWidth : 1,
+        h: container ? container.clientHeight : 1
     };
 }
 
@@ -3013,17 +3005,19 @@ function getMapContainerSize() {
 function mapLocalFromClient(clientX, clientY) {
     const container = document.getElementById('dm-map-container');
     const rect = container.getBoundingClientRect();
-    const centerX = rect.width / 2;
-    const centerY = rect.height / 2;
+    const w = container.clientWidth || rect.width;
+    const h = container.clientHeight || rect.height;
+    const centerX = w / 2;
+    const centerY = h / 2;
     const relX = (clientX - rect.left - centerX - mapPanX) / mapZoom + centerX;
     const relY = (clientY - rect.top - centerY - mapPanY) / mapZoom + centerY;
     return {
         xPx: relX,
         yPx: relY,
-        xPct: parseFloat((relX / rect.width * 100).toFixed(2)),
-        yPct: parseFloat((relY / rect.height * 100).toFixed(2)),
-        width: rect.width,
-        height: rect.height
+        xPct: parseFloat((relX / w * 100).toFixed(2)),
+        yPct: parseFloat((relY / h * 100).toFixed(2)),
+        width: w,
+        height: h
     };
 }
 
@@ -3182,7 +3176,7 @@ function addZone() {
 // Firebase 監聽
 let areaMode = false;
 let placeMode = null;
-let mapZoom = 1;
+let mapZoom = 2; // preset 200%
 let calibrateMode = false;
 let calibrateStart = null;
 let pixelsPerFiveFeet = 50;
@@ -3253,7 +3247,7 @@ function updateMapTransform() {
 }
 
 function resetZoom() {
-    mapZoom = 1;
+    mapZoom = 2; // preset 200%
     mapPanX = 0;
     mapPanY = 0;
     updateMapTransform();
@@ -3436,7 +3430,7 @@ db.ref('maps/phandalin').on('value', snap => {
     } else if (data.pixelsPerFiveFeet) {
         pixelsPerFiveFeet = data.pixelsPerFiveFeet;
     }
-    if (data.zoom != null) mapZoom = data.zoom;
+    mapZoom = data.zoom != null ? data.zoom : 2;
     // v2 uses translate()*scale() with pan as screen px / panXPct.
     // Ignore legacy panX/panY from the old scale()*translate() model.
     if (data.transformVersion >= 2 && (data.panXPct != null || data.panYPct != null)) {
@@ -3448,6 +3442,10 @@ db.ref('maps/phandalin').on('value', snap => {
     }
     // Apply only — do not write back (avoids feedback loop while panning)
     applyDmTransformOnly();
+    // Seed preset 200% once if zoom was never saved
+    if (data.zoom == null) {
+        db.ref('maps/phandalin').update({ transformVersion: 2, zoom: 2, panXPct: 0, panYPct: 0 });
+    }
 });
 
 window.addEventListener('resize', () => {
