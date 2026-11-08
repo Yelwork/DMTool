@@ -18,287 +18,20 @@
       caches.keys().then(names => names.forEach(n => caches.delete(n)));
     }
     </script>
-    <script src="https://cdn.tailwindcss.com">
-        // 點在多邊形內判斷
-        function isPointInPolygon(x, y, points) {
-            if (!points || points.length < 3) return false;
-            let inside = false;
-            for (let i = 0, j = points.length - 1; i < points.length; j = i++) {
-                const xi = points[i].x, yi = points[i].y;
-                const xj = points[j].x, yj = points[j].y;
-                if (((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi)) {
-                    inside = !inside;
-                }
-            }
-            return inside;
-        }
-
-        // 地圖移動
-        const mapEl = document.getElementById('player-map');
-        
-        function updatePlayerMapTransform() {
-            if (mapEl) {
-                mapEl.style.transform = `translate(${mapPanX}px, ${mapPanY}px)`;
-            }
-        }
-        
-        mapContainer.addEventListener('mousedown', e => {
-            if (e.button === 1 || e.altKey) {
-                isPanning = true;
-                panStartX = e.clientX - mapPanX;
-                panStartY = e.clientY - mapPanY;
-                e.preventDefault();
-            }
-        });
-        
-        mapContainer.addEventListener('mousemove', e => {
-            if (isPanning) {
-                mapPanX = e.clientX - panStartX;
-                mapPanY = e.clientY - panStartY;
-                updatePlayerMapTransform();
-            }
-        });
-        
-        mapContainer.addEventListener('mouseup', () => { isPanning = false; });
-        mapContainer.addEventListener('mouseleave', () => { isPanning = false; });
-
-        // 自由移動拖曳
-        const mapContainer = document.getElementById('player-map-container');
-        
-        mapContainer.addEventListener('mousedown', startDrag);
-        mapContainer.addEventListener('mousemove', onDrag);
-        mapContainer.addEventListener('mouseup', endDrag);
-        mapContainer.addEventListener('mouseleave', endDrag);
-
-        function startDrag(e) {
-            if (!currentChar || !currentZone) return;
-            const token = document.querySelector('.token');
-            if (!token) return;
-            const rect = token.getBoundingClientRect();
-            if (e.clientX >= rect.left && e.clientX <= rect.right &&
-                e.clientY >= rect.top && e.clientY <= rect.bottom) {
-                isDragging = true;
-            }
-        }
-
-        function onDrag(e) {
-            if (!isDragging || !currentChar) return;
-            const container = mapContainer.getBoundingClientRect();
-            const x = ((e.clientX - container.left) / container.width * 100);
-            const y = ((e.clientY - container.top) / container.height * 100);
-            
-            // 檢查是否在任一自由區域內
-            const inArea = areas.some(a => isPointInPolygon(x, y, a.points));
-            
-            if (inArea) {
-                currentZone = { ...currentZone, x, y, isFree: true };
-                render();
-            }
-        }
-
-        function endDrag() {
-            if (isDragging && currentZone && currentZone.isFree && myTokenId) {
-                db.ref('tokens/' + myTokenId).update({ 
-                    freeX: currentZone.x, 
-                    freeY: currentZone.y 
-                });
-            }
-            isDragging = false;
-        }
-    </script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js">
-        // 點在多邊形內判斷
-        function isPointInPolygon(x, y, points) {
-            if (!points || points.length < 3) return false;
-            let inside = false;
-            for (let i = 0, j = points.length - 1; i < points.length; j = i++) {
-                const xi = points[i].x, yi = points[i].y;
-                const xj = points[j].x, yj = points[j].y;
-                if (((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi)) {
-                    inside = !inside;
-                }
-            }
-            return inside;
-        }
-
-        // 地圖移動
-        const mapEl = document.getElementById('player-map');
-        
-        function updatePlayerMapTransform() {
-            if (mapEl) {
-                mapEl.style.transform = `translate(${mapPanX}px, ${mapPanY}px)`;
-            }
-        }
-        
-        mapContainer.addEventListener('mousedown', e => {
-            if (e.button === 1 || e.altKey) {
-                isPanning = true;
-                panStartX = e.clientX - mapPanX;
-                panStartY = e.clientY - mapPanY;
-                e.preventDefault();
-            }
-        });
-        
-        mapContainer.addEventListener('mousemove', e => {
-            if (isPanning) {
-                mapPanX = e.clientX - panStartX;
-                mapPanY = e.clientY - panStartY;
-                updatePlayerMapTransform();
-            }
-        });
-        
-        mapContainer.addEventListener('mouseup', () => { isPanning = false; });
-        mapContainer.addEventListener('mouseleave', () => { isPanning = false; });
-
-        // 自由移動拖曳
-        const mapContainer = document.getElementById('player-map-container');
-        
-        mapContainer.addEventListener('mousedown', startDrag);
-        mapContainer.addEventListener('mousemove', onDrag);
-        mapContainer.addEventListener('mouseup', endDrag);
-        mapContainer.addEventListener('mouseleave', endDrag);
-
-        function startDrag(e) {
-            if (!currentChar || !currentZone) return;
-            const token = document.querySelector('.token');
-            if (!token) return;
-            const rect = token.getBoundingClientRect();
-            if (e.clientX >= rect.left && e.clientX <= rect.right &&
-                e.clientY >= rect.top && e.clientY <= rect.bottom) {
-                isDragging = true;
-            }
-        }
-
-        function onDrag(e) {
-            if (!isDragging || !currentChar) return;
-            const container = mapContainer.getBoundingClientRect();
-            const x = ((e.clientX - container.left) / container.width * 100);
-            const y = ((e.clientY - container.top) / container.height * 100);
-            
-            // 檢查是否在任一自由區域內
-            const inArea = areas.some(a => isPointInPolygon(x, y, a.points));
-            
-            if (inArea) {
-                currentZone = { ...currentZone, x, y, isFree: true };
-                render();
-            }
-        }
-
-        function endDrag() {
-            if (isDragging && currentZone && currentZone.isFree && myTokenId) {
-                db.ref('tokens/' + myTokenId).update({ 
-                    freeX: currentZone.x, 
-                    freeY: currentZone.y 
-                });
-            }
-            isDragging = false;
-        }
-    </script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js">
-        // 點在多邊形內判斷
-        function isPointInPolygon(x, y, points) {
-            if (!points || points.length < 3) return false;
-            let inside = false;
-            for (let i = 0, j = points.length - 1; i < points.length; j = i++) {
-                const xi = points[i].x, yi = points[i].y;
-                const xj = points[j].x, yj = points[j].y;
-                if (((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi)) {
-                    inside = !inside;
-                }
-            }
-            return inside;
-        }
-
-        // 地圖移動
-        const mapEl = document.getElementById('player-map');
-        
-        function updatePlayerMapTransform() {
-            if (mapEl) {
-                mapEl.style.transform = `translate(${mapPanX}px, ${mapPanY}px)`;
-            }
-        }
-        
-        mapContainer.addEventListener('mousedown', e => {
-            if (e.button === 1 || e.altKey) {
-                isPanning = true;
-                panStartX = e.clientX - mapPanX;
-                panStartY = e.clientY - mapPanY;
-                e.preventDefault();
-            }
-        });
-        
-        mapContainer.addEventListener('mousemove', e => {
-            if (isPanning) {
-                mapPanX = e.clientX - panStartX;
-                mapPanY = e.clientY - panStartY;
-                updatePlayerMapTransform();
-            }
-        });
-        
-        mapContainer.addEventListener('mouseup', () => { isPanning = false; });
-        mapContainer.addEventListener('mouseleave', () => { isPanning = false; });
-
-        // 自由移動拖曳
-        const mapContainer = document.getElementById('player-map-container');
-        
-        mapContainer.addEventListener('mousedown', startDrag);
-        mapContainer.addEventListener('mousemove', onDrag);
-        mapContainer.addEventListener('mouseup', endDrag);
-        mapContainer.addEventListener('mouseleave', endDrag);
-
-        function startDrag(e) {
-            if (!currentChar || !currentZone) return;
-            const token = document.querySelector('.token');
-            if (!token) return;
-            const rect = token.getBoundingClientRect();
-            if (e.clientX >= rect.left && e.clientX <= rect.right &&
-                e.clientY >= rect.top && e.clientY <= rect.bottom) {
-                isDragging = true;
-            }
-        }
-
-        function onDrag(e) {
-            if (!isDragging || !currentChar) return;
-            const container = mapContainer.getBoundingClientRect();
-            const x = ((e.clientX - container.left) / container.width * 100);
-            const y = ((e.clientY - container.top) / container.height * 100);
-            
-            // 檢查是否在任一自由區域內
-            const inArea = areas.some(a => isPointInPolygon(x, y, a.points));
-            
-            if (inArea) {
-                currentZone = { ...currentZone, x, y, isFree: true };
-                render();
-            }
-        }
-
-        function endDrag() {
-            if (isDragging && currentZone && currentZone.isFree && myTokenId) {
-                db.ref('tokens/' + myTokenId).update({ 
-                    freeX: currentZone.x, 
-                    freeY: currentZone.y 
-                });
-            }
-            isDragging = false;
-        }
-    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
     <style>
         body { background: #1a1a2e; color: #eee; }
-        .vision-circle { 
-            position: absolute; 
-            border-radius: 50%; 
+        .vision-circle {
+            position: absolute;
+            border-radius: 50%;
             background: transparent;
             border: 2px dashed rgba(255,255,255,0.5);
             pointer-events: none;
             transform: translate(-50%, -50%);
             z-index: 15;
             box-shadow: 0 0 0 9999px rgba(0,0,0,0.85);
-        }
-        .fog { 
-            position: absolute; 
-            inset: 0; 
-            background: #000; 
-            pointer-events: none;
         }
         .zone-marker {
             position: absolute;
@@ -308,6 +41,7 @@
             border-radius: 50%;
             transform: translate(-50%, -50%);
             cursor: pointer;
+            z-index: 25;
         }
         .token {
             position: absolute;
@@ -318,6 +52,12 @@
             display: flex; align-items: center; justify-content: center;
             font-size: 12px; font-weight: bold;
             color: white;
+            z-index: 30;
+        }
+        #player-map {
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
         }
     </style>
 </head>
@@ -325,7 +65,7 @@
     <div class="max-w-4xl mx-auto">
         <h1 class="text-2xl font-bold mb-4">玩家地圖</h1>
         <div id="fb-status" class="text-sm mb-2">連線狀態：檢查中...</div>
-        
+
         <div class="bg-gray-800 rounded p-4 mb-4">
             <label class="block mb-2">選擇角色：</label>
             <select id="char-select" class="bg-gray-700 text-white px-3 py-2 rounded w-full max-w-xs" onchange="selectCharacter()">
@@ -337,17 +77,16 @@
             </select>
         </div>
 
+        <!-- All map content shares one transform layer so zoom/pan keeps tokens + vision aligned -->
         <div id="player-map-container" class="relative bg-gray-900 rounded overflow-hidden" style="height: 500px;">
-            <div id="fog-overlay" class="absolute inset-0 pointer-events-none" style="z-index: 10; background: #000;"></div>
-            <div id="tokens-layer" class="absolute inset-0" style="z-index: 20; transform-origin: center center;"></div>
-            <div id="zones-layer" class="absolute inset-0" style="z-index: 25; transform-origin: center center;"></div>
-            <div id="vision-layer" class="absolute inset-0" style="z-index: 15; pointer-events: none;"></div>
             <div id="map-transform-layer" class="absolute inset-0" style="transform-origin: center center;">
-                <div id="player-map" class="absolute inset-0 bg-cover bg-center" style="background-color: #1a1a2e;"></div>
+                <div id="player-map" class="absolute inset-0" style="background-color: #1a1a2e;"></div>
                 <div id="areas-layer" class="absolute inset-0"></div>
-                
-                <div id="entities-layer" class="absolute inset-0" style="z-index: 15;" style="z-index: 15;"></div>
-                
+                <div id="entities-layer" class="absolute inset-0"></div>
+                <div id="fog-overlay" class="absolute inset-0 pointer-events-none" style="z-index: 10; background: #000;"></div>
+                <div id="vision-layer" class="absolute inset-0 pointer-events-none" style="z-index: 15;"></div>
+                <div id="zones-layer" class="absolute inset-0" style="z-index: 25;"></div>
+                <div id="tokens-layer" class="absolute inset-0" style="z-index: 30;"></div>
             </div>
         </div>
 
@@ -381,33 +120,50 @@
         let entities = [];
         let pixelsPerFiveFeet = 50;
         let isDragging = false;
-        let isPanning = false;
-        let mapPanX = 0;
-        let mapPanY = 0;
-        let panStartX = 0;
-        let panStartY = 0;
         let currentChar = null;
         let currentZone = null;
         let myTokenId = null;
+        let currentZoom = 1;
+        let currentPanX = 0;
+        let currentPanY = 0;
 
         function selectCharacter() {
             const id = document.getElementById('char-select').value;
             currentChar = id ? characters[id] : null;
-            if (currentChar) {
-                // 建立或更新自己的 token
-                if (!myTokenId) {
-                    const ref = db.ref('tokens').push();
-                    myTokenId = ref.key;
-                    ref.set({
-                        characterId: id,
-                        characterName: currentChar.name,
-                        color: currentChar.color,
-                        visionRange: currentChar.vision,
-                        zoneId: null
-                    });
-                }
+            if (currentChar && !myTokenId) {
+                const ref = db.ref('tokens').push();
+                myTokenId = ref.key;
+                ref.set({
+                    characterId: id,
+                    characterName: currentChar.name,
+                    color: currentChar.color,
+                    visionRange: currentChar.vision,
+                    zoneId: null
+                });
             }
             render();
+        }
+
+        function applyMapTransform() {
+            const transformLayer = document.getElementById('map-transform-layer');
+            if (!transformLayer) return;
+            // Match DM: scale() translate() with center origin
+            // => screen = center + zoom * (local - center + pan)
+            transformLayer.style.transform =
+                `scale(${currentZoom}) translate(${currentPanX}px, ${currentPanY}px)`;
+        }
+
+        function visionRadiusPx(zone) {
+            const visionRange = (zone && zone.vision) || (currentChar && currentChar.vision) || 30;
+            return (visionRange / 5) * pixelsPerFiveFeet;
+        }
+
+        function tokenPosition(zone) {
+            // Prefer free movement coords when present
+            if (zone && zone.isFree && zone.x != null && zone.y != null) {
+                return { x: zone.x, y: zone.y };
+            }
+            return { x: zone.x, y: zone.y };
         }
 
         function renderFog() {
@@ -417,214 +173,13 @@
                 fog.style.background = '#000';
                 return;
             }
-            
-            const container = document.getElementById('player-map-container');
-            const w = container.offsetWidth;
-            const h = container.offsetHeight;
-            const zoom = window.currentZoom || 1;
-            const panX = window.currentPanX || 0;
-            const panY = window.currentPanY || 0;
-            
-            // Vision radius
-            const visionRange = currentZone.vision || currentChar.vision || 30;
-            const radius = (visionRange / 5) * pixelsPerFiveFeet * zoom / 2;
-            
-            // Character position (percentage)
-            const charXPct = currentZone.x;
-            const charYPct = currentZone.y;
-            
-            // Transform: scale from center, then translate
-            // Screen position = center + (charPos - center) * zoom + pan
-            const screenXPct = 50 + (charXPct - 50) * zoom + (panX / w * 100);
-            const screenYPct = 50 + (charYPct - 50) * zoom + (panY / h * 100);
-            
-            fog.style.background = `radial-gradient(circle at ${screenXPct}% ${screenYPct}%, transparent 0px, transparent ${radius}px, black ${radius}px)`;
+            const pos = tokenPosition(currentZone);
+            const radius = visionRadiusPx(currentZone);
+            // Fog lives inside the transform layer, so use local % and unscaled px
+            fog.style.background =
+                `radial-gradient(circle at ${pos.x}% ${pos.y}%, transparent 0px, transparent ${radius}px, black ${radius}px)`;
         }
 
-        
-        function render() {
-            const container = document.getElementById('player-map-container');
-            const zonesLayer = document.getElementById('zones-layer');
-            const tokensLayer = document.getElementById('tokens-layer');
-            const visionLayer = document.getElementById('vision-layer');
-            
-            zonesLayer.innerHTML = '';
-            tokensLayer.innerHTML = '';
-            visionLayer.innerHTML = '';
-
-            // 繪製自由區域
-            const areasLayer = document.getElementById('areas-layer');
-            areasLayer.innerHTML = '';
-            areas.forEach(a => {
-                if (!a.points || a.points.length < 3) return;
-                const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-                svg.setAttribute('class', 'absolute inset-0 w-full h-full');
-                svg.style.pointerEvents = 'none';
-                const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
-                const container = document.getElementById('player-map-container');
-                const w = container.offsetWidth;
-                const h = container.offsetHeight;
-                const pts = a.points.map(p => (p.x / 100 * w) + ',' + (p.y / 100 * h)).join(' ');
-                polygon.setAttribute('points', pts);
-                polygon.setAttribute('fill', 'rgba(34, 197, 94, 0.15)');
-                polygon.setAttribute('stroke', '#22c55e');
-                polygon.setAttribute('stroke-width', '2');
-                svg.appendChild(polygon);
-                areasLayer.appendChild(svg);
-            });
-
-            // 繪製怪物/NPC
-            const entitiesLayer = document.getElementById('entities-layer');
-            if (entitiesLayer) {
-                entitiesLayer.innerHTML = '';
-                entities.forEach(e => {
-                    const el = document.createElement('div');
-                    el.className = 'absolute rounded-full border-2 border-white flex items-center justify-center text-xs font-bold text-white';
-                    el.style.width = '14px';
-                    el.style.height = '14px';
-                    el.style.left = e.x + '%';
-                    el.style.top = e.y + '%';
-                    el.style.transform = 'translate(-50%, -50%)';
-                    el.style.background = e.type === 'monster' ? '#dc2626' : '#ca8a04';
-                    el.style.zIndex = '15';
-                    el.textContent = e.name ? e.name[0] : '?';
-                    el.title = e.name;
-                    entitiesLayer.appendChild(el);
-                });
-            }
-
-            zones.forEach(z => {
-                if (z.playerVisible === false) return;
-                const el = document.createElement('div');
-                el.className = 'zone-marker';
-                el.style.left = z.x + '%';
-                el.style.top = z.y + '%';
-                el.style.zIndex = '25';
-                el.title = z.name;
-                el.onclick = () => moveTo(z);
-                zonesLayer.appendChild(el);
-            });
-
-            if (currentChar && currentZone) {
-                const token = document.createElement('div');
-                token.className = 'token';
-                token.style.left = currentZone.x + '%';
-                token.style.top = currentZone.y + '%';
-                token.style.background = currentChar.color;
-                token.textContent = currentChar.name[0];
-                tokensLayer.appendChild(token);
-                renderFog();
-
-                const visionRange = currentZone.vision || currentChar.vision || 30;
-                const radiusPx = (visionRange / 5) * pixelsPerFiveFeet / 2;
-                const circle = document.createElement('div');
-                circle.className = 'vision-circle';
-                // Use same calculation as fog
-                const zoom = window.currentZoom || 1;
-                const panX = window.currentPanX || 0;
-                const panY = window.currentPanY || 0;
-                const charX = currentZone.x / 100 * container.offsetWidth;
-                const charY = currentZone.y / 100 * container.offsetHeight;
-                const centerX = container.offsetWidth / 2;
-                const centerY = container.offsetHeight / 2;
-                const screenX = centerX + (charX - centerX) * zoom + panX;
-                const screenY = centerY + (charY - centerY) * zoom + panY;
-                circle.style.left = screenX + 'px';
-                circle.style.top = screenY + 'px';
-                circle.style.width = radiusPx * 2 * zoom + 'px';
-                circle.style.height = radiusPx * 2 * zoom + 'px';
-                visionLayer.appendChild(circle);
-            }
-        
-            renderFog();
-        }
-
-        function isInVision(zone) {
-            if (!currentZone || !currentChar) return false;
-            const dx = (zone.x - currentZone.x) / 100 * 800;
-            const dy = (zone.y - currentZone.y) / 100 * 600;
-            const dist = Math.sqrt(dx*dx + dy*dy);
-            const radius = (currentChar.vision / 5) * 50;
-            return dist <= radius;
-        }
-
-        function moveTo(zone) {
-            console.log('moveTo called', zone, currentChar, myTokenId);
-            if (!currentChar || !myTokenId) {
-                alert('請先選擇角色');
-                return;
-            }
-            currentZone = zone;
-            db.ref('tokens/' + myTokenId).update({ zoneId: zone.id });
-            
-            // 移動地圖讓角色在中間
-            const container = document.getElementById('player-map-container');
-            const zoom = window.currentZoom || 1;
-            const w = container.offsetWidth;
-            const h = container.offsetHeight;
-            
-            // 計算需要的 pan 讓角色在中心
-            const charX = zone.x / 100 * w;
-            const charY = zone.y / 100 * h;
-            window.currentPanX = (w / 2 - charX) * zoom;
-            window.currentPanY = (h / 2 - charY) * zoom;
-            
-            // 套用 transform
-            const transform = 'scale(' + zoom + ') translate(' + window.currentPanX + 'px, ' + window.currentPanY + 'px)';
-            const transformLayer = document.getElementById('map-transform-layer');
-            if (transformLayer) transformLayer.style.transform = transform;
-            const zonesLayer = document.getElementById('zones-layer');
-            if (zonesLayer) zonesLayer.style.transform = transform;
-            const tokensLayer = document.getElementById('tokens-layer');
-            if (tokensLayer) tokensLayer.style.transform = transform;
-            
-            render();
-        }
-
-        // 監聽 zones
-        db.ref('.info/connected').on('value', snap => {
-            const el = document.getElementById('fb-status');
-            if (el) {
-                el.textContent = snap.val() ? '🟢 Firebase 已連線' : '🔴 Firebase 未連線';
-                el.style.color = snap.val() ? '#22c55e' : '#ef4444';
-            }
-        });
-
-        db.ref('maps/phandalin').on('value', snap => {
-            const data = snap.val();
-            if (!data) return;
-            
-            if (data.pixelsPerFiveFeet) {
-                pixelsPerFiveFeet = data.pixelsPerFiveFeet;
-            }
-            if (data.imageUrl) {
-                document.getElementById('player-map').style.backgroundImage = "url('" + data.imageUrl + "')";
-            }
-            window.currentZoom = data.zoom || 1;
-            window.currentPanX = data.panX || 0;
-            window.currentPanY = data.panY || 0;
-            const transform = 'scale(' + window.currentZoom + ') translate(' + window.currentPanX + 'px, ' + window.currentPanY + 'px)';
-            const transformLayer = document.getElementById('map-transform-layer');
-            if (transformLayer) transformLayer.style.transform = transform;
-            const zonesLayer = document.getElementById('zones-layer');
-            if (zonesLayer) zonesLayer.style.transform = transform;
-            const tokensLayer = document.getElementById('tokens-layer');
-            if (tokensLayer) tokensLayer.style.transform = transform;
-            render();
-        });
-
-        db.ref('zones').on('value', snap => {
-            zones = [];
-            snap.forEach(child => {
-                zones.push({ id: child.key, ...child.val() });
-            });
-            if (currentZone) {
-                currentZone = zones.find(z => z.id === currentZone.id) || currentZone;
-            }
-            render();
-        });
-    
-        // 點在多邊形內判斷
         function isPointInPolygon(x, y, points) {
             if (!points || points.length < 3) return false;
             let inside = false;
@@ -638,42 +193,121 @@
             return inside;
         }
 
-        // 地圖移動
-        const mapEl = document.getElementById('player-map');
-        
-        function updatePlayerMapTransform() {
-            if (mapEl) {
-                mapEl.style.transform = `translate(${mapPanX}px, ${mapPanY}px)`;
-            }
+        function screenToMapPercent(clientX, clientY) {
+            const container = document.getElementById('player-map-container');
+            const rect = container.getBoundingClientRect();
+            let relX = clientX - rect.left;
+            let relY = clientY - rect.top;
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+            // Inverse of: screen = center + zoom * (local - center + pan)
+            relX = (relX - centerX) / currentZoom - currentPanX + centerX;
+            relY = (relY - centerY) / currentZoom - currentPanY + centerY;
+            return {
+                x: parseFloat((relX / rect.width * 100).toFixed(2)),
+                y: parseFloat((relY / rect.height * 100).toFixed(2))
+            };
         }
-        
-        mapContainer.addEventListener('mousedown', e => {
-            if (e.button === 1 || e.altKey) {
-                isPanning = true;
-                panStartX = e.clientX - mapPanX;
-                panStartY = e.clientY - mapPanY;
-                e.preventDefault();
-            }
-        });
-        
-        mapContainer.addEventListener('mousemove', e => {
-            if (isPanning) {
-                mapPanX = e.clientX - panStartX;
-                mapPanY = e.clientY - panStartY;
-                updatePlayerMapTransform();
-            }
-        });
-        
-        mapContainer.addEventListener('mouseup', () => { isPanning = false; });
-        mapContainer.addEventListener('mouseleave', () => { isPanning = false; });
 
-        // 自由移動拖曳
-        const mapContainer = document.getElementById('player-map-container');
-        
-        mapContainer.addEventListener('mousedown', startDrag);
-        mapContainer.addEventListener('mousemove', onDrag);
-        mapContainer.addEventListener('mouseup', endDrag);
-        mapContainer.addEventListener('mouseleave', endDrag);
+        function render() {
+            const container = document.getElementById('player-map-container');
+            const zonesLayer = document.getElementById('zones-layer');
+            const tokensLayer = document.getElementById('tokens-layer');
+            const visionLayer = document.getElementById('vision-layer');
+            const areasLayer = document.getElementById('areas-layer');
+            const entitiesLayer = document.getElementById('entities-layer');
+            if (!container || !zonesLayer) return;
+
+            zonesLayer.innerHTML = '';
+            tokensLayer.innerHTML = '';
+            visionLayer.innerHTML = '';
+            areasLayer.innerHTML = '';
+            if (entitiesLayer) entitiesLayer.innerHTML = '';
+
+            const w = container.offsetWidth;
+            const h = container.offsetHeight;
+
+            areas.forEach(a => {
+                if (!a.points || a.points.length < 3) return;
+                const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                svg.setAttribute('class', 'absolute inset-0 w-full h-full');
+                svg.style.pointerEvents = 'none';
+                const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+                const pts = a.points.map(p => (p.x / 100 * w) + ',' + (p.y / 100 * h)).join(' ');
+                polygon.setAttribute('points', pts);
+                polygon.setAttribute('fill', 'rgba(34, 197, 94, 0.15)');
+                polygon.setAttribute('stroke', '#22c55e');
+                polygon.setAttribute('stroke-width', '2');
+                svg.appendChild(polygon);
+                areasLayer.appendChild(svg);
+            });
+
+            if (entitiesLayer) {
+                entities.forEach(e => {
+                    const el = document.createElement('div');
+                    el.className = 'absolute rounded-full border-2 border-white flex items-center justify-center text-xs font-bold text-white';
+                    el.style.width = '14px';
+                    el.style.height = '14px';
+                    el.style.left = e.x + '%';
+                    el.style.top = e.y + '%';
+                    el.style.transform = 'translate(-50%, -50%)';
+                    el.style.background = e.type === 'monster' ? '#dc2626' : '#ca8a04';
+                    el.textContent = e.name ? e.name[0] : '?';
+                    el.title = e.name;
+                    entitiesLayer.appendChild(el);
+                });
+            }
+
+            zones.forEach(z => {
+                if (z.playerVisible === false) return;
+                const el = document.createElement('div');
+                el.className = 'zone-marker';
+                el.style.left = z.x + '%';
+                el.style.top = z.y + '%';
+                el.title = z.name;
+                el.onclick = () => moveTo(z);
+                zonesLayer.appendChild(el);
+            });
+
+            if (currentChar && currentZone) {
+                const pos = tokenPosition(currentZone);
+
+                const token = document.createElement('div');
+                token.className = 'token';
+                token.style.left = pos.x + '%';
+                token.style.top = pos.y + '%';
+                token.style.background = currentChar.color;
+                token.textContent = currentChar.name[0];
+                tokensLayer.appendChild(token);
+
+                // Vision circle uses the same local % coords as the token;
+                // CSS transform on the shared layer keeps them aligned after zoom/pan.
+                const radiusPx = visionRadiusPx(currentZone);
+                const circle = document.createElement('div');
+                circle.className = 'vision-circle';
+                circle.style.left = pos.x + '%';
+                circle.style.top = pos.y + '%';
+                circle.style.width = (radiusPx * 2) + 'px';
+                circle.style.height = (radiusPx * 2) + 'px';
+                visionLayer.appendChild(circle);
+            }
+
+            renderFog();
+        }
+
+        function moveTo(zone) {
+            if (!currentChar || !myTokenId) {
+                alert('請先選擇角色');
+                return;
+            }
+            currentZone = { ...zone, isFree: false };
+            db.ref('tokens/' + myTokenId).update({
+                zoneId: zone.id,
+                freeX: null,
+                freeY: null
+            });
+            render();
+        }
 
         function startDrag(e) {
             if (!currentChar || !currentZone) return;
@@ -683,18 +317,14 @@
             if (e.clientX >= rect.left && e.clientX <= rect.right &&
                 e.clientY >= rect.top && e.clientY <= rect.bottom) {
                 isDragging = true;
+                e.preventDefault();
             }
         }
 
         function onDrag(e) {
             if (!isDragging || !currentChar) return;
-            const container = mapContainer.getBoundingClientRect();
-            const x = ((e.clientX - container.left) / container.width * 100);
-            const y = ((e.clientY - container.top) / container.height * 100);
-            
-            // 檢查是否在任一自由區域內
+            const { x, y } = screenToMapPercent(e.clientX, e.clientY);
             const inArea = areas.some(a => isPointInPolygon(x, y, a.points));
-            
             if (inArea) {
                 currentZone = { ...currentZone, x, y, isFree: true };
                 render();
@@ -703,13 +333,98 @@
 
         function endDrag() {
             if (isDragging && currentZone && currentZone.isFree && myTokenId) {
-                db.ref('tokens/' + myTokenId).update({ 
-                    freeX: currentZone.x, 
-                    freeY: currentZone.y 
+                db.ref('tokens/' + myTokenId).update({
+                    freeX: currentZone.x,
+                    freeY: currentZone.y,
+                    zoneId: currentZone.id || null
                 });
             }
             isDragging = false;
         }
+
+        const mapContainer = document.getElementById('player-map-container');
+        mapContainer.addEventListener('mousedown', startDrag);
+        mapContainer.addEventListener('mousemove', onDrag);
+        mapContainer.addEventListener('mouseup', endDrag);
+        mapContainer.addEventListener('mouseleave', endDrag);
+
+        db.ref('.info/connected').on('value', snap => {
+            const el = document.getElementById('fb-status');
+            if (el) {
+                el.textContent = snap.val() ? '🟢 Firebase 已連線' : '🔴 Firebase 未連線';
+                el.style.color = snap.val() ? '#22c55e' : '#ef4444';
+            }
+        });
+
+        db.ref('maps/phandalin').on('value', snap => {
+            const data = snap.val();
+            if (!data) return;
+
+            if (data.pixelsPerFiveFeet) {
+                pixelsPerFiveFeet = data.pixelsPerFiveFeet;
+            }
+            if (data.imageUrl) {
+                const mapEl = document.getElementById('player-map');
+                mapEl.style.backgroundImage = "url('" + data.imageUrl + "')";
+                mapEl.style.backgroundSize = 'contain';
+                mapEl.style.backgroundRepeat = 'no-repeat';
+                mapEl.style.backgroundPosition = 'center';
+            }
+            currentZoom = data.zoom || 1;
+            currentPanX = data.panX || 0;
+            currentPanY = data.panY || 0;
+            applyMapTransform();
+            render();
+        });
+
+        db.ref('zones').on('value', snap => {
+            zones = [];
+            snap.forEach(child => {
+                zones.push({ id: child.key, ...child.val() });
+            });
+            if (currentZone && currentZone.id && !currentZone.isFree) {
+                const updated = zones.find(z => z.id === currentZone.id);
+                if (updated) currentZone = { ...updated, isFree: false };
+            }
+            render();
+        });
+
+        db.ref('areas').on('value', snap => {
+            areas = [];
+            snap.forEach(child => {
+                areas.push({ id: child.key, ...child.val() });
+            });
+            render();
+        });
+
+        db.ref('entities').on('value', snap => {
+            entities = [];
+            snap.forEach(child => {
+                entities.push({ id: child.key, ...child.val() });
+            });
+            render();
+        });
+
+        // Restore free position / zone when our token updates
+        db.ref('tokens').on('value', snap => {
+            if (!myTokenId) return;
+            const t = snap.child(myTokenId).val();
+            if (!t) return;
+            if (t.freeX != null && t.freeY != null) {
+                currentZone = {
+                    ...(currentZone || {}),
+                    id: t.zoneId || (currentZone && currentZone.id),
+                    x: t.freeX,
+                    y: t.freeY,
+                    isFree: true,
+                    vision: (currentZone && currentZone.vision) || t.visionRange
+                };
+            } else if (t.zoneId) {
+                const z = zones.find(z => z.id === t.zoneId);
+                if (z) currentZone = { ...z, isFree: false };
+            }
+            render();
+        });
     </script>
     <script>
     if ('serviceWorker' in navigator) {

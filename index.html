@@ -2747,7 +2747,7 @@ window.onload = () => {
                 <div class="flex-1">
                     <div id="dm-map-container" class="relative bg-gray-900 rounded overflow-hidden cursor-crosshair" style="height: 500px;" onclick="onMapClick(event)">
                         <div id="dm-transform-layer" class="absolute inset-0" style="transform-origin: center center;">
-                            <div id="dm-map" class="absolute inset-0 bg-cover bg-center" style="background-color: #1a1a2e;"></div>
+                            <div id="dm-map" class="absolute inset-0" style="background-color: #1a1a2e; background-size: contain; background-repeat: no-repeat; background-position: center;"></div>
                             <div id="dm-zones" class="absolute inset-0"></div>
                             <div id="dm-tokens" class="absolute inset-0 pointer-events-none"></div>
                         </div>
@@ -3080,12 +3080,16 @@ function renderDMMap() {
     }
 
     dmTokens.forEach(t => {
-        const zone = dmZones.find(z => z.id === t.zoneId);
-        if (!zone) return;
+        const zone = t.zoneId ? dmZones.find(z => z.id === t.zoneId) : null;
+        // Prefer free-move coords so DM map stays aligned with player map after scale
+        const hasFree = t.freeX != null && t.freeY != null;
+        if (!hasFree && !zone) return;
+        const x = hasFree ? t.freeX : zone.x;
+        const y = hasFree ? t.freeY : zone.y;
         const el = document.createElement('div');
         el.className = 'absolute w-8 h-8 rounded-full border-2 border-white flex items-center justify-center text-xs font-bold text-white';
-        el.style.left = zone.x + '%';
-        el.style.top = zone.y + '%';
+        el.style.left = x + '%';
+        el.style.top = y + '%';
         el.style.transform = 'translate(-50%, -50%)';
         el.style.background = t.color || '#3b82f6';
         el.textContent = (t.characterName || t.name || '?')[0];
@@ -3094,7 +3098,9 @@ function renderDMMap() {
 
         const item = document.createElement('div');
         item.className = 'py-1';
-        item.textContent = `${t.characterName || t.name} → ${zone.name}`;
+        item.textContent = hasFree
+            ? `${t.characterName || t.name} → 自由移動 (${Number(x).toFixed(1)}%, ${Number(y).toFixed(1)}%)`
+            : `${t.characterName || t.name} → ${zone.name}`;
         tokenList.appendChild(item);
     });
 }
@@ -3204,16 +3210,21 @@ function zoomMap(delta) {
 function updateMapTransform() {
     const transformLayer = document.getElementById('dm-transform-layer');
     if (transformLayer) {
+        // scale then translate (CSS right-to-left) with center origin:
+        // screen = center + zoom * (local - center + pan)
         transformLayer.style.transform = `scale(${mapZoom}) translate(${mapPanX}px, ${mapPanY}px)`;
     }
+    const input = document.getElementById('zoom-input');
+    if (input) input.value = Math.round(mapZoom * 100);
     // 同步到 Firebase
     db.ref('maps/phandalin').update({ zoom: mapZoom, panX: mapPanX, panY: mapPanY });
 }
 
 function resetZoom() {
     mapZoom = 1;
-    document.getElementById('zoom-level').textContent = '100%';
-    document.getElementById('dm-map').style.transform = 'scale(1)';
+    mapPanX = 0;
+    mapPanY = 0;
+    updateMapTransform();
 }
 
 function removeAllMonsters() {
@@ -3257,25 +3268,22 @@ function onMapClick(e) {
     // 計算相對於容器的位置
     let relX = e.clientX - rect.left;
     let relY = e.clientY - rect.top;
-    // 反向計算縮放與位移的影響
+    // Inverse of: screen = center + zoom * (local - center + pan)
     const centerX = rect.width / 2;
     const centerY = rect.height / 2;
-    relX = (relX - centerX - mapPanX * mapZoom) / mapZoom + centerX;
-    relY = (relY - centerY - mapPanY * mapZoom) / mapZoom + centerY;
+    relX = (relX - centerX) / mapZoom - mapPanX + centerX;
+    relY = (relY - centerY) / mapZoom - mapPanY + centerY;
     const x = parseFloat((relX / rect.width * 100).toFixed(1));
     const y = parseFloat((relY / rect.height * 100).toFixed(1));
     
     if (calibrateMode) {
-        const container = document.getElementById('dm-map-container');
-        const rect = container.getBoundingClientRect();
-        const cx = e.clientX - rect.left;
-        const cy = e.clientY - rect.top;
+        // Use map-local pixels so calibration stays valid after zoom/pan
         if (!calibrateStart) {
-            calibrateStart = { x: cx, y: cy };
+            calibrateStart = { x: relX, y: relY };
             document.getElementById('btn-calibrate').textContent = '點擊第二點...';
         } else {
-            const dx = cx - calibrateStart.x;
-            const dy = cy - calibrateStart.y;
+            const dx = relX - calibrateStart.x;
+            const dy = relY - calibrateStart.y;
             pixelsPerFiveFeet = Math.sqrt(dx*dx + dy*dy);
             db.ref('maps/phandalin').update({ pixelsPerFiveFeet });
             alert('已設定 5尺 = ' + Math.round(pixelsPerFiveFeet) + ' 像素');
@@ -3387,12 +3395,28 @@ function setMapImage() {
 
 db.ref('maps/phandalin').on('value', snap => {
     const data = snap.val();
-    if (data && data.imageUrl) {
+    if (!data) return;
+    if (data.imageUrl) {
         const mapEl = document.getElementById('dm-map');
-        if (mapEl) mapEl.style.backgroundImage = "url('" + data.imageUrl + "')";
+        if (mapEl) {
+            mapEl.style.backgroundImage = "url('" + data.imageUrl + "')";
+            mapEl.style.backgroundSize = 'contain';
+            mapEl.style.backgroundRepeat = 'no-repeat';
+            mapEl.style.backgroundPosition = 'center';
+        }
         const input = document.getElementById('map-url-input');
         if (input && !input.value) input.value = data.imageUrl;
     }
+    if (data.pixelsPerFiveFeet) pixelsPerFiveFeet = data.pixelsPerFiveFeet;
+    if (data.zoom != null) mapZoom = data.zoom;
+    if (data.panX != null) mapPanX = data.panX;
+    if (data.panY != null) mapPanY = data.panY;
+    const transformLayer = document.getElementById('dm-transform-layer');
+    if (transformLayer) {
+        transformLayer.style.transform = `scale(${mapZoom}) translate(${mapPanX}px, ${mapPanY}px)`;
+    }
+    const zoomInput = document.getElementById('zoom-input');
+    if (zoomInput) zoomInput.value = Math.round(mapZoom * 100);
 });
 
 loadDriveMaps();
