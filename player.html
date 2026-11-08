@@ -147,10 +147,11 @@
         function applyMapTransform() {
             const transformLayer = document.getElementById('map-transform-layer');
             if (!transformLayer) return;
-            // Match DM: scale() translate() with center origin
-            // => screen = center + zoom * (local - center + pan)
+            // Match DM: translate() scale() + origin center
+            // screen = center + zoom * (local - center) + pan  (pan in screen px)
+            transformLayer.style.transformOrigin = 'center center';
             transformLayer.style.transform =
-                `scale(${currentZoom}) translate(${currentPanX}px, ${currentPanY}px)`;
+                `translate(${currentPanX}px, ${currentPanY}px) scale(${currentZoom})`;
         }
 
         function visionRadiusPx(zone) {
@@ -159,10 +160,7 @@
         }
 
         function tokenPosition(zone) {
-            // Prefer free movement coords when present
-            if (zone && zone.isFree && zone.x != null && zone.y != null) {
-                return { x: zone.x, y: zone.y };
-            }
+            if (!zone) return { x: 50, y: 50 };
             return { x: zone.x, y: zone.y };
         }
 
@@ -196,13 +194,11 @@
         function screenToMapPercent(clientX, clientY) {
             const container = document.getElementById('player-map-container');
             const rect = container.getBoundingClientRect();
-            let relX = clientX - rect.left;
-            let relY = clientY - rect.top;
             const centerX = rect.width / 2;
             const centerY = rect.height / 2;
-            // Inverse of: screen = center + zoom * (local - center + pan)
-            relX = (relX - centerX) / currentZoom - currentPanX + centerX;
-            relY = (relY - centerY) / currentZoom - currentPanY + centerY;
+            // Inverse of: screen = center + zoom * (local - center) + pan
+            const relX = (clientX - rect.left - centerX - currentPanX) / currentZoom + centerX;
+            const relY = (clientY - rect.top - centerY - currentPanY) / currentZoom + centerY;
             return {
                 x: parseFloat((relX / rect.width * 100).toFixed(2)),
                 y: parseFloat((relY / rect.height * 100).toFixed(2))
@@ -359,8 +355,13 @@
         db.ref('maps/phandalin').on('value', snap => {
             const data = snap.val();
             if (!data) return;
+            const container = document.getElementById('player-map-container');
+            const w = container.offsetWidth || 1;
+            const h = container.offsetHeight || 1;
 
-            if (data.pixelsPerFiveFeet) {
+            if (data.fiveFeetWidthPct != null) {
+                pixelsPerFiveFeet = (data.fiveFeetWidthPct / 100) * w;
+            } else if (data.pixelsPerFiveFeet) {
                 pixelsPerFiveFeet = data.pixelsPerFiveFeet;
             }
             if (data.imageUrl) {
@@ -371,10 +372,36 @@
                 mapEl.style.backgroundPosition = 'center';
             }
             currentZoom = data.zoom || 1;
-            currentPanX = data.panX || 0;
-            currentPanY = data.panY || 0;
+            // v2: translate()*scale(), pan as % of container. Ignore legacy pan pixels.
+            if (data.transformVersion >= 2) {
+                currentPanX = ((data.panXPct || 0) / 100) * w;
+                currentPanY = ((data.panYPct || 0) / 100) * h;
+            } else {
+                currentPanX = 0;
+                currentPanY = 0;
+            }
             applyMapTransform();
             render();
+        });
+
+        window.addEventListener('resize', () => {
+            db.ref('maps/phandalin').once('value').then(snap => {
+                const data = snap.val();
+                if (!data) return;
+                const container = document.getElementById('player-map-container');
+                const w = container.offsetWidth || 1;
+                const h = container.offsetHeight || 1;
+                if (data.transformVersion >= 2) {
+                    currentPanX = ((data.panXPct || 0) / 100) * w;
+                    currentPanY = ((data.panYPct || 0) / 100) * h;
+                }
+                if (data.fiveFeetWidthPct != null) {
+                    pixelsPerFiveFeet = (data.fiveFeetWidthPct / 100) * w;
+                }
+                currentZoom = data.zoom || 1;
+                applyMapTransform();
+                render();
+            });
         });
 
         db.ref('zones').on('value', snap => {

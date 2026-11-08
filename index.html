@@ -3000,6 +3000,43 @@ function removeMapInit(idx) {
     renderMapInit();
 }
 
+function getMapContainerSize() {
+    const container = document.getElementById('dm-map-container');
+    return {
+        w: container ? container.offsetWidth : 1,
+        h: container ? container.offsetHeight : 1
+    };
+}
+
+// translate() scale() + origin center:
+// screen = center + zoom * (local - center) + pan   (pan in screen px)
+function mapLocalFromClient(clientX, clientY) {
+    const container = document.getElementById('dm-map-container');
+    const rect = container.getBoundingClientRect();
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    const relX = (clientX - rect.left - centerX - mapPanX) / mapZoom + centerX;
+    const relY = (clientY - rect.top - centerY - mapPanY) / mapZoom + centerY;
+    return {
+        xPx: relX,
+        yPx: relY,
+        xPct: parseFloat((relX / rect.width * 100).toFixed(2)),
+        yPct: parseFloat((relY / rect.height * 100).toFixed(2)),
+        width: rect.width,
+        height: rect.height
+    };
+}
+
+function applyDmTransformOnly() {
+    const transformLayer = document.getElementById('dm-transform-layer');
+    if (transformLayer) {
+        transformLayer.style.transformOrigin = 'center center';
+        transformLayer.style.transform = `translate(${mapPanX}px, ${mapPanY}px) scale(${mapZoom})`;
+    }
+    const input = document.getElementById('zoom-input');
+    if (input) input.value = Math.round(mapZoom * 100);
+}
+
 function initMapPan() {
     const container = document.getElementById('dm-map-container');
     if (!container) return;
@@ -3007,6 +3044,7 @@ function initMapPan() {
     container.addEventListener('mousedown', e => {
         if (e.button === 1 || e.altKey || placeMode === 'pan') {
             isPanning = true;
+            // pan is screen-space with translate()*scale()
             panStartX = e.clientX - mapPanX;
             panStartY = e.clientY - mapPanY;
             container.style.cursor = 'grabbing';
@@ -3195,29 +3233,23 @@ document.addEventListener('keydown', e => {
 function setZoom(val) {
     mapZoom = Math.max(0.5, Math.min(3, parseInt(val) / 100));
     updateMapTransform();
-    document.getElementById('dm-map').style.transformOrigin = 'center center';
 }
 
 function zoomMap(delta) {
     mapZoom = Math.max(0.5, Math.min(3, mapZoom + delta));
-    const input = document.getElementById('zoom-input');
-    if (input) input.value = Math.round(mapZoom * 100);
-    const mapEl = document.getElementById('dm-map');
     updateMapTransform();
-    mapEl.style.transformOrigin = 'center center';
 }
 
 function updateMapTransform() {
-    const transformLayer = document.getElementById('dm-transform-layer');
-    if (transformLayer) {
-        // scale then translate (CSS right-to-left) with center origin:
-        // screen = center + zoom * (local - center + pan)
-        transformLayer.style.transform = `scale(${mapZoom}) translate(${mapPanX}px, ${mapPanY}px)`;
-    }
-    const input = document.getElementById('zoom-input');
-    if (input) input.value = Math.round(mapZoom * 100);
-    // 同步到 Firebase
-    db.ref('maps/phandalin').update({ zoom: mapZoom, panX: mapPanX, panY: mapPanY });
+    applyDmTransformOnly();
+    const { w, h } = getMapContainerSize();
+    // Sync zoom + pan as % so player map follows at any container size
+    db.ref('maps/phandalin').update({
+        transformVersion: 2,
+        zoom: mapZoom,
+        panXPct: (mapPanX / w) * 100,
+        panYPct: (mapPanY / h) * 100
+    });
 }
 
 function resetZoom() {
@@ -3262,30 +3294,21 @@ function setPlaceMode(mode) {
 
 function onMapClick(e) {
     if (e.target.closest('.zone-marker, .entity-marker, button, input')) return;
-    const container = document.getElementById('dm-map-container');
-    const transformLayer = document.getElementById('dm-transform-layer');
-    const rect = container.getBoundingClientRect();
-    // 計算相對於容器的位置
-    let relX = e.clientX - rect.left;
-    let relY = e.clientY - rect.top;
-    // Inverse of: screen = center + zoom * (local - center + pan)
-    const centerX = rect.width / 2;
-    const centerY = rect.height / 2;
-    relX = (relX - centerX) / mapZoom - mapPanX + centerX;
-    relY = (relY - centerY) / mapZoom - mapPanY + centerY;
-    const x = parseFloat((relX / rect.width * 100).toFixed(1));
-    const y = parseFloat((relY / rect.height * 100).toFixed(1));
+    const local = mapLocalFromClient(e.clientX, e.clientY);
+    const x = local.xPct;
+    const y = local.yPct;
     
     if (calibrateMode) {
-        // Use map-local pixels so calibration stays valid after zoom/pan
+        // Use map-local pixels; also store as % of width for player sync
         if (!calibrateStart) {
-            calibrateStart = { x: relX, y: relY };
+            calibrateStart = { x: local.xPx, y: local.yPx };
             document.getElementById('btn-calibrate').textContent = '點擊第二點...';
         } else {
-            const dx = relX - calibrateStart.x;
-            const dy = relY - calibrateStart.y;
+            const dx = local.xPx - calibrateStart.x;
+            const dy = local.yPx - calibrateStart.y;
             pixelsPerFiveFeet = Math.sqrt(dx*dx + dy*dy);
-            db.ref('maps/phandalin').update({ pixelsPerFiveFeet });
+            const fiveFeetWidthPct = (pixelsPerFiveFeet / local.width) * 100;
+            db.ref('maps/phandalin').update({ pixelsPerFiveFeet, fiveFeetWidthPct });
             alert('已設定 5尺 = ' + Math.round(pixelsPerFiveFeet) + ' 像素');
             calibrateMode = false;
             calibrateStart = null;
@@ -3407,16 +3430,43 @@ db.ref('maps/phandalin').on('value', snap => {
         const input = document.getElementById('map-url-input');
         if (input && !input.value) input.value = data.imageUrl;
     }
-    if (data.pixelsPerFiveFeet) pixelsPerFiveFeet = data.pixelsPerFiveFeet;
-    if (data.zoom != null) mapZoom = data.zoom;
-    if (data.panX != null) mapPanX = data.panX;
-    if (data.panY != null) mapPanY = data.panY;
-    const transformLayer = document.getElementById('dm-transform-layer');
-    if (transformLayer) {
-        transformLayer.style.transform = `scale(${mapZoom}) translate(${mapPanX}px, ${mapPanY}px)`;
+    const { w, h } = getMapContainerSize();
+    if (data.fiveFeetWidthPct != null) {
+        pixelsPerFiveFeet = (data.fiveFeetWidthPct / 100) * w;
+    } else if (data.pixelsPerFiveFeet) {
+        pixelsPerFiveFeet = data.pixelsPerFiveFeet;
     }
-    const zoomInput = document.getElementById('zoom-input');
-    if (zoomInput) zoomInput.value = Math.round(mapZoom * 100);
+    if (data.zoom != null) mapZoom = data.zoom;
+    // v2 uses translate()*scale() with pan as screen px / panXPct.
+    // Ignore legacy panX/panY from the old scale()*translate() model.
+    if (data.transformVersion >= 2 && (data.panXPct != null || data.panYPct != null)) {
+        mapPanX = ((data.panXPct || 0) / 100) * w;
+        mapPanY = ((data.panYPct || 0) / 100) * h;
+    } else if (!(data.transformVersion >= 2)) {
+        mapPanX = 0;
+        mapPanY = 0;
+    }
+    // Apply only — do not write back (avoids feedback loop while panning)
+    applyDmTransformOnly();
+});
+
+window.addEventListener('resize', () => {
+    // Re-derive screen pan from last known percentages after layout changes
+    db.ref('maps/phandalin').once('value').then(snap => {
+        const data = snap.val() || {};
+        const { w, h } = getMapContainerSize();
+        if (data.transformVersion >= 2) {
+            mapPanX = ((data.panXPct || 0) / 100) * w;
+            mapPanY = ((data.panYPct || 0) / 100) * h;
+        }
+        if (data.fiveFeetWidthPct != null) {
+            pixelsPerFiveFeet = (data.fiveFeetWidthPct / 100) * w;
+        }
+        applyDmTransformOnly();
+        renderDMMap();
+        renderAreas();
+        renderMapEntities();
+    });
 });
 
 loadDriveMaps();
