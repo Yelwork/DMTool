@@ -8,7 +8,7 @@
     <meta http-equiv="Expires" content="0">
     <title>玩家地圖</title>
     <script>
-    // cache-bust: 20261108-clear — clear old SW/cache, then install self-destructing SW
+    // cache-bust: 20261108-main2 — clear old SW/cache, then install self-destructing SW
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.getRegistrations().then(regs => {
         regs.forEach(r => r.unregister());
@@ -462,7 +462,7 @@
     <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js?v=20261108-clear')
+        navigator.serviceWorker.register('./sw.js?v=20261108-main2')
           .then(reg => console.log('SW clear registered', reg.scope))
           .catch(err => console.log('SW clear failed', err));
       });
