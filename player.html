@@ -3,7 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>玩家地圖</title>
+    <script>
+    // cache-bust: 20261108-clear — clear old SW/cache, then install self-destructing SW
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(regs => {
+        regs.forEach(r => r.unregister());
+      });
+    }
+    if (window.caches) {
+      caches.keys().then(names => names.forEach(n => caches.delete(n)));
+    }
+    </script>
     <script src="https://cdn.tailwindcss.com">
         // 點在多邊形內判斷
         function isPointInPolygon(x, y, points) {
@@ -696,6 +710,15 @@
             }
             isDragging = false;
         }
+    </script>
+    <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js?v=20261108-clear')
+          .then(reg => console.log('SW clear registered', reg.scope))
+          .catch(err => console.log('SW clear failed', err));
+      });
+    }
     </script>
 </body>
 </html>
