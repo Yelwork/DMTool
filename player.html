@@ -273,11 +273,12 @@
         .vision-circle { 
             position: absolute; 
             border-radius: 50%; 
-            background: radial-gradient(circle, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.1) 60%, transparent 100%);
-            border: 2px dashed rgba(255,255,255,0.3);
+            background: transparent;
+            border: 2px dashed rgba(255,255,255,0.5);
             pointer-events: none;
             transform: translate(-50%, -50%);
-            z-index: 5;
+            z-index: 15;
+            box-shadow: 0 0 0 9999px rgba(0,0,0,0.85);
         }
         .fog { 
             position: absolute; 
@@ -324,13 +325,15 @@
 
         <div id="player-map-container" class="relative bg-gray-900 rounded overflow-hidden" style="height: 500px;">
             <div id="fog-overlay" class="absolute inset-0 pointer-events-none" style="z-index: 10; background: #000;"></div>
-            <div id="vision-layer" class="absolute inset-0" style="z-index: 5; pointer-events: none;"></div>
+            <div id="tokens-layer" class="absolute inset-0" style="z-index: 20; transform-origin: center center;"></div>
+            <div id="zones-layer" class="absolute inset-0" style="z-index: 25; transform-origin: center center;"></div>
+            <div id="vision-layer" class="absolute inset-0" style="z-index: 15; pointer-events: none;"></div>
             <div id="map-transform-layer" class="absolute inset-0" style="transform-origin: center center;">
                 <div id="player-map" class="absolute inset-0 bg-cover bg-center" style="background-color: #1a1a2e;"></div>
                 <div id="areas-layer" class="absolute inset-0"></div>
-                <div id="zones-layer" class="absolute inset-0" style="z-index: 20;"></div>
-                <div id="entities-layer" class="absolute inset-0" style="z-index: 15;"></div>
-                <div id="tokens-layer" class="absolute inset-0"></div>
+                
+                <div id="entities-layer" class="absolute inset-0" style="z-index: 15;" style="z-index: 15;"></div>
+                
             </div>
         </div>
 
@@ -402,28 +405,26 @@
             }
             
             const container = document.getElementById('player-map-container');
+            const w = container.offsetWidth;
+            const h = container.offsetHeight;
             const zoom = window.currentZoom || 1;
             const panX = window.currentPanX || 0;
             const panY = window.currentPanY || 0;
             
-            // Calculate vision radius in pixels (scaled)
-            const radius = (currentChar.vision / 5) * pixelsPerFiveFeet * zoom / 2;
+            // Vision radius
+            const visionRange = currentZone.vision || currentChar.vision || 30;
+            const radius = (visionRange / 5) * pixelsPerFiveFeet * zoom / 2;
             
-            // Character position in container (percentage to pixels)
-            const charX = currentZone.x / 100 * container.offsetWidth;
-            const charY = currentZone.y / 100 * container.offsetHeight;
+            // Character position (percentage)
+            const charXPct = currentZone.x;
+            const charYPct = currentZone.y;
             
-            // Apply transform: scale from center, then translate
-            const centerX = container.offsetWidth / 2;
-            const centerY = container.offsetHeight / 2;
-            const screenX = centerX + (charX - centerX) * zoom + panX;
-            const screenY = centerY + (charY - centerY) * zoom + panY;
+            // Transform: scale from center, then translate
+            // Screen position = center + (charPos - center) * zoom + pan
+            const screenXPct = 50 + (charXPct - 50) * zoom + (panX / w * 100);
+            const screenYPct = 50 + (charYPct - 50) * zoom + (panY / h * 100);
             
-            // Convert to percentage for CSS
-            const centerXPct = (screenX / container.offsetWidth) * 100;
-            const centerYPct = (screenY / container.offsetHeight) * 100;
-            
-            fog.style.background = `radial-gradient(circle at ${centerXPct}% ${centerYPct}%, transparent 0px, transparent ${radius}px, black ${radius}px)`;
+            fog.style.background = `radial-gradient(circle at ${screenXPct}% ${screenYPct}%, transparent 0px, transparent ${radius}px, black ${radius}px)`;
         }
 
         
@@ -480,11 +481,11 @@
 
             zones.forEach(z => {
                 if (z.playerVisible === false) return;
-                if (!z.explored && (!currentChar || !isInVision(z))) return;
                 const el = document.createElement('div');
                 el.className = 'zone-marker';
                 el.style.left = z.x + '%';
                 el.style.top = z.y + '%';
+                el.style.zIndex = '25';
                 el.title = z.name;
                 el.onclick = () => moveTo(z);
                 zonesLayer.appendChild(el);
@@ -500,7 +501,8 @@
                 tokensLayer.appendChild(token);
                 renderFog();
 
-                const radiusPx = (currentChar.vision / 5) * pixelsPerFiveFeet / 2;
+                const visionRange = currentZone.vision || currentChar.vision || 30;
+                const radiusPx = (visionRange / 5) * pixelsPerFiveFeet / 2;
                 const circle = document.createElement('div');
                 circle.className = 'vision-circle';
                 // Use same calculation as fog
@@ -540,6 +542,28 @@
             }
             currentZone = zone;
             db.ref('tokens/' + myTokenId).update({ zoneId: zone.id });
+            
+            // 移動地圖讓角色在中間
+            const container = document.getElementById('player-map-container');
+            const zoom = window.currentZoom || 1;
+            const w = container.offsetWidth;
+            const h = container.offsetHeight;
+            
+            // 計算需要的 pan 讓角色在中心
+            const charX = zone.x / 100 * w;
+            const charY = zone.y / 100 * h;
+            window.currentPanX = (w / 2 - charX) * zoom;
+            window.currentPanY = (h / 2 - charY) * zoom;
+            
+            // 套用 transform
+            const transform = 'scale(' + zoom + ') translate(' + window.currentPanX + 'px, ' + window.currentPanY + 'px)';
+            const transformLayer = document.getElementById('map-transform-layer');
+            if (transformLayer) transformLayer.style.transform = transform;
+            const zonesLayer = document.getElementById('zones-layer');
+            if (zonesLayer) zonesLayer.style.transform = transform;
+            const tokensLayer = document.getElementById('tokens-layer');
+            if (tokensLayer) tokensLayer.style.transform = transform;
+            
             render();
         }
 
@@ -565,10 +589,13 @@
             window.currentZoom = data.zoom || 1;
             window.currentPanX = data.panX || 0;
             window.currentPanY = data.panY || 0;
+            const transform = 'scale(' + window.currentZoom + ') translate(' + window.currentPanX + 'px, ' + window.currentPanY + 'px)';
             const transformLayer = document.getElementById('map-transform-layer');
-            if (transformLayer) {
-                transformLayer.style.transform = 'scale(' + window.currentZoom + ') translate(' + window.currentPanX + 'px, ' + window.currentPanY + 'px)';
-            }
+            if (transformLayer) transformLayer.style.transform = transform;
+            const zonesLayer = document.getElementById('zones-layer');
+            if (zonesLayer) zonesLayer.style.transform = transform;
+            const tokensLayer = document.getElementById('tokens-layer');
+            if (tokensLayer) tokensLayer.style.transform = transform;
             render();
         });
 
