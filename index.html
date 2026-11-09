@@ -9,13 +9,13 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="戰役助手">
-    <link rel="manifest" href="manifest.json?v=20261108-main2">
-    <link rel="apple-touch-icon" href="icon-192.png?v=20261108-main2">
+    <link rel="manifest" href="manifest.json?v=20261109-timeline1">
+    <link rel="apple-touch-icon" href="icon-192.png?v=20261109-timeline1">
     <title>TRPG 戰役助手</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script>
-// cache-bust: 20261108-main2 — clear old SW/cache, then install self-destructing SW
+    // cache-bust: 20261109-timeline1 — clear old SW/cache, then install self-destructing SW
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.getRegistrations().then(regs => {
     regs.forEach(r => r.unregister());
@@ -133,21 +133,25 @@ if (window.caches) {
     <main class="flex-grow overflow-y-auto custom-scrollbar p-4 relative" id="main-content">
    
 
-<!-- 🆕 動態時間線 (獨立分頁) -->
+<!-- 🆕 動態時間線 + 實體百科 -->
 <div id="tab-timeline" class="tab-content w-full h-full bg-gray-900 text-gray-100 overflow-y-auto">
     <div class="p-6 max-w-6xl mx-auto">
-        <!-- 將 index.html 左側的 API 輸入框移到這裡作為頂部控制列 -->
-        <div class="mb-8 p-4 bg-gray-800 rounded-lg border border-gray-700 flex gap-4 items-center">
-            <input type="text" id="apiUrl" placeholder="貼上 Google Apps Script API 網址..." class="flex-1 bg-gray-900 border border-gray-600 rounded px-3 py-2 text-sm">
-            <button onclick="fetchData()" class="bg-amber-600 hover:bg-amber-500 text-white px-4 py-2 rounded text-sm font-bold shadow">連線並載入</button>
+        <div class="mb-6 p-4 bg-gray-800 rounded-lg border border-gray-700 flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
+            <input type="text" id="apiUrl" placeholder="貼上 Google Apps Script API 網址..." class="flex-1 bg-gray-900 border border-gray-600 rounded px-3 py-2 text-sm text-gray-100">
+            <button id="fetchDataBtn" onclick="fetchData()" class="bg-amber-600 hover:bg-amber-500 text-white px-4 py-2 rounded text-sm font-bold shadow whitespace-nowrap">連線並載入</button>
         </div>
-</div>
-        <!-- 貼上 index.html 的 #view-timeline 內容 -->
- <div id="view-timeline" class="max-w-7xl mx-auto space-y-8 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-gray-800 before:via-gray-600 before:to-gray-800">
+        <div id="timeline-status" class="mb-4 text-sm text-gray-400">尚未載入 API 資料</div>
+
+        <h2 class="text-xl font-bold text-amber-400 mb-4">時間線</h2>
+        <div id="view-timeline" class="mb-10 space-y-8 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-gray-800 before:via-gray-600 before:to-gray-800">
+        </div>
+
+        <h2 class="text-xl font-bold text-amber-400 mb-4">實體與狀態百科</h2>
+        <div id="entities-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 pb-10"></div>
     </div>
 </div>
 
-<!-- 🆕 實體與狀態百科 (獨立分頁) -->
+<!-- 任務板 -->
 <div id="tab-story" class="tab-content max-w-[1400px] mx-auto space-y-4">
             <div class="flex gap-2 flex-wrap mb-2 bg-white p-3 rounded-xl shadow-sm border items-center justify-between">
                 <div class="flex gap-2 flex-wrap">
@@ -942,6 +946,16 @@ if (window.caches) {
         {n:"黛西（那頭牛）(Daisy the Cow)", r:"異常的牛", d:"受Far Realm影響而行為異常的牛。", b:"bg-green-50 border-green-200", i:"【細節】第6章支線「奇怪的牛」主角，吃了受污染的三葉草後出現異常。"},
         {n:"昆布拉克塞爾 (Qunbraxel)", r:"心靈異怪相關", d:"在Gibbet Crossing活動的角色。", b:"bg-purple-50 border-purple-200", i:"【細節】試圖建立自己的勢力，與玩家競賽收集碎片。"},
         {n:"里維·比德爾 (Rivy Biddle)", r:"侏儒考古學家", d:"活躍的探險家，可作為嚮導。", b:"bg-green-50 border-green-200", i:"【細節】在後續章節可協助玩家理解地底與古代威脅。"}
+    ]},
+    {c:99, n:"故事聖經角色 (Story Bible)", d:"跨團主角與關鍵夥伴的詳細設定。", nl:[
+        {n:"唐 (Tang)", r:"純血獸人狂戰士 (Lv3)", d:"混亂善良，原苔爪氏族農夫。", b:"bg-green-50 border-green-200", i:"【動機】奪回被巴倫騙走的聖物「翡翠沃土石」、營救父親、向巴倫復仇。\n【背景】在塔莎之吻之前被巴倫欺騙，為了救父與找回神石而離開部落旅行，中途遭遇塔莎之吻。\n【父親被賣原因】父親曾是苔爪氏族的戰士，對地脈有特殊感應。灰矮人需要這種「活體陣眼」來穩定他們在幽暗地域的腐化儀式。\n【性格】心智如孩童般純真。"},
+        {n:"漢克 (Hank)", r:"歌利亞月亮圈德魯伊 (Lv3)", d:"中立善良，溫和農夫。", b:"bg-green-50 border-green-200", i:"【動機】追查塔莎之吻引發的農田枯萎，淨化被毒化的地脈。\n【背景】放棄高山傳統，滿月下覺醒大地神力。"},
+        {n:"伊琳娜 (Elexa)", r:"人類神聖之魂術士 (Lv3)", d:"中立善良，具備警覺專長。", b:"bg-green-50 border-green-200", i:"【動機】調查凡戴林散塔林陰謀。\n【關鍵線索】信件簽名為哈莉亞·松頓。\n【身世迷團】不知魔法血脈源自何處（遠古巨龍眷顧？狂野魔法誤擊？）。\n【12歲事件】冬天暴風雪中為救凍僵流浪狗，雙掌爆發金紅色火焰，差點燒毀村莊。因村民恐懼而在大雪夜離開。\n【流浪歲月】學會像狼一樣睡覺，極度警覺。曾在矮人礦道與要塞周邊徘徊，學會矮人語。矮人們稱她為「被幸運女神吻過的孩子」（多次奇蹟生還）。\n【轉折】在地精襲擊農莊時第一次主動使用火焰救人，找到生命意義。\n【現況】攜帶散塔林信件南下凡戴林繼續調查。"},
+        {n:"凱爾 (Yelwork)", r:"人類法師 (暗線DMPC)", d:"左眼為木製義眼。", b:"bg-green-50 border-green-200", i:"【狀態】看破鬼婆部分幻象後脫隊潛入幽暗地域。\n【背景】與蕾歐娜交易復活（木義眼）。「師傅在環遊世界」是蕾歐娜的謊言，真師傅正被囚禁。\n【揭示節點3】木義眼可讓蕾歐娜在特定條件下短暫控制凱爾（將製作被操縱時刻）。\n【揭示節點4】某NPC協助修復懷錶，使其能抵抗詛咒並保護玩家。"},
+        {n:"茶葉·布妮 (Tea Leaf Bunny)", r:"半身人遊蕩者", d:"凡戴爾英雄。", b:"bg-green-50 border-green-200", i:"【角色】剿滅紅標幫的英雄，Droop 的「大家姐」。目前擔任新團擔保人。\n【高光】樹林舊帳中精準破甲救出 Droop。\n【目標】保護 Droop 與凡戴林的弱小者，追查仍可能威脅小鎮的紅標幫殘黨與黑蜘蛛餘黨。\n【長期】在凡戴林建立一個能讓像 Droop 這樣的人安心生活的地方。"},
+        {n:"施琳·伊菲凱爾 (Céline Ifikael)", r:"高等精靈法師", d:"茶葉的搭檔。", b:"bg-green-50 border-green-200", i:"【角色】經歷礦坑前期章節，提供戰力與情報支援。歐格馬信徒。\n【目標】記錄並理解凡戴林周邊的魔法異變（地脈腐化、黑蜘蛛詛咒、鬼婆魔法），防止知識被濫用。\n【長期】尋找能安全封印或淨化異界魔法的方法，同時守護茶葉與隊伍的秘密。"},
+        {n:"班吉 (Benji)", r:"覺醒德魯伊 (18歲)", d:"無冬城馬廄少年。", b:"bg-green-50 border-green-200", i:"【外貌】亂蓬蓬稻草色短髮、滿臉雀斑、過大厚皮圍裙、大草叉。\n【高光】玻璃杖自爆時召喚藤蔓護盾拯救全隊與西爾達。\n【師傅】拜了西樹鎮（Thundertree）的德魯伊為師傅。\n【未來目標】學習控制自然之力，成為能保護同伴的真正守護者；同時協助淨化被腐化的地脈。"},
+        {n:"Droop (督督)", r:"地精", d:"茶葉的小弟。", b:"bg-green-50 border-green-200", i:"【背景】被黑蜘蛛手下轉賣至紅標幫地下室當奴隸。\n【轉折】被茶葉解放後認定她為大家姐。\n【後續】樹林舊帳中被莫斯克挾持，被茶葉救出。"}
     ]}
 ];
         let spls = [
@@ -2387,19 +2401,7 @@ function generateWebDungeon() {
     // 入口/出口樓梯
     if (rooms.length > 0) {
         let startRoom = rooms[0];
-        let endRoom = rooms[rooms.length - 1
-    ,{c:99, n:"故事聖經角色 (Story Bible)", d:"跨團主角與關鍵夥伴的詳細設定。", nl:[
-        {n:"唐 (Tang)", r:"純血獸人狂戰士 (Lv3)", d:"混亂善良，原苔爪氏族農夫。", b:"bg-green-50 border-green-200", i:"【動機】奪回被巴倫騙走的聖物「翡翠沃土石」、營救父親、向巴倫復仇。\n【背景】在塔莎之吻之前被巴倫欺騙，為了救父與找回神石而離開部落旅行，中途遭遇塔莎之吻。\n【父親被賣原因】父親曾是苔爪氏族的戰士，對地脈有特殊感應。灰矮人需要這種「活體陣眼」來穩定他們在幽暗地域的腐化儀式。\n【性格】心智如孩童般純真。"},
-        {n:"漢克 (Hank)", r:"歌利亞月亮圈德魯伊 (Lv3)", d:"中立善良，溫和農夫。", b:"bg-green-50 border-green-200", i:"【動機】追查塔莎之吻引發的農田枯萎，淨化被毒化的地脈。\n【背景】放棄高山傳統，滿月下覺醒大地神力。"},
-        {n:"伊琳娜 (Elexa)", r:"人類神聖之魂術士 (Lv3)", d:"中立善良，具備警覺專長。", b:"bg-green-50 border-green-200", i:"【動機】調查凡戴林散塔林陰謀。\n【關鍵線索】信件簽名為哈莉亞·松頓。\n【身世迷團】不知魔法血脈源自何處（遠古巨龍眷顧？狂野魔法誤擊？）。\n【12歲事件】冬天暴風雪中為救凍僵流浪狗，雙掌爆發金紅色火焰，差點燒毀村莊。因村民恐懼而在大雪夜離開。\n【流浪歲月】學會像狼一樣睡覺，極度警覺。曾在矮人礦道與要塞周邊徘徊，學會矮人語。矮人們稱她為「被幸運女神吻過的孩子」（多次奇蹟生還）。\n【轉折】在地精襲擊農莊時第一次主動使用火焰救人，找到生命意義。\n【現況】攜帶散塔林信件南下凡戴林繼續調查。"},
-        {n:"凱爾 (Yelwork)", r:"人類法師 (暗線DMPC)", d:"左眼為木製義眼。", b:"bg-green-50 border-green-200", i:"【狀態】看破鬼婆部分幻象後脫隊潛入幽暗地域。\n【背景】與蕾歐娜交易復活（木義眼）。「師傅在環遊世界」是蕾歐娜的謊言，真師傅正被囚禁。\n【揭示節點3】木義眼可讓蕾歐娜在特定條件下短暫控制凱爾（將製作被操縱時刻）。\n【揭示節點4】某NPC協助修復懷錶，使其能抵抗詛咒並保護玩家。"},
-        {n:"茶葉·布妮 (Tea Leaf Bunny)", r:"半身人遊蕩者", d:"凡戴爾英雄。", b:"bg-green-50 border-green-200", i:"【角色】剿滅紅標幫的英雄，Droop 的「大家姐」。目前擔任新團擔保人。\n【高光】樹林舊帳中精準破甲救出 Droop。\n【目標】保護 Droop 與凡戴林的弱小者，追查仍可能威脅小鎮的紅標幫殘黨與黑蜘蛛餘黨。\n【長期】在凡戴林建立一個能讓像 Droop 這樣的人安心生活的地方。"},
-        {n:"施琳·伊菲凱爾 (Céline Ifikael)", r:"高等精靈法師", d:"茶葉的搭檔。", b:"bg-green-50 border-green-200", i:"【角色】經歷礦坑前期章節，提供戰力與情報支援。歐格馬信徒。\n【目標】記錄並理解凡戴林周邊的魔法異變（地脈腐化、黑蜘蛛詛咒、鬼婆魔法），防止知識被濫用。\n【長期】尋找能安全封印或淨化異界魔法的方法，同時守護茶葉與隊伍的秘密。"},
-        {n:"班吉 (Benji)", r:"覺醒德魯伊 (18歲)", d:"無冬城馬廄少年。", b:"bg-green-50 border-green-200", i:"【外貌】亂蓬蓬稻草色短髮、滿臉雀斑、過大厚皮圍裙、大草叉。\n【高光】玻璃杖自爆時召喚藤蔓護盾拯救全隊與西爾達。\n【師傅】拜了西樹鎮（Thundertree）的德魯伊為師傅。\n【未來目標】學習控制自然之力，成為能保護同伴的真正守護者；同時協助淨化被腐化的地脈。"},
-        {n:"Droop (督督)", r:"地精", d:"茶葉的小弟。", b:"bg-green-50 border-green-200", i:"【背景】被黑蜘蛛手下轉賣至紅標幫地下室當奴隸。\n【轉折】被茶葉解放後認定她為大家姐。\n【後續】樹林舊帳中被莫斯克挾持，被茶葉救出。"}
-    ]}
-
-];
+        let endRoom = rooms[rooms.length - 1];
         grid[startRoom.x + 1][startRoom.y + 1] = 3; // 上樓梯
         if (rooms.length > 1) {
             grid[endRoom.x + 1][endRoom.y + 1] = 4; // 下樓梯
@@ -2593,6 +2595,7 @@ function generateWebDungeon() {
 
         function renderEntities() {
             const grid = document.getElementById('entities-grid');
+            if (!grid) return;
             grid.innerHTML = '';
             
             if (!appData || !appData.entities) return;
@@ -2623,6 +2626,7 @@ function generateWebDungeon() {
 
         function renderTimeline() {
             const timeline = document.getElementById('view-timeline');
+            if (!timeline) return;
             timeline.innerHTML = '';
             
             if (!appData || !appData.events) return;
@@ -2666,58 +2670,89 @@ function generateWebDungeon() {
             });
         }
 
+        const DEFAULT_TIMELINE_API = "https://script.google.com/macros/s/AKfycbwqbd84S0hVmYyQJtx6il4-9rJlLPLzmP4lPfVK7mYicQONtIcKu5IA_SSOva_wB7qA/exec";
+
+        function setTimelineStatus(msg, ok) {
+            const el = document.getElementById('timeline-status');
+            if (!el) return;
+            el.textContent = msg;
+            el.className = 'mb-4 text-sm ' + (ok ? 'text-emerald-400' : 'text-rose-400');
+        }
+
         async function fetchData() {
-            const urlInput = document.getElementById('apiUrl').value;
-            const targetUrl = urlInput ? urlInput : "https://script.google.com/macros/s/AKfycbwqbd84S0hVmYyQJtx6il4-9rJlLPLzmP4lPfVK7mYicQONtIcKu5IA_SSOva_wB7qA/exec";
-            
-            const btn = document.querySelector('button[onclick="fetchData()"]');
-            
+            const urlEl = document.getElementById('apiUrl');
+            const urlInput = urlEl ? urlEl.value.trim() : '';
+            const targetUrl = urlInput || localStorage.getItem('dm_timeline_api') || DEFAULT_TIMELINE_API;
+            if (urlEl && !urlEl.value.trim()) urlEl.value = targetUrl;
+
+            const btn = document.getElementById('fetchDataBtn') || document.querySelector('button[onclick="fetchData()"]');
+            const resetBtn = () => {
+                if (!btn) return;
+                btn.innerText = '連線並載入';
+                btn.classList.remove('bg-emerald-600', 'bg-rose-600', 'bg-gray-600');
+                btn.classList.add('bg-amber-600');
+            };
+
             try {
-                btn.innerText = '連線中...';
-                btn.classList.replace('bg-amber-600', 'bg-gray-600');
-                
+                if (btn) {
+                    btn.innerText = '連線中...';
+                    btn.classList.remove('bg-amber-600', 'bg-emerald-600', 'bg-rose-600');
+                    btn.classList.add('bg-gray-600');
+                }
+                setTimelineStatus('正在連線 Google Apps Script…', true);
+
                 const res = await fetch(targetUrl, {
                     method: 'GET',
                     mode: 'cors',
-                    redirect: 'follow'
+                    redirect: 'follow',
+                    cache: 'no-store'
                 });
-                
+
                 if (!res.ok) {
                     throw new Error(`HTTP error! status: ${res.status}`);
                 }
-                
+
                 const data = await res.json();
-                
-                if(data && data.entities && data.events) {
-                    appData = data;
-                    renderTimeline();
-                    renderEntities();
-                    btn.innerText = '載入成功！';
-                    btn.classList.replace('bg-gray-600', 'bg-emerald-600');
-                } else {
+                const entities = data && (data.entities || data.Entities);
+                const events = data && (data.events || data.Events);
+                if (!entities || !events) {
                     throw new Error('回傳的 JSON 缺少 entities 或 events 陣列');
                 }
-            } catch(err) {
-                console.error("Fetch Error:", err);
-                let errorMsg = err.message;
-                if (err.message.includes('fetch')) {
-                    errorMsg = "CORS 跨域阻擋或網路中斷。請確認 Apps Script 部署時「誰可以存取」已設定為「所有人 (Anyone)」。";
-                }
-                
-                alert(`API 讀取失敗：\n${errorMsg}\n\n將退回使用內建測試資料。`);
-                
-                btn.innerText = '連線失敗';
-                btn.classList.replace('bg-gray-600', 'bg-rose-600');
+
+                appData = { ...data, entities, events };
+                localStorage.setItem('dm_timeline_api', targetUrl);
                 renderTimeline();
+                renderEntities();
+
+                const msg = `已載入 ${events.length} 個事件、${entities.length} 個實體`;
+                setTimelineStatus(msg, true);
+                if (btn) {
+                    btn.innerText = '載入成功！';
+                    btn.classList.remove('bg-gray-600');
+                    btn.classList.add('bg-emerald-600');
+                }
+            } catch (err) {
+                console.error('Fetch Error:', err);
+                let errorMsg = err && err.message ? err.message : String(err);
+                if (/Failed to fetch|NetworkError|Load failed|CORS/i.test(errorMsg)) {
+                    errorMsg = 'CORS 跨域阻擋或網路中斷。請確認 Apps Script 部署時「誰可以存取」已設定為「所有人 (Anyone)」。';
+                }
+                setTimelineStatus('API 讀取失敗：' + errorMsg + '（顯示內建測試資料）', false);
+                if (btn) {
+                    btn.innerText = '連線失敗';
+                    btn.classList.remove('bg-gray-600');
+                    btn.classList.add('bg-rose-600');
+                }
+                // Keep whatever appData we already have; only fall back if empty
+                if (!appData || !appData.events || !appData.events.length) {
+                    appData = mockData;
+                }
+                renderTimeline();
+                renderEntities();
             }
-            
-setTimeout(() => {
-    btn.innerText = '連線並載入';
-    // 移除成功(綠)或失敗(紅)的顏色，加回原本的琥珀色
-    btn.classList.remove('bg-emerald-600', 'bg-rose-600');
-    btn.classList.add('bg-amber-600');
-}, 3000);
-}
+
+            setTimeout(resetBtn, 3000);
+        }
 
 window.onload = () => {
     // 來自 DM_index.html 的初始化
@@ -2725,7 +2760,11 @@ window.onload = () => {
     renderQuests(); renderLocs(); renderSpells(); renderStore(); renderPlayers(); 
     renderNpcHistory(); 
     
-    // 來自 index.html 的初始化
+    // 預填並載入時間線 API
+    const urlEl = document.getElementById('apiUrl');
+    if (urlEl) {
+        urlEl.value = localStorage.getItem('dm_timeline_api') || DEFAULT_TIMELINE_API;
+    }
     fetchData(); 
 
     // 預設開啟任務板
@@ -2835,7 +2874,7 @@ window.onload = () => {
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     // Register self-destructing SW so any old caching SW is replaced and cleared
-    navigator.serviceWorker.register('./sw.js?v=20261108-main2')
+    navigator.serviceWorker.register('./sw.js?v=20261109-timeline1')
       .then(reg => console.log('SW clear registered', reg.scope))
       .catch(err => console.log('SW clear failed', err));
   });
