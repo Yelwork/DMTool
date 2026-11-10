@@ -9,13 +9,13 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="戰役助手">
-    <link rel="manifest" href="manifest.json?v=20261110-dice3">
-    <link rel="apple-touch-icon" href="icon-192.png?v=20261110-dice3">
+    <link rel="manifest" href="manifest.json?v=20261110-dice4">
+    <link rel="apple-touch-icon" href="icon-192.png?v=20261110-dice4">
     <title>TRPG 戰役助手</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script>
-    // cache-bust: 20261110-dice3 — clear old SW/cache, then install self-destructing SW
+    // cache-bust: 20261110-dice4 — clear old SW/cache, then install self-destructing SW
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.getRegistrations().then(regs => {
     regs.forEach(r => r.unregister());
@@ -49,84 +49,236 @@ if (window.caches) {
         }
         #tab-houserules { min-height: 0; }
 
-        /* 通用擲骰器：多面體外形滾動動畫（對應 D4/D6/D8/D10/D12/D20） */
+        /* 通用擲骰器：CSS 3D 多面體翻滾 */
         .dice-stage {
-            min-height: 132px;
+            --die: 58px;
+            min-height: 150px;
             display: flex;
             flex-wrap: wrap;
             align-items: center;
             justify-content: center;
-            gap: 0.7rem;
+            gap: 1rem;
             margin-bottom: 0.75rem;
+            perspective: 700px;
+            perspective-origin: 50% 45%;
         }
-        .dice-poly {
+        .dice-stage[data-count="1"] { --die: 72px; }
+        .dice-stage[data-count="2"],
+        .dice-stage[data-count="3"] { --die: 64px; }
+        .dice-3d {
             position: relative;
-            width: 76px;
-            height: 76px;
+            width: calc(var(--die) * 1.35);
+            height: calc(var(--die) * 1.35);
             flex: 0 0 auto;
             user-select: none;
-            transform: translateZ(0);
-            filter: drop-shadow(0 8px 12px rgba(79, 70, 229, 0.28));
         }
-        .dice-stage[data-count="1"] .dice-poly { width: 96px; height: 96px; }
-        .dice-stage[data-count="2"] .dice-poly,
-        .dice-stage[data-count="3"] .dice-poly { width: 84px; height: 84px; }
-        .dice-poly svg {
+        .dice-scene {
             width: 100%;
             height: 100%;
-            display: block;
-            overflow: visible;
+            display: grid;
+            place-items: center;
+            transform-style: preserve-3d;
         }
-        .dice-poly .dice-num {
+        .dice-mesh {
+            position: relative;
+            width: var(--die);
+            height: var(--die);
+            transform-style: preserve-3d;
+            transform: rotateX(-22deg) rotateY(28deg);
+            transition: transform 0.35s ease-out;
+        }
+        .dice-mesh .f {
             position: absolute;
-            inset: 0;
+            left: 50%;
+            top: 50%;
+            box-sizing: border-box;
+            background: linear-gradient(145deg, #ffffff 0%, #e0e7ff 42%, #a5b4fc 100%);
+            border: 2px solid #6366f1;
+            color: #1f2937;
+            font-weight: 900;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.45rem;
+            backface-visibility: hidden;
+            box-shadow: inset 0 -6px 14px rgba(79, 70, 229, 0.18), inset 0 6px 10px rgba(255,255,255,0.55);
+        }
+        .dice-3d .dice-num {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 5;
+            min-width: 1.6em;
+            text-align: center;
+            font-size: calc(var(--die) * 0.42);
             font-weight: 900;
-            color: #1f2937;
+            color: #111827;
             pointer-events: none;
-            text-shadow: 0 1px 0 rgba(255,255,255,0.7);
+            text-shadow: 0 1px 0 rgba(255,255,255,0.85), 0 0 10px rgba(255,255,255,0.55);
             line-height: 1;
         }
-        .dice-stage[data-count="1"] .dice-poly .dice-num { font-size: 1.85rem; }
-        .dice-stage[data-count="2"] .dice-poly .dice-num,
-        .dice-stage[data-count="3"] .dice-poly .dice-num { font-size: 1.6rem; }
-        .dice-poly.shape-d4 .dice-num { padding-top: 18%; }
-        .dice-poly.shape-d10 .dice-num { padding-top: 6%; }
-        .dice-poly.is-rolling {
-            animation: diceRollSpin 0.85s cubic-bezier(0.2, 0.8, 0.2, 1);
+        .dice-3d.is-nat20 .f {
+            background: linear-gradient(145deg, #ffffff 0%, #bbf7d0 45%, #4ade80 100%);
+            border-color: #16a34a;
         }
-        .dice-poly.is-settle {
-            animation: diceSettle 0.35s ease-out;
+        .dice-3d.is-nat20 .dice-num { color: #15803d; }
+        .dice-3d.is-nat1 .f {
+            background: linear-gradient(145deg, #ffffff 0%, #fecaca 45%, #f87171 100%);
+            border-color: #dc2626;
         }
-        .dice-poly .dice-face { fill: #c7d2fe; stroke: #6366f1; }
-        .dice-poly .dice-shade { fill: #a5b4fc; stroke: none; opacity: 0.55; }
-        .dice-poly .dice-edge { stroke: #818cf8; fill: none; }
-        .dice-poly.is-nat20 .dice-face { fill: #86efac; stroke: #16a34a; }
-        .dice-poly.is-nat20 .dice-shade { fill: #4ade80; }
-        .dice-poly.is-nat20 .dice-edge { stroke: #15803d; }
-        .dice-poly.is-nat20 .dice-num { color: #15803d; }
-        .dice-poly.is-nat1 .dice-face { fill: #fca5a5; stroke: #dc2626; }
-        .dice-poly.is-nat1 .dice-shade { fill: #f87171; }
-        .dice-poly.is-nat1 .dice-edge { stroke: #b91c1c; }
-        .dice-poly.is-nat1 .dice-num { color: #b91c1c; }
-        @keyframes diceRollSpin {
-            0%   { transform: rotate(0deg) scale(1); }
-            20%  { transform: rotate(140deg) scale(1.08) translateY(-8px); }
-            45%  { transform: rotate(320deg) scale(0.94) translateY(4px); }
-            70%  { transform: rotate(520deg) scale(1.06) translateY(-4px); }
-            100% { transform: rotate(720deg) scale(1) translateY(0); }
+        .dice-3d.is-nat1 .dice-num { color: #b91c1c; }
+
+        /* D6 cube */
+        .shape-d6 .f {
+            width: var(--die);
+            height: var(--die);
+            margin: calc(var(--die) / -2) 0 0 calc(var(--die) / -2);
+            border-radius: 10px;
+            font-size: calc(var(--die) * 0.38);
         }
-        @keyframes diceSettle {
-            0%   { transform: scale(1.12); }
-            60%  { transform: scale(0.96); }
-            100% { transform: scale(1); }
+        .shape-d6 .f1 { transform: rotateY(0deg) translateZ(calc(var(--die) / 2)); }
+        .shape-d6 .f2 { transform: rotateY(90deg) translateZ(calc(var(--die) / 2)); }
+        .shape-d6 .f3 { transform: rotateY(180deg) translateZ(calc(var(--die) / 2)); }
+        .shape-d6 .f4 { transform: rotateY(-90deg) translateZ(calc(var(--die) / 2)); }
+        .shape-d6 .f5 { transform: rotateX(90deg) translateZ(calc(var(--die) / 2)); }
+        .shape-d6 .f6 { transform: rotateX(-90deg) translateZ(calc(var(--die) / 2)); }
+
+        /* D4 tetrahedron */
+        .shape-d4 .f {
+            width: var(--die);
+            height: calc(var(--die) * 0.9);
+            margin: calc(var(--die) * -0.45) 0 0 calc(var(--die) / -2);
+            clip-path: polygon(50% 4%, 4% 96%, 96% 96%);
+            border: 0;
+            background: linear-gradient(160deg, #ffffff 0%, #c7d2fe 55%, #818cf8 100%);
+            box-shadow: none;
+            filter: drop-shadow(0 0 0.5px #6366f1);
+        }
+        .shape-d4 .f1 { transform: rotateY(0deg) translateZ(calc(var(--die) * 0.2)) rotateX(20deg); }
+        .shape-d4 .f2 { transform: rotateY(120deg) translateZ(calc(var(--die) * 0.2)) rotateX(20deg); }
+        .shape-d4 .f3 { transform: rotateY(240deg) translateZ(calc(var(--die) * 0.2)) rotateX(20deg); }
+        .shape-d4 .f4 { transform: rotateX(-90deg) translateZ(calc(var(--die) * -0.18)) rotateZ(180deg); }
+
+        /* D8 octahedron */
+        .shape-d8 .f {
+            width: var(--die);
+            height: var(--die);
+            margin: calc(var(--die) / -2) 0 0 calc(var(--die) / -2);
+            clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
+            border: 0;
+            background: linear-gradient(160deg, #ffffff 0%, #c7d2fe 50%, #818cf8 100%);
+            box-shadow: none;
+            filter: drop-shadow(0 0 0.5px #6366f1);
+        }
+        .shape-d8 .f1 { transform: rotateY(0deg) translateZ(calc(var(--die) * 0.22)) rotateX(28deg); }
+        .shape-d8 .f2 { transform: rotateY(90deg) translateZ(calc(var(--die) * 0.22)) rotateX(28deg); }
+        .shape-d8 .f3 { transform: rotateY(180deg) translateZ(calc(var(--die) * 0.22)) rotateX(28deg); }
+        .shape-d8 .f4 { transform: rotateY(270deg) translateZ(calc(var(--die) * 0.22)) rotateX(28deg); }
+        .shape-d8 .f5 { transform: rotateY(0deg) translateZ(calc(var(--die) * 0.22)) rotateX(152deg); }
+        .shape-d8 .f6 { transform: rotateY(90deg) translateZ(calc(var(--die) * 0.22)) rotateX(152deg); }
+        .shape-d8 .f7 { transform: rotateY(180deg) translateZ(calc(var(--die) * 0.22)) rotateX(152deg); }
+        .shape-d8 .f8 { transform: rotateY(270deg) translateZ(calc(var(--die) * 0.22)) rotateX(152deg); }
+
+        /* D10 / D100 kite solid */
+        .shape-d10 .f,
+        .shape-d100 .f {
+            width: calc(var(--die) * 0.72);
+            height: calc(var(--die) * 0.95);
+            margin: calc(var(--die) * -0.475) 0 0 calc(var(--die) * -0.36);
+            clip-path: polygon(50% 0%, 100% 38%, 50% 100%, 0% 38%);
+            border: 0;
+            background: linear-gradient(160deg, #ffffff 0%, #c7d2fe 48%, #818cf8 100%);
+            box-shadow: none;
+            filter: drop-shadow(0 0 0.5px #6366f1);
+        }
+        .shape-d10 .f1, .shape-d100 .f1 { transform: rotateY(0deg) translateZ(calc(var(--die) * 0.28)) rotateX(12deg); }
+        .shape-d10 .f2, .shape-d100 .f2 { transform: rotateY(72deg) translateZ(calc(var(--die) * 0.28)) rotateX(12deg); }
+        .shape-d10 .f3, .shape-d100 .f3 { transform: rotateY(144deg) translateZ(calc(var(--die) * 0.28)) rotateX(12deg); }
+        .shape-d10 .f4, .shape-d100 .f4 { transform: rotateY(216deg) translateZ(calc(var(--die) * 0.28)) rotateX(12deg); }
+        .shape-d10 .f5, .shape-d100 .f5 { transform: rotateY(288deg) translateZ(calc(var(--die) * 0.28)) rotateX(12deg); }
+        .shape-d10 .f6, .shape-d100 .f6 { transform: rotateY(36deg) translateZ(calc(var(--die) * 0.28)) rotateX(168deg); }
+        .shape-d10 .f7, .shape-d100 .f7 { transform: rotateY(108deg) translateZ(calc(var(--die) * 0.28)) rotateX(168deg); }
+        .shape-d10 .f8, .shape-d100 .f8 { transform: rotateY(180deg) translateZ(calc(var(--die) * 0.28)) rotateX(168deg); }
+        .shape-d10 .f9, .shape-d100 .f9 { transform: rotateY(252deg) translateZ(calc(var(--die) * 0.28)) rotateX(168deg); }
+        .shape-d10 .f10, .shape-d100 .f10 { transform: rotateY(324deg) translateZ(calc(var(--die) * 0.28)) rotateX(168deg); }
+
+        /* D12 dodeca-ish (pentagon ring + caps) */
+        .shape-d12 .f {
+            width: calc(var(--die) * 0.7);
+            height: calc(var(--die) * 0.7);
+            margin: calc(var(--die) * -0.35) 0 0 calc(var(--die) * -0.35);
+            clip-path: polygon(50% 0%, 95% 35%, 78% 95%, 22% 95%, 5% 35%);
+            border: 0;
+            background: linear-gradient(160deg, #ffffff 0%, #c7d2fe 50%, #818cf8 100%);
+            box-shadow: none;
+            filter: drop-shadow(0 0 0.5px #6366f1);
+        }
+        .shape-d12 .f1 { transform: rotateY(0deg) translateZ(calc(var(--die) * 0.34)); }
+        .shape-d12 .f2 { transform: rotateY(72deg) translateZ(calc(var(--die) * 0.34)); }
+        .shape-d12 .f3 { transform: rotateY(144deg) translateZ(calc(var(--die) * 0.34)); }
+        .shape-d12 .f4 { transform: rotateY(216deg) translateZ(calc(var(--die) * 0.34)); }
+        .shape-d12 .f5 { transform: rotateY(288deg) translateZ(calc(var(--die) * 0.34)); }
+        .shape-d12 .f6 { transform: rotateX(63deg) rotateZ(0deg) translateZ(calc(var(--die) * 0.34)); }
+        .shape-d12 .f7 { transform: rotateX(63deg) rotateZ(72deg) translateZ(calc(var(--die) * 0.34)); }
+        .shape-d12 .f8 { transform: rotateX(63deg) rotateZ(144deg) translateZ(calc(var(--die) * 0.34)); }
+        .shape-d12 .f9 { transform: rotateX(63deg) rotateZ(216deg) translateZ(calc(var(--die) * 0.34)); }
+        .shape-d12 .f10 { transform: rotateX(63deg) rotateZ(288deg) translateZ(calc(var(--die) * 0.34)); }
+        .shape-d12 .f11 { transform: rotateX(-63deg) translateZ(calc(var(--die) * 0.34)); }
+        .shape-d12 .f12 { transform: rotateX(180deg) translateZ(calc(var(--die) * 0.34)); }
+
+        /* D20 icosa-ish (triangle faceted gem) */
+        .shape-d20 .f {
+            width: var(--die);
+            height: var(--die);
+            margin: calc(var(--die) / -2) 0 0 calc(var(--die) / -2);
+            clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
+            border: 0;
+            background: linear-gradient(160deg, #ffffff 0%, #c7d2fe 48%, #818cf8 100%);
+            box-shadow: none;
+            filter: drop-shadow(0 0 0.5px #6366f1);
+        }
+        .shape-d20 .f1 { transform: rotateY(0deg) translateZ(calc(var(--die) * 0.3)) rotateX(20deg); }
+        .shape-d20 .f2 { transform: rotateY(72deg) translateZ(calc(var(--die) * 0.3)) rotateX(20deg); }
+        .shape-d20 .f3 { transform: rotateY(144deg) translateZ(calc(var(--die) * 0.3)) rotateX(20deg); }
+        .shape-d20 .f4 { transform: rotateY(216deg) translateZ(calc(var(--die) * 0.3)) rotateX(20deg); }
+        .shape-d20 .f5 { transform: rotateY(288deg) translateZ(calc(var(--die) * 0.3)) rotateX(20deg); }
+        .shape-d20 .f6 { transform: rotateY(36deg) translateZ(calc(var(--die) * 0.3)) rotateX(70deg); }
+        .shape-d20 .f7 { transform: rotateY(108deg) translateZ(calc(var(--die) * 0.3)) rotateX(70deg); }
+        .shape-d20 .f8 { transform: rotateY(180deg) translateZ(calc(var(--die) * 0.3)) rotateX(70deg); }
+        .shape-d20 .f9 { transform: rotateY(252deg) translateZ(calc(var(--die) * 0.3)) rotateX(70deg); }
+        .shape-d20 .f10 { transform: rotateY(324deg) translateZ(calc(var(--die) * 0.3)) rotateX(70deg); }
+        .shape-d20 .f11 { transform: rotateY(0deg) translateZ(calc(var(--die) * 0.3)) rotateX(160deg); }
+        .shape-d20 .f12 { transform: rotateY(72deg) translateZ(calc(var(--die) * 0.3)) rotateX(160deg); }
+        .shape-d20 .f13 { transform: rotateY(144deg) translateZ(calc(var(--die) * 0.3)) rotateX(160deg); }
+        .shape-d20 .f14 { transform: rotateY(216deg) translateZ(calc(var(--die) * 0.3)) rotateX(160deg); }
+        .shape-d20 .f15 { transform: rotateY(288deg) translateZ(calc(var(--die) * 0.3)) rotateX(160deg); }
+        .shape-d20 .f16 { transform: rotateY(36deg) translateZ(calc(var(--die) * 0.3)) rotateX(110deg); }
+        .shape-d20 .f17 { transform: rotateY(108deg) translateZ(calc(var(--die) * 0.3)) rotateX(110deg); }
+        .shape-d20 .f18 { transform: rotateY(180deg) translateZ(calc(var(--die) * 0.3)) rotateX(110deg); }
+        .shape-d20 .f19 { transform: rotateY(252deg) translateZ(calc(var(--die) * 0.3)) rotateX(110deg); }
+        .shape-d20 .f20 { transform: rotateY(324deg) translateZ(calc(var(--die) * 0.3)) rotateX(110deg); }
+
+        .dice-3d.is-rolling .dice-mesh {
+            animation: diceTumble3d 0.95s cubic-bezier(0.18, 0.7, 0.2, 1) forwards;
+        }
+        .dice-3d.is-settle .dice-mesh {
+            animation: diceSettle3d 0.4s ease-out;
+        }
+        @keyframes diceTumble3d {
+            0%   { transform: rotateX(-20deg) rotateY(25deg) rotateZ(0deg) translateY(0); }
+            18%  { transform: rotateX(160deg) rotateY(140deg) rotateZ(80deg) translateY(-16px) scale(1.06); }
+            40%  { transform: rotateX(360deg) rotateY(300deg) rotateZ(170deg) translateY(6px) scale(0.94); }
+            65%  { transform: rotateX(560deg) rotateY(470deg) rotateZ(280deg) translateY(-8px) scale(1.05); }
+            100% { transform: rotateX(740deg) rotateY(655deg) rotateZ(360deg) translateY(0) scale(1); }
+        }
+        @keyframes diceSettle3d {
+            0%   { transform: rotateX(-18deg) rotateY(32deg) scale(1.12); }
+            60%  { transform: rotateX(-24deg) rotateY(24deg) scale(0.96); }
+            100% { transform: rotateX(-22deg) rotateY(28deg) scale(1); }
         }
         @media (prefers-reduced-motion: reduce) {
-            .dice-poly.is-rolling,
-            .dice-poly.is-settle { animation: none; }
+            .dice-3d.is-rolling .dice-mesh,
+            .dice-3d.is-settle .dice-mesh { animation: none; }
         }
 
     </style>
@@ -2474,53 +2626,31 @@ let savedQuests = JSON.parse(localStorage.getItem('dm_saved_quests') || '{}');
             return 'd20';
         }
 
-        function dicePolySvg(sides) {
+        function diceFaceCount(sides) {
             const key = diceShapeKey(sides);
-            // Classic RPG polyhedral silhouettes with facet lines
-            const shapes = {
-                // Tetrahedron (D4)
-                d4: `
-                    <polygon class="dice-face" points="50,6 94,88 6,88" stroke-width="3.5" stroke-linejoin="round"/>
-                    <polygon class="dice-shade" points="50,6 72,88 50,88"/>
-                    <path class="dice-edge" d="M50 6 L50 88 M50 6 L28 88 M50 6 L72 88" stroke-width="1.6" opacity="0.9"/>`,
-                // Cube (D6) — isometric
-                d6: `
-                    <polygon class="dice-face" points="50,10 86,30 86,70 50,90 14,70 14,30" stroke-width="3.2" stroke-linejoin="round"/>
-                    <polygon class="dice-shade" points="50,50 86,30 86,70 50,90"/>
-                    <path class="dice-edge" d="M50 10 L50 50 L14 70 M50 50 L86 70 M14 30 L50 50 L86 30" stroke-width="1.8" opacity="0.95"/>`,
-                // Octahedron (D8)
-                d8: `
-                    <polygon class="dice-face" points="50,4 92,50 50,96 8,50" stroke-width="3.5" stroke-linejoin="round"/>
-                    <polygon class="dice-shade" points="50,4 92,50 50,50"/>
-                    <path class="dice-edge" d="M50 4 L50 96 M8 50 L92 50 M29 27 L71 73 M71 27 L29 73" stroke-width="1.5" opacity="0.9"/>`,
-                // Percentile / trapezohedron kite (D10)
-                d10: `
-                    <polygon class="dice-face" points="50,3 86,38 70,92 30,92 14,38" stroke-width="3.5" stroke-linejoin="round"/>
-                    <polygon class="dice-shade" points="50,3 86,38 50,52"/>
-                    <path class="dice-edge" d="M50 3 L50 92 M14 38 L86 38 M30 92 L50 38 L70 92" stroke-width="1.5" opacity="0.9"/>`,
-                // Dodecahedron face (D12)
-                d12: `
-                    <polygon class="dice-face" points="50,5 90,33 76,88 24,88 10,33" stroke-width="3.5" stroke-linejoin="round"/>
-                    <polygon class="dice-shade" points="50,34 76,88 50,58"/>
-                    <path class="dice-edge" d="M50 5 L50 34 L24 88 M50 5 L50 34 L76 88 M10 33 L50 34 L90 33 M24 88 L50 58 L76 88 M50 34 L50 58" stroke-width="1.4" opacity="0.9"/>`,
-                // Icosahedron (D20)
-                d20: `
-                    <polygon class="dice-face" points="50,4 90,27 90,73 50,96 10,73 10,27" stroke-width="3.5" stroke-linejoin="round"/>
-                    <polygon class="dice-shade" points="50,4 90,27 50,50"/>
-                    <path class="dice-edge" d="M50 4 L50 96 M10 27 L90 73 M90 27 L10 73 M10 27 L90 27 M10 73 L90 73 M50 4 L10 73 M50 4 L90 73 M50 96 L10 27 M50 96 L90 27" stroke-width="1.3" opacity="0.85"/>`,
-                // Percentile (D100) — d10-style with ring
-                d100: `
-                    <circle class="dice-face" cx="50" cy="50" r="42" stroke-width="3.5"/>
-                    <polygon class="dice-shade" points="50,12 74,28 50,50"/>
-                    <path class="dice-edge" d="M50 12 L74 28 L74 60 L50 88 L26 60 L26 28 Z M50 12 L50 88 M26 28 L74 60 M74 28 L26 60" stroke-width="1.4" opacity="0.9"/>`
-            };
-            return `<svg viewBox="0 0 100 100" aria-hidden="true">${shapes[key] || shapes.d20}</svg>`;
+            return ({ d4: 4, d6: 6, d8: 8, d10: 10, d12: 12, d20: 20, d100: 10 })[key] || 6;
+        }
+
+        function diceMeshHTML(sides) {
+            const n = diceFaceCount(sides);
+            // Face labels help sell the polyhedron during tumble; center billboard shows the roll value.
+            const faceLabels = Array.from({ length: n }, (_, i) => {
+                if (sides === 100) return String((i % 10) * 10).padStart(2, '0');
+                if (sides === 10) return String((i + 1) % 10);
+                return String((i % sides) + 1);
+            });
+            return `<div class="dice-mesh">${faceLabels.map((lab, i) =>
+                `<div class="f f${i + 1}">${lab}</div>`
+            ).join('')}</div>`;
         }
 
         function dicePolyHTML(sides, label, delayMs = 0) {
             const shape = diceShapeKey(sides);
             const delay = delayMs ? ` style="animation-delay:${delayMs}ms"` : '';
-            return `<div class="dice-poly shape-${shape}" data-sides="${sides}"${delay}>${dicePolySvg(sides)}<span class="dice-num">${label}</span></div>`;
+            return `<div class="dice-3d shape-${shape}" data-sides="${sides}"${delay}>
+                <div class="dice-scene">${diceMeshHTML(sides)}</div>
+                <span class="dice-num">${label}</span>
+            </div>`;
         }
 
         function setDiceNum(el, value) {
@@ -2555,8 +2685,8 @@ let savedQuests = JSON.parse(localStorage.getItem('dm_saved_quests') || '{}');
 
             stage.setAttribute('data-count', String(count));
             stage.setAttribute('data-sides', String(s));
-            stage.innerHTML = finals.map((_, i) => dicePolyHTML(s, '?', i * 45)).join('');
-            const discs = [...stage.querySelectorAll('.dice-poly')];
+            stage.innerHTML = finals.map((_, i) => dicePolyHTML(s, '?', i * 55)).join('');
+            const discs = [...stage.querySelectorAll('.dice-3d')];
 
             res.textContent = count > 1 ? `擲 ${count}D${s} 中…` : `擲 D${s} 中…`;
             res.className = 'text-sm font-bold text-center mb-3 min-h-[24px] flex items-center justify-center text-indigo-500';
@@ -2585,6 +2715,13 @@ let savedQuests = JSON.parse(localStorage.getItem('dm_saved_quests') || '{}');
                     disc.classList.remove('is-nat20', 'is-nat1');
                     if (s === 20 && final === 20) disc.classList.add('is-nat20');
                     else if (s === 20 && final === 1) disc.classList.add('is-nat1');
+                    // Rest at a slightly different 3D pose per die
+                    const mesh = disc.querySelector('.dice-mesh');
+                    if (mesh) {
+                        const rx = -18 - (i % 3) * 4;
+                        const ry = 22 + (i % 5) * 7;
+                        mesh.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg)`;
+                    }
                     void disc.offsetWidth;
                     disc.classList.add('is-settle');
                 });
@@ -2605,7 +2742,7 @@ let savedQuests = JSON.parse(localStorage.getItem('dm_saved_quests') || '{}');
 
                 diceRolling = false;
                 document.querySelectorAll('.dice-btn').forEach(b => b.disabled = false);
-            }, 850);
+            }, 950);
         }
 
 let cmbs = [];
@@ -3421,7 +3558,7 @@ window.onload = () => {
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     // Register self-destructing SW so any old caching SW is replaced and cleared
-    navigator.serviceWorker.register('./sw.js?v=20261110-dice3')
+    navigator.serviceWorker.register('./sw.js?v=20261110-dice4')
       .then(reg => console.log('SW clear registered', reg.scope))
       .catch(err => console.log('SW clear failed', err));
   });
