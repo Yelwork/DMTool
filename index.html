@@ -49,52 +49,69 @@ if (window.caches) {
         }
         #tab-houserules { min-height: 0; }
 
-        /* 通用擲骰器：多顆 disc 滾動動畫 */
+        /* 通用擲骰器：多面體外形滾動動畫（對應 D4/D6/D8/D10/D12/D20） */
         .dice-stage {
-            min-height: 120px;
+            min-height: 132px;
             display: flex;
             flex-wrap: wrap;
             align-items: center;
             justify-content: center;
-            gap: 0.6rem;
+            gap: 0.7rem;
             margin-bottom: 0.75rem;
         }
-        .dice-disc {
-            width: 72px;
-            height: 72px;
-            border-radius: 9999px;
+        .dice-poly {
+            position: relative;
+            width: 76px;
+            height: 76px;
+            flex: 0 0 auto;
+            user-select: none;
+            transform: translateZ(0);
+            filter: drop-shadow(0 8px 12px rgba(79, 70, 229, 0.28));
+        }
+        .dice-stage[data-count="1"] .dice-poly { width: 96px; height: 96px; }
+        .dice-stage[data-count="2"] .dice-poly,
+        .dice-stage[data-count="3"] .dice-poly { width: 84px; height: 84px; }
+        .dice-poly svg {
+            width: 100%;
+            height: 100%;
+            display: block;
+            overflow: visible;
+        }
+        .dice-poly .dice-num {
+            position: absolute;
+            inset: 0;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.6rem;
+            font-size: 1.45rem;
             font-weight: 900;
             color: #1f2937;
-            background: radial-gradient(circle at 30% 28%, #ffffff 0%, #eef2ff 42%, #c7d2fe 78%, #a5b4fc 100%);
-            border: 3px solid #6366f1;
-            box-shadow: 0 8px 18px rgba(79, 70, 229, 0.28), inset 0 -6px 12px rgba(0,0,0,0.08);
-            user-select: none;
-            transform: translateZ(0);
-            flex: 0 0 auto;
+            pointer-events: none;
+            text-shadow: 0 1px 0 rgba(255,255,255,0.7);
+            line-height: 1;
         }
-        .dice-stage[data-count="1"] .dice-disc { width: 88px; height: 88px; font-size: 2rem; }
-        .dice-stage[data-count="2"] .dice-disc,
-        .dice-stage[data-count="3"] .dice-disc { width: 78px; height: 78px; font-size: 1.75rem; }
-        .dice-disc.is-rolling {
+        .dice-stage[data-count="1"] .dice-poly .dice-num { font-size: 1.85rem; }
+        .dice-stage[data-count="2"] .dice-poly .dice-num,
+        .dice-stage[data-count="3"] .dice-poly .dice-num { font-size: 1.6rem; }
+        .dice-poly.shape-d4 .dice-num { padding-top: 18%; }
+        .dice-poly.shape-d10 .dice-num { padding-top: 6%; }
+        .dice-poly.is-rolling {
             animation: diceRollSpin 0.85s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
-        .dice-disc.is-nat20 {
-            color: #15803d;
-            border-color: #22c55e;
-            background: radial-gradient(circle at 30% 28%, #ffffff 0%, #dcfce7 45%, #86efac 100%);
-        }
-        .dice-disc.is-nat1 {
-            color: #b91c1c;
-            border-color: #ef4444;
-            background: radial-gradient(circle at 30% 28%, #ffffff 0%, #fee2e2 45%, #fca5a5 100%);
-        }
-        .dice-disc.is-settle {
+        .dice-poly.is-settle {
             animation: diceSettle 0.35s ease-out;
         }
+        .dice-poly .dice-face { fill: #c7d2fe; stroke: #6366f1; }
+        .dice-poly .dice-shade { fill: #a5b4fc; stroke: none; opacity: 0.55; }
+        .dice-poly .dice-edge { stroke: #818cf8; fill: none; }
+        .dice-poly.is-nat20 .dice-face { fill: #86efac; stroke: #16a34a; }
+        .dice-poly.is-nat20 .dice-shade { fill: #4ade80; }
+        .dice-poly.is-nat20 .dice-edge { stroke: #15803d; }
+        .dice-poly.is-nat20 .dice-num { color: #15803d; }
+        .dice-poly.is-nat1 .dice-face { fill: #fca5a5; stroke: #dc2626; }
+        .dice-poly.is-nat1 .dice-shade { fill: #f87171; }
+        .dice-poly.is-nat1 .dice-edge { stroke: #b91c1c; }
+        .dice-poly.is-nat1 .dice-num { color: #b91c1c; }
         @keyframes diceRollSpin {
             0%   { transform: rotate(0deg) scale(1); }
             20%  { transform: rotate(140deg) scale(1.08) translateY(-8px); }
@@ -108,8 +125,8 @@ if (window.caches) {
             100% { transform: scale(1); }
         }
         @media (prefers-reduced-motion: reduce) {
-            .dice-disc.is-rolling,
-            .dice-disc.is-settle { animation: none; }
+            .dice-poly.is-rolling,
+            .dice-poly.is-settle { animation: none; }
         }
 
     </style>
@@ -554,9 +571,7 @@ if (window.caches) {
             <button onclick="rDice(20)" class="dice-btn min-h-[44px] min-w-[52px] px-4 py-2 bg-purple-100 text-purple-800 rounded-lg font-bold border border-purple-300 hover:bg-purple-200">D20</button>
             <button onclick="rDice(100)" class="dice-btn min-h-[44px] min-w-[52px] px-4 py-2 bg-gray-100 rounded-lg font-bold border hover:bg-gray-200">D100</button>
         </div>
-        <div id="dice-stage" class="dice-stage" data-count="1" aria-live="polite">
-            <div class="dice-disc">—</div>
-        </div>
+        <div id="dice-stage" class="dice-stage" data-count="1" data-sides="20" aria-live="polite"></div>
         <div id="dice-res" class="text-sm font-bold text-center mb-3 min-h-[24px] flex items-center justify-center text-gray-500">選擇數量後點骰面開始</div>
         <div id="dice-hist" class="h-28 overflow-y-auto bg-gray-50 border rounded p-2 text-sm custom-scrollbar"></div>
     </div>
@@ -2413,6 +2428,7 @@ let savedQuests = JSON.parse(localStorage.getItem('dm_saved_quests') || '{}');
         let diceRollTimer = null;
         let diceFlickerTimer = null;
         let diceCount = Math.max(1, Math.min(12, parseInt(localStorage.getItem('dm_dice_count') || '1', 10) || 1));
+        let diceSidesPreview = parseInt(localStorage.getItem('dm_dice_sides') || '20', 10) || 20;
 
         function getDiceCount() {
             return Math.max(1, Math.min(12, diceCount | 0));
@@ -2452,18 +2468,83 @@ let savedQuests = JSON.parse(localStorage.getItem('dm_saved_quests') || '{}');
             setDiceCount(parseInt(input && input.value, 10) || 1);
         };
 
+        function diceShapeKey(sides) {
+            if (sides === 100) return 'd100';
+            if ([4, 6, 8, 10, 12, 20].includes(sides)) return `d${sides}`;
+            return 'd20';
+        }
+
+        function dicePolySvg(sides) {
+            const key = diceShapeKey(sides);
+            // Classic RPG polyhedral silhouettes with facet lines
+            const shapes = {
+                // Tetrahedron (D4)
+                d4: `
+                    <polygon class="dice-face" points="50,6 94,88 6,88" stroke-width="3.5" stroke-linejoin="round"/>
+                    <polygon class="dice-shade" points="50,6 72,88 50,88"/>
+                    <path class="dice-edge" d="M50 6 L50 88 M50 6 L28 88 M50 6 L72 88" stroke-width="1.6" opacity="0.9"/>`,
+                // Cube (D6) — isometric
+                d6: `
+                    <polygon class="dice-face" points="50,10 86,30 86,70 50,90 14,70 14,30" stroke-width="3.2" stroke-linejoin="round"/>
+                    <polygon class="dice-shade" points="50,50 86,30 86,70 50,90"/>
+                    <path class="dice-edge" d="M50 10 L50 50 L14 70 M50 50 L86 70 M14 30 L50 50 L86 30" stroke-width="1.8" opacity="0.95"/>`,
+                // Octahedron (D8)
+                d8: `
+                    <polygon class="dice-face" points="50,4 92,50 50,96 8,50" stroke-width="3.5" stroke-linejoin="round"/>
+                    <polygon class="dice-shade" points="50,4 92,50 50,50"/>
+                    <path class="dice-edge" d="M50 4 L50 96 M8 50 L92 50 M29 27 L71 73 M71 27 L29 73" stroke-width="1.5" opacity="0.9"/>`,
+                // Percentile / trapezohedron kite (D10)
+                d10: `
+                    <polygon class="dice-face" points="50,3 86,38 70,92 30,92 14,38" stroke-width="3.5" stroke-linejoin="round"/>
+                    <polygon class="dice-shade" points="50,3 86,38 50,52"/>
+                    <path class="dice-edge" d="M50 3 L50 92 M14 38 L86 38 M30 92 L50 38 L70 92" stroke-width="1.5" opacity="0.9"/>`,
+                // Dodecahedron face (D12)
+                d12: `
+                    <polygon class="dice-face" points="50,5 90,33 76,88 24,88 10,33" stroke-width="3.5" stroke-linejoin="round"/>
+                    <polygon class="dice-shade" points="50,34 76,88 50,58"/>
+                    <path class="dice-edge" d="M50 5 L50 34 L24 88 M50 5 L50 34 L76 88 M10 33 L50 34 L90 33 M24 88 L50 58 L76 88 M50 34 L50 58" stroke-width="1.4" opacity="0.9"/>`,
+                // Icosahedron (D20)
+                d20: `
+                    <polygon class="dice-face" points="50,4 90,27 90,73 50,96 10,73 10,27" stroke-width="3.5" stroke-linejoin="round"/>
+                    <polygon class="dice-shade" points="50,4 90,27 50,50"/>
+                    <path class="dice-edge" d="M50 4 L50 96 M10 27 L90 73 M90 27 L10 73 M10 27 L90 27 M10 73 L90 73 M50 4 L10 73 M50 4 L90 73 M50 96 L10 27 M50 96 L90 27" stroke-width="1.3" opacity="0.85"/>`,
+                // Percentile (D100) — d10-style with ring
+                d100: `
+                    <circle class="dice-face" cx="50" cy="50" r="42" stroke-width="3.5"/>
+                    <polygon class="dice-shade" points="50,12 74,28 50,50"/>
+                    <path class="dice-edge" d="M50 12 L74 28 L74 60 L50 88 L26 60 L26 28 Z M50 12 L50 88 M26 28 L74 60 M74 28 L26 60" stroke-width="1.4" opacity="0.9"/>`
+            };
+            return `<svg viewBox="0 0 100 100" aria-hidden="true">${shapes[key] || shapes.d20}</svg>`;
+        }
+
+        function dicePolyHTML(sides, label, delayMs = 0) {
+            const shape = diceShapeKey(sides);
+            const delay = delayMs ? ` style="animation-delay:${delayMs}ms"` : '';
+            return `<div class="dice-poly shape-${shape}" data-sides="${sides}"${delay}>${dicePolySvg(sides)}<span class="dice-num">${label}</span></div>`;
+        }
+
+        function setDiceNum(el, value) {
+            const num = el && el.querySelector('.dice-num');
+            if (num) num.textContent = String(value);
+        }
+
         function renderDicePlaceholders() {
             const stage = $('dice-stage');
             if (!stage || diceRolling) return;
             const n = getDiceCount();
-            stage.innerHTML = Array.from({ length: n }, () => `<div class="dice-disc">—</div>`).join('');
+            const sides = diceSidesPreview;
             stage.setAttribute('data-count', String(n));
+            stage.setAttribute('data-sides', String(sides));
+            stage.innerHTML = Array.from({ length: n }, () => dicePolyHTML(sides, '—')).join('');
         }
 
         function rDice(s) {
             const stage = $('dice-stage');
             const res = $('dice-res');
             if (!stage || !res || diceRolling) return;
+
+            diceSidesPreview = s;
+            localStorage.setItem('dm_dice_sides', String(s));
 
             const count = getDiceCount();
             const finals = Array.from({ length: count }, () => Math.floor(Math.random() * s) + 1);
@@ -2473,10 +2554,9 @@ let savedQuests = JSON.parse(localStorage.getItem('dm_saved_quests') || '{}');
             document.querySelectorAll('.dice-btn').forEach(b => b.disabled = true);
 
             stage.setAttribute('data-count', String(count));
-            stage.innerHTML = finals.map((_, i) =>
-                `<div class="dice-disc" data-i="${i}" style="animation-delay:${i * 45}ms">?</div>`
-            ).join('');
-            const discs = [...stage.querySelectorAll('.dice-disc')];
+            stage.setAttribute('data-sides', String(s));
+            stage.innerHTML = finals.map((_, i) => dicePolyHTML(s, '?', i * 45)).join('');
+            const discs = [...stage.querySelectorAll('.dice-poly')];
 
             res.textContent = count > 1 ? `擲 ${count}D${s} 中…` : `擲 D${s} 中…`;
             res.className = 'text-sm font-bold text-center mb-3 min-h-[24px] flex items-center justify-center text-indigo-500';
@@ -2484,7 +2564,6 @@ let savedQuests = JSON.parse(localStorage.getItem('dm_saved_quests') || '{}');
             if (diceFlickerTimer) clearInterval(diceFlickerTimer);
             if (diceRollTimer) clearTimeout(diceRollTimer);
 
-            // restart animations
             discs.forEach(disc => {
                 disc.classList.remove('is-nat20', 'is-nat1', 'is-settle', 'is-rolling');
                 void disc.offsetWidth;
@@ -2492,9 +2571,7 @@ let savedQuests = JSON.parse(localStorage.getItem('dm_saved_quests') || '{}');
             });
 
             diceFlickerTimer = setInterval(() => {
-                discs.forEach(disc => {
-                    disc.textContent = String(Math.floor(Math.random() * s) + 1);
-                });
+                discs.forEach(disc => setDiceNum(disc, Math.floor(Math.random() * s) + 1));
             }, 55);
 
             diceRollTimer = setTimeout(() => {
@@ -2504,7 +2581,7 @@ let savedQuests = JSON.parse(localStorage.getItem('dm_saved_quests') || '{}');
                 discs.forEach((disc, i) => {
                     const final = finals[i];
                     disc.classList.remove('is-rolling');
-                    disc.textContent = String(final);
+                    setDiceNum(disc, final);
                     disc.classList.remove('is-nat20', 'is-nat1');
                     if (s === 20 && final === 20) disc.classList.add('is-nat20');
                     else if (s === 20 && final === 1) disc.classList.add('is-nat1');
