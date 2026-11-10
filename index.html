@@ -9,13 +9,14 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="戰役助手">
-    <link rel="manifest" href="manifest.json?v=20261110-dice5">
-    <link rel="apple-touch-icon" href="icon-192.png?v=20261110-dice5">
+    <link rel="manifest" href="manifest.json?v=20261110-dice6">
+    <link rel="apple-touch-icon" href="icon-192.png?v=20261110-dice6">
     <title>TRPG 戰役助手</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
     <script>
-    // cache-bust: 20261110-dice5 — clear old SW/cache, then install self-destructing SW
+    // cache-bust: 20261110-dice6 — clear old SW/cache, then install self-destructing SW
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.getRegistrations().then(regs => {
     regs.forEach(r => r.unregister());
@@ -49,7 +50,7 @@ if (window.caches) {
         }
         #tab-houserules { min-height: 0; }
 
-        /* 通用擲骰器：毛氈骰盤 + 立體翻滾固體 */
+        /* 通用擲骰器：毛氈骰盤 + Three.js WebGL */
         .dice-tray {
             position: relative;
             border-radius: 1.1rem;
@@ -57,8 +58,8 @@ if (window.caches) {
             margin-bottom: 0.75rem;
             overflow: hidden;
             background:
-                radial-gradient(ellipse at 50% 20%, rgba(255,255,255,0.16), transparent 55%),
-                radial-gradient(ellipse at 50% 120%, rgba(0,0,0,0.35), transparent 55%),
+                radial-gradient(ellipse at 50% 18%, rgba(255,255,255,0.14), transparent 52%),
+                radial-gradient(ellipse at 50% 120%, rgba(0,0,0,0.38), transparent 55%),
                 linear-gradient(160deg, #1f3d2f 0%, #163528 45%, #0f241c 100%);
             box-shadow:
                 inset 0 1px 0 rgba(255,255,255,0.12),
@@ -73,98 +74,68 @@ if (window.caches) {
             border-radius: 0.85rem;
             border: 1px dashed rgba(212, 175, 55, 0.28);
             pointer-events: none;
+            z-index: 2;
         }
         .dice-tray-label {
             position: relative;
-            z-index: 1;
+            z-index: 3;
             text-align: center;
             font-size: 0.7rem;
             letter-spacing: 0.18em;
             text-transform: uppercase;
             color: rgba(250, 236, 180, 0.72);
             font-weight: 700;
-            margin-bottom: 0.35rem;
+            margin-bottom: 0.2rem;
         }
         .dice-stage {
             position: relative;
             z-index: 1;
-            min-height: 168px;
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            justify-content: center;
-            gap: 0.85rem 1rem;
-            perspective: 900px;
-            perspective-origin: 50% 40%;
+            height: 220px;
+            width: 100%;
+            border-radius: 0.75rem;
+            overflow: hidden;
         }
-        .dice-solid {
-            --die: 78px;
-            position: relative;
-            width: var(--die);
-            height: var(--die);
-            flex: 0 0 auto;
-            transform-style: preserve-3d;
-            transform: rotateX(18deg) rotateY(-24deg);
-            filter: drop-shadow(0 14px 10px rgba(0,0,0,0.45));
-            user-select: none;
-        }
-        .dice-stage[data-count="1"] .dice-solid { --die: 104px; }
-        .dice-stage[data-count="2"] .dice-solid,
-        .dice-stage[data-count="3"] .dice-solid { --die: 88px; }
-        .dice-solid svg {
+        #dice-canvas {
+            display: block;
             width: 100%;
             height: 100%;
-            display: block;
-            overflow: visible;
         }
-        .dice-solid .dice-num {
+        #dice-overlays {
             position: absolute;
             inset: 0;
-            display: grid;
-            place-items: center;
-            font-size: calc(var(--die) * 0.34);
-            font-weight: 900;
-            color: #111827;
             pointer-events: none;
-            text-shadow: 0 1px 0 rgba(255,255,255,0.75);
+            z-index: 4;
+        }
+        .dice-chip {
+            position: absolute;
+            transform: translate(-50%, -50%);
+            min-width: 2rem;
+            padding: 0.2rem 0.45rem;
+            border-radius: 999px;
+            background: rgba(15, 23, 42, 0.72);
+            border: 1px solid rgba(253, 230, 138, 0.45);
+            color: #f8fafc;
+            font-weight: 900;
+            font-size: 0.95rem;
             line-height: 1;
-            z-index: 2;
+            text-align: center;
+            backdrop-filter: blur(4px);
+            box-shadow: 0 6px 14px rgba(0,0,0,0.28);
         }
-        .dice-solid.shape-d4 .dice-num { padding-top: 16%; }
-        .dice-solid .face-main { fill: #c7d2fe; stroke: #4338ca; stroke-width: 2.8; stroke-linejoin: round; }
-        .dice-solid .face-lit { fill: #eef2ff; stroke: none; opacity: 0.95; }
-        .dice-solid .face-shade { fill: #818cf8; stroke: none; opacity: 0.85; }
-        .dice-solid .face-edge { fill: none; stroke: #312e81; stroke-width: 1.35; opacity: 0.55; }
-        .dice-solid.is-nat20 .face-main { fill: #86efac; stroke: #15803d; }
-        .dice-solid.is-nat20 .face-lit { fill: #dcfce7; }
-        .dice-solid.is-nat20 .face-shade { fill: #22c55e; }
-        .dice-solid.is-nat20 .dice-num { color: #166534; }
-        .dice-solid.is-nat1 .face-main { fill: #fca5a5; stroke: #b91c1c; }
-        .dice-solid.is-nat1 .face-lit { fill: #fee2e2; }
-        .dice-solid.is-nat1 .face-shade { fill: #ef4444; }
-        .dice-solid.is-nat1 .dice-num { color: #991b1b; }
-        .dice-solid.is-rolling {
-            animation: diceTumblePretty 0.95s cubic-bezier(0.2, 0.75, 0.2, 1) forwards;
+        .dice-chip.is-nat20 {
+            background: rgba(22, 101, 52, 0.85);
+            border-color: #86efac;
+            color: #dcfce7;
         }
-        .dice-solid.is-settle {
-            animation: diceLandPretty 0.42s ease-out;
-        }
-        @keyframes diceTumblePretty {
-            0%   { transform: rotateX(18deg) rotateY(-24deg) rotateZ(0deg) translateY(0) scale(1); }
-            20%  { transform: rotateX(210deg) rotateY(120deg) rotateZ(70deg) translateY(-18px) scale(1.08); }
-            45%  { transform: rotateX(430deg) rotateY(300deg) rotateZ(160deg) translateY(8px) scale(0.94); }
-            70%  { transform: rotateX(620deg) rotateY(470deg) rotateZ(270deg) translateY(-10px) scale(1.05); }
-            100% { transform: rotateX(738deg) rotateY(696deg) rotateZ(360deg) translateY(0) scale(1); }
-        }
-        @keyframes diceLandPretty {
-            0%   { transform: rotateX(18deg) rotateY(-24deg) scale(1.14); }
-            55%  { transform: rotateX(22deg) rotateY(-18deg) scale(0.96); }
-            100% { transform: rotateX(18deg) rotateY(-24deg) scale(1); }
+        .dice-chip.is-nat1 {
+            background: rgba(153, 27, 27, 0.85);
+            border-color: #fca5a5;
+            color: #fee2e2;
         }
         .dice-result-banner {
             position: relative;
-            z-index: 1;
-            margin-top: 0.35rem;
+            z-index: 3;
+            margin-top: 0.45rem;
             min-height: 2rem;
             display: flex;
             align-items: center;
@@ -179,10 +150,6 @@ if (window.caches) {
         .dice-result-banner .ok { color: #86efac; }
         .dice-result-banner .bad { color: #fca5a5; }
         .dice-result-banner .sum { color: #fde68a; font-size: 1.05rem; }
-        @media (prefers-reduced-motion: reduce) {
-            .dice-solid.is-rolling,
-            .dice-solid.is-settle { animation: none; }
-        }
 
     </style>
 </head>
@@ -627,8 +594,11 @@ if (window.caches) {
             <button onclick="rDice(100)" class="dice-btn min-h-[44px] min-w-[52px] px-4 py-2 bg-gray-100 rounded-lg font-bold border hover:bg-gray-200">D100</button>
         </div>
         <div class="dice-tray">
-            <div class="dice-tray-label">Dice Tray</div>
-            <div id="dice-stage" class="dice-stage" data-count="1" data-sides="20" aria-live="polite"></div>
+            <div class="dice-tray-label">WebGL Dice Tray</div>
+            <div id="dice-stage" class="dice-stage" data-count="1" data-sides="20" aria-live="polite">
+                <canvas id="dice-canvas"></canvas>
+                <div id="dice-overlays"></div>
+            </div>
             <div id="dice-res" class="dice-result-banner"><span class="muted">選擇數量後點骰面開始</span></div>
         </div>
         <div id="dice-hist" class="h-28 overflow-y-auto bg-gray-50 border rounded p-2 text-sm custom-scrollbar"></div>
@@ -2488,6 +2458,20 @@ let savedQuests = JSON.parse(localStorage.getItem('dm_saved_quests') || '{}');
         let diceCount = Math.max(1, Math.min(12, parseInt(localStorage.getItem('dm_dice_count') || '1', 10) || 1));
         let diceSidesPreview = parseInt(localStorage.getItem('dm_dice_sides') || '20', 10) || 20;
 
+        // --- Three.js WebGL dice engine ---
+        let dice3 = {
+            ready: false,
+            scene: null,
+            camera: null,
+            renderer: null,
+            root: null,
+            dice: [],
+            overlays: [],
+            raf: 0,
+            clock: null,
+            idleSpin: true
+        };
+
         function getDiceCount() {
             return Math.max(1, Math.min(12, diceCount | 0));
         }
@@ -2526,83 +2510,314 @@ let savedQuests = JSON.parse(localStorage.getItem('dm_saved_quests') || '{}');
             setDiceCount(parseInt(input && input.value, 10) || 1);
         };
 
-        function diceShapeKey(sides) {
-            if (sides === 100) return 'd100';
-            if ([4, 6, 8, 10, 12, 20].includes(sides)) return `d${sides}`;
-            return 'd20';
-        }
-
-        function diceSolidSvg(sides) {
-            const key = diceShapeKey(sides);
-            const shapes = {
-                d4: `
-                    <polygon class="face-main" points="50,8 92,88 8,88"/>
-                    <polygon class="face-lit" points="50,8 50,88 8,88"/>
-                    <polygon class="face-shade" points="50,8 92,88 50,88"/>
-                    <path class="face-edge" d="M50 8 L50 88 M50 8 L30 88 M50 8 L70 88"/>`,
-                d6: `
-                    <polygon class="face-main" points="22,30 50,14 78,30 78,62 50,78 22,62"/>
-                    <polygon class="face-lit" points="22,30 50,14 78,30 50,46"/>
-                    <polygon class="face-shade" points="50,46 78,30 78,62 50,78"/>
-                    <path class="face-edge" d="M22 30 L50 46 L78 30 M50 46 L50 78 M22 30 L22 62 L50 78 L78 62 L78 30"/>`,
-                d8: `
-                    <polygon class="face-main" points="50,6 90,50 50,94 10,50"/>
-                    <polygon class="face-lit" points="50,6 90,50 50,50"/>
-                    <polygon class="face-shade" points="50,50 90,50 50,94"/>
-                    <path class="face-edge" d="M50 6 L50 94 M10 50 L90 50 M28 28 L72 72 M72 28 L28 72"/>`,
-                d10: `
-                    <polygon class="face-main" points="50,4 86,40 68,92 32,92 14,40"/>
-                    <polygon class="face-lit" points="50,4 86,40 50,50"/>
-                    <polygon class="face-shade" points="50,50 68,92 32,92"/>
-                    <path class="face-edge" d="M50 4 L50 92 M14 40 L86 40 M32 92 L50 40 L68 92"/>`,
-                d12: `
-                    <polygon class="face-main" points="50,6 88,32 76,86 24,86 12,32"/>
-                    <polygon class="face-lit" points="50,6 88,32 50,36"/>
-                    <polygon class="face-shade" points="50,36 76,86 24,86"/>
-                    <path class="face-edge" d="M50 6 L50 36 L24 86 M50 6 L50 36 L76 86 M12 32 L50 36 L88 32 M24 86 L50 58 L76 86"/>`,
-                d20: `
-                    <polygon class="face-main" points="50,5 88,28 88,72 50,95 12,72 12,28"/>
-                    <polygon class="face-lit" points="50,5 88,28 50,50"/>
-                    <polygon class="face-shade" points="50,50 88,72 50,95"/>
-                    <path class="face-edge" d="M50 5 L50 95 M12 28 L88 72 M88 28 L12 72 M12 28 L88 28 M12 72 L88 72 M50 5 L12 72 M50 5 L88 72 M50 95 L12 28 M50 95 L88 28"/>`,
-                d100: `
-                    <circle class="face-main" cx="50" cy="50" r="40"/>
-                    <polygon class="face-lit" points="50,12 74,30 50,50"/>
-                    <polygon class="face-shade" points="50,50 74,30 74,58 50,88"/>
-                    <path class="face-edge" d="M50 12 L74 30 L74 58 L50 88 L26 58 L26 30 Z M50 12 L50 88 M26 30 L74 58 M74 30 L26 58"/>`
+        function createD10Geometry(radius = 0.75) {
+            // Pentagonal trapezohedron approximation (classic d10 look)
+            const top = new THREE.Vector3(0, radius * 1.15, 0);
+            const bottom = new THREE.Vector3(0, -radius * 1.15, 0);
+            const upper = [];
+            const lower = [];
+            for (let i = 0; i < 5; i++) {
+                const a1 = (i / 5) * Math.PI * 2;
+                const a2 = ((i + 0.5) / 5) * Math.PI * 2;
+                upper.push(new THREE.Vector3(Math.cos(a1) * radius, radius * 0.18, Math.sin(a1) * radius));
+                lower.push(new THREE.Vector3(Math.cos(a2) * radius, -radius * 0.18, Math.sin(a2) * radius));
+            }
+            const positions = [];
+            const pushTri = (a, b, c) => {
+                positions.push(a.x, a.y, a.z, b.x, b.y, b.z, c.x, c.y, c.z);
             };
-            return `<svg viewBox="0 0 100 100" aria-hidden="true">${shapes[key] || shapes.d20}</svg>`;
+            for (let i = 0; i < 5; i++) {
+                const n = (i + 1) % 5;
+                pushTri(top, upper[i], upper[n]);
+                pushTri(upper[i], lower[i], upper[n]);
+                pushTri(upper[n], lower[i], lower[n]);
+                pushTri(bottom, lower[n], lower[i]);
+            }
+            const geo = new THREE.BufferGeometry();
+            geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+            geo.computeVertexNormals();
+            return geo;
         }
 
-        function diceSolidHTML(sides, label, delayMs = 0) {
-            const shape = diceShapeKey(sides);
-            const delay = delayMs ? ` style="animation-delay:${delayMs}ms"` : '';
-            return `<div class="dice-solid shape-${shape}" data-sides="${sides}"${delay}>${diceSolidSvg(sides)}<span class="dice-num">${label}</span></div>`;
+        function createDiceGeometry(sides) {
+            if (sides === 4) return new THREE.TetrahedronGeometry(0.95);
+            if (sides === 6) return new THREE.BoxGeometry(1.05, 1.05, 1.05);
+            if (sides === 8) return new THREE.OctahedronGeometry(0.95);
+            if (sides === 10 || sides === 100) return createD10Geometry(0.8);
+            if (sides === 12) return new THREE.DodecahedronGeometry(0.85);
+            return new THREE.IcosahedronGeometry(0.95); // d20 default
         }
 
-        function setDiceNum(el, value) {
-            const num = el && el.querySelector('.dice-num');
-            if (num) num.textContent = String(value);
+        function createDiceMaterial(accent = 0x818cf8) {
+            return new THREE.MeshPhysicalMaterial({
+                color: 0xc7d2fe,
+                metalness: 0.15,
+                roughness: 0.28,
+                clearcoat: 0.85,
+                clearcoatRoughness: 0.2,
+                reflectivity: 0.5,
+                emissive: accent,
+                emissiveIntensity: 0.08
+            });
+        }
+
+        function makeDieMesh(sides) {
+            const geo = createDiceGeometry(sides);
+            const mat = createDiceMaterial(sides === 20 ? 0xa78bfa : 0x818cf8);
+            const mesh = new THREE.Mesh(geo, mat);
+            const edges = new THREE.LineSegments(
+                new THREE.EdgesGeometry(geo, 25),
+                new THREE.LineBasicMaterial({ color: 0x312e81, transparent: true, opacity: 0.55 })
+            );
+            mesh.add(edges);
+            mesh.userData = {
+                sides,
+                spin: new THREE.Vector3(
+                    (Math.random() - 0.5) * 0.4,
+                    (Math.random() - 0.5) * 0.5,
+                    (Math.random() - 0.5) * 0.4
+                ),
+                bounce: Math.random() * Math.PI * 2,
+                baseY: 0.15,
+                tumbling: false,
+                angVel: new THREE.Vector3(),
+                settleAt: 0,
+                value: null,
+                nat: null
+            };
+            mesh.castShadow = true;
+            mesh.receiveShadow = true;
+            return mesh;
+        }
+
+        function layoutDice(count) {
+            const spacing = count <= 3 ? 2.15 : (count <= 6 ? 1.7 : 1.35);
+            const start = -((count - 1) * spacing) / 2;
+            dice3.dice.forEach((mesh, i) => {
+                mesh.position.set(start + i * spacing, mesh.userData.baseY, 0);
+                const s = count <= 2 ? 1 : (count <= 4 ? 0.9 : (count <= 8 ? 0.75 : 0.62));
+                mesh.scale.setScalar(s);
+            });
+            // Camera framing
+            const span = Math.max(3.2, count * spacing * 0.7);
+            dice3.camera.position.set(0, 2.4, Math.max(5.2, span * 1.35));
+            dice3.camera.lookAt(0, 0.2, 0);
+        }
+
+        function rebuildDiceMeshes(sides, count, labels) {
+            if (!dice3.ready) return;
+            // dispose old meshes
+            [...dice3.root.children].forEach(child => {
+                dice3.root.remove(child);
+                child.traverse(obj => {
+                    if (obj.geometry) obj.geometry.dispose();
+                    if (obj.material) {
+                        if (Array.isArray(obj.material)) obj.material.forEach(m => m.dispose());
+                        else obj.material.dispose();
+                    }
+                });
+            });
+            dice3.dice = [];
+            const overlays = $('dice-overlays');
+            if (overlays) overlays.innerHTML = '';
+            dice3.overlays = [];
+
+            for (let i = 0; i < count; i++) {
+                const mesh = makeDieMesh(sides);
+                mesh.rotation.set(0.4 + i * 0.15, 0.6 + i * 0.2, 0.15);
+                dice3.root.add(mesh);
+                dice3.dice.push(mesh);
+
+                const chip = document.createElement('div');
+                chip.className = 'dice-chip';
+                chip.textContent = labels ? labels[i] : '—';
+                overlays.appendChild(chip);
+                dice3.overlays.push(chip);
+            }
+            layoutDice(count);
+            syncDiceOverlays();
+        }
+
+        function syncDiceOverlays() {
+            if (!dice3.ready) return;
+            const stage = $('dice-stage');
+            if (!stage) return;
+            const w = stage.clientWidth;
+            const h = stage.clientHeight;
+            const v = new THREE.Vector3();
+            dice3.dice.forEach((mesh, i) => {
+                const chip = dice3.overlays[i];
+                if (!chip) return;
+                v.set(mesh.position.x, mesh.position.y + 0.85 * mesh.scale.x, mesh.position.z);
+                v.project(dice3.camera);
+                const x = (v.x * 0.5 + 0.5) * w;
+                const y = (-v.y * 0.5 + 0.5) * h;
+                chip.style.left = `${x}px`;
+                chip.style.top = `${y}px`;
+                chip.style.opacity = (v.z > 1) ? '0' : '1';
+            });
+        }
+
+        function resizeDiceRenderer() {
+            if (!dice3.ready) return;
+            const stage = $('dice-stage');
+            const canvas = $('dice-canvas');
+            if (!stage || !canvas) return;
+            const w = Math.max(1, stage.clientWidth);
+            const h = Math.max(1, stage.clientHeight);
+            const pr = Math.min(window.devicePixelRatio || 1, 2);
+            dice3.renderer.setPixelRatio(pr);
+            dice3.renderer.setSize(w, h, false);
+            dice3.camera.aspect = w / h;
+            dice3.camera.updateProjectionMatrix();
+            syncDiceOverlays();
+        }
+
+        function animateDice(t) {
+            dice3.raf = requestAnimationFrame(animateDice);
+            if (!dice3.ready) return;
+            const dt = Math.min(0.05, dice3.clock.getDelta());
+            dice3.dice.forEach((mesh, i) => {
+                const u = mesh.userData;
+                if (u.tumbling) {
+                    mesh.rotation.x += u.angVel.x * dt;
+                    mesh.rotation.y += u.angVel.y * dt;
+                    mesh.rotation.z += u.angVel.z * dt;
+                    u.bounce += dt * 10;
+                    mesh.position.y = u.baseY + Math.abs(Math.sin(u.bounce)) * 0.55;
+                    u.angVel.multiplyScalar(0.992);
+                } else if (dice3.idleSpin && !diceRolling) {
+                    mesh.rotation.x += u.spin.x * dt;
+                    mesh.rotation.y += u.spin.y * dt;
+                    mesh.rotation.z += u.spin.z * dt;
+                    mesh.position.y = u.baseY + Math.sin(t * 0.002 + i) * 0.04;
+                }
+            });
+            dice3.renderer.render(dice3.scene, dice3.camera);
+            syncDiceOverlays();
+        }
+
+        function initDice3D() {
+            if (dice3.ready || typeof THREE === 'undefined') {
+                if (typeof THREE === 'undefined') {
+                    const res = $('dice-res');
+                    if (res) res.innerHTML = '<span class="bad">Three.js 載入失敗</span>';
+                }
+                return;
+            }
+            const canvas = $('dice-canvas');
+            const stage = $('dice-stage');
+            if (!canvas || !stage) return;
+
+            const scene = new THREE.Scene();
+            scene.fog = new THREE.Fog(0x0f241c, 8, 18);
+
+            const camera = new THREE.PerspectiveCamera(36, 1, 0.1, 50);
+            camera.position.set(0, 2.4, 6.2);
+            camera.lookAt(0, 0.2, 0);
+
+            const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+            renderer.setClearColor(0x000000, 0);
+            renderer.shadowMap.enabled = true;
+            renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+            const hemi = new THREE.HemisphereLight(0xf8fafc, 0x14532d, 1.05);
+            scene.add(hemi);
+            const key = new THREE.DirectionalLight(0xfff7ed, 1.35);
+            key.position.set(3.5, 7, 4);
+            key.castShadow = true;
+            scene.add(key);
+            const fill = new THREE.DirectionalLight(0xa5b4fc, 0.55);
+            fill.position.set(-4, 2, -3);
+            scene.add(fill);
+            const rim = new THREE.PointLight(0xfde68a, 0.55, 12);
+            rim.position.set(0, 2.2, 2.5);
+            scene.add(rim);
+
+            // Felt table plane
+            const tableMat = new THREE.MeshStandardMaterial({
+                color: 0x14532d,
+                roughness: 0.95,
+                metalness: 0.05
+            });
+            const table = new THREE.Mesh(new THREE.CircleGeometry(6.5, 48), tableMat);
+            table.rotation.x = -Math.PI / 2;
+            table.position.y = -0.55;
+            table.receiveShadow = true;
+            scene.add(table);
+
+            const root = new THREE.Group();
+            scene.add(root);
+
+            dice3.scene = scene;
+            dice3.camera = camera;
+            dice3.renderer = renderer;
+            dice3.root = root;
+            dice3.clock = new THREE.Clock();
+            dice3.ready = true;
+
+            window.addEventListener('resize', resizeDiceRenderer);
+            if (window.ResizeObserver) {
+                new ResizeObserver(resizeDiceRenderer).observe(stage);
+            }
+            resizeDiceRenderer();
+            rebuildDiceMeshes(diceSidesPreview, getDiceCount(), null);
+            cancelAnimationFrame(dice3.raf);
+            animateDice(performance.now());
         }
 
         function renderDicePlaceholders() {
-            const stage = $('dice-stage');
-            if (!stage || diceRolling) return;
+            if (diceRolling) return;
             const n = getDiceCount();
             const sides = diceSidesPreview;
-            stage.setAttribute('data-count', String(n));
-            stage.setAttribute('data-sides', String(sides));
-            stage.innerHTML = Array.from({ length: n }, () => diceSolidHTML(sides, '—')).join('');
+            const stage = $('dice-stage');
+            if (stage) {
+                stage.setAttribute('data-count', String(n));
+                stage.setAttribute('data-sides', String(sides));
+            }
+            if (!dice3.ready) {
+                initDice3D();
+            } else {
+                rebuildDiceMeshes(sides, n, null);
+            }
             const res = $('dice-res');
             if (res && !res.dataset.locked) {
                 res.innerHTML = `<span class="muted">準備擲 ${n > 1 ? n + 'D' + sides : 'D' + sides}</span>`;
             }
         }
 
+        function setDiceChipValues(values, sides) {
+            dice3.overlays.forEach((chip, i) => {
+                const v = values[i];
+                chip.textContent = String(v);
+                chip.classList.remove('is-nat20', 'is-nat1');
+                if (sides === 20 && v === 20) chip.classList.add('is-nat20');
+                if (sides === 20 && v === 1) chip.classList.add('is-nat1');
+            });
+            dice3.dice.forEach((mesh, i) => {
+                const v = values[i];
+                const mat = mesh.material;
+                if (sides === 20 && v === 20) {
+                    mat.color.setHex(0x86efac);
+                    mat.emissive.setHex(0x22c55e);
+                    mat.emissiveIntensity = 0.22;
+                } else if (sides === 20 && v === 1) {
+                    mat.color.setHex(0xfca5a5);
+                    mat.emissive.setHex(0xef4444);
+                    mat.emissiveIntensity = 0.22;
+                } else {
+                    mat.color.setHex(0xc7d2fe);
+                    mat.emissive.setHex(sides === 20 ? 0xa78bfa : 0x818cf8);
+                    mat.emissiveIntensity = 0.08;
+                }
+            });
+        }
+
         function rDice(s) {
-            const stage = $('dice-stage');
             const res = $('dice-res');
-            if (!stage || !res || diceRolling) return;
+            if (!res || diceRolling) return;
+            if (!dice3.ready) initDice3D();
+            if (!dice3.ready) return;
 
             diceSidesPreview = s;
             localStorage.setItem('dm_dice_sides', String(s));
@@ -2612,43 +2827,54 @@ let savedQuests = JSON.parse(localStorage.getItem('dm_saved_quests') || '{}');
             const total = finals.reduce((a, b) => a + b, 0);
 
             diceRolling = true;
+            dice3.idleSpin = false;
             res.dataset.locked = '1';
             document.querySelectorAll('.dice-btn').forEach(b => b.disabled = true);
 
-            stage.setAttribute('data-count', String(count));
-            stage.setAttribute('data-sides', String(s));
-            stage.innerHTML = finals.map((_, i) => diceSolidHTML(s, '?', i * 50)).join('');
-            const discs = [...stage.querySelectorAll('.dice-solid')];
+            const stage = $('dice-stage');
+            if (stage) {
+                stage.setAttribute('data-count', String(count));
+                stage.setAttribute('data-sides', String(s));
+            }
 
+            rebuildDiceMeshes(s, count, Array(count).fill('?'));
             res.innerHTML = `<span class="muted">${count > 1 ? `擲 ${count}D${s} 中…` : `擲 D${s} 中…`}</span>`;
 
             if (diceFlickerTimer) clearInterval(diceFlickerTimer);
             if (diceRollTimer) clearTimeout(diceRollTimer);
 
-            discs.forEach(disc => {
-                disc.classList.remove('is-nat20', 'is-nat1', 'is-settle', 'is-rolling');
-                void disc.offsetWidth;
-                disc.classList.add('is-rolling');
+            dice3.dice.forEach((mesh, i) => {
+                const u = mesh.userData;
+                u.tumbling = true;
+                u.bounce = Math.random() * Math.PI;
+                u.angVel.set(
+                    8 + Math.random() * 10,
+                    10 + Math.random() * 12,
+                    6 + Math.random() * 8
+                );
+                if (i % 2) u.angVel.x *= -1;
+                if (i % 3 === 0) u.angVel.z *= -1;
             });
 
             diceFlickerTimer = setInterval(() => {
-                discs.forEach(disc => setDiceNum(disc, Math.floor(Math.random() * s) + 1));
+                dice3.overlays.forEach(chip => {
+                    chip.textContent = String(Math.floor(Math.random() * s) + 1);
+                });
             }, 55);
 
             diceRollTimer = setTimeout(() => {
                 clearInterval(diceFlickerTimer);
                 diceFlickerTimer = null;
 
-                discs.forEach((disc, i) => {
-                    const final = finals[i];
-                    disc.classList.remove('is-rolling');
-                    setDiceNum(disc, final);
-                    disc.classList.remove('is-nat20', 'is-nat1');
-                    if (s === 20 && final === 20) disc.classList.add('is-nat20');
-                    else if (s === 20 && final === 1) disc.classList.add('is-nat1');
-                    void disc.offsetWidth;
-                    disc.classList.add('is-settle');
+                dice3.dice.forEach((mesh) => {
+                    const u = mesh.userData;
+                    u.tumbling = false;
+                    u.angVel.set(0, 0, 0);
+                    mesh.position.y = u.baseY;
+                    // pleasant resting pose
+                    mesh.rotation.set(0.35 + Math.random() * 0.25, 0.55 + Math.random() * 0.5, 0.12);
                 });
+                setDiceChipValues(finals, s);
 
                 const detail = finals.join(' + ');
                 if (count === 1) {
@@ -2665,8 +2891,9 @@ let savedQuests = JSON.parse(localStorage.getItem('dm_saved_quests') || '{}');
 
                 delete res.dataset.locked;
                 diceRolling = false;
+                dice3.idleSpin = true;
                 document.querySelectorAll('.dice-btn').forEach(b => b.disabled = false);
-            }, 950);
+            }, 1100);
         }
 
 
@@ -3366,7 +3593,7 @@ window.onload = () => {
     // 來自 DM_index.html 的初始化
     initArena(); genOdds(); 
     renderQuests(); renderLocs(); renderSpells(); renderStore(); renderPlayers(); renderRunSheets();
-    updateDiceCountUI(); renderDicePlaceholders(); 
+    updateDiceCountUI(); initDice3D(); renderDicePlaceholders(); 
     renderNpcHistory(); 
     
     // 預填並載入時間線 API
@@ -3483,7 +3710,7 @@ window.onload = () => {
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     // Register self-destructing SW so any old caching SW is replaced and cleared
-    navigator.serviceWorker.register('./sw.js?v=20261110-dice5')
+    navigator.serviceWorker.register('./sw.js?v=20261110-dice6')
       .then(reg => console.log('SW clear registered', reg.scope))
       .catch(err => console.log('SW clear failed', err));
   });
