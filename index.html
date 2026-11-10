@@ -9,13 +9,13 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="戰役助手">
-    <link rel="manifest" href="manifest.json?v=20261110-runsheet1">
-    <link rel="apple-touch-icon" href="icon-192.png?v=20261110-runsheet1">
+    <link rel="manifest" href="manifest.json?v=20261110-dice1">
+    <link rel="apple-touch-icon" href="icon-192.png?v=20261110-dice1">
     <title>TRPG 戰役助手</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script>
-    // cache-bust: 20261110-runsheet1 — clear old SW/cache, then install self-destructing SW
+    // cache-bust: 20261110-dice1 — clear old SW/cache, then install self-destructing SW
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.getRegistrations().then(regs => {
     regs.forEach(r => r.unregister());
@@ -48,6 +48,63 @@ if (window.caches) {
             max-height: 100%;
         }
         #tab-houserules { min-height: 0; }
+
+        /* 通用擲骰器：單顆 disc 滾動動畫 */
+        .dice-stage {
+            min-height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 0.75rem;
+        }
+        .dice-disc {
+            width: 88px;
+            height: 88px;
+            border-radius: 9999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: 900;
+            color: #1f2937;
+            background: radial-gradient(circle at 30% 28%, #ffffff 0%, #eef2ff 42%, #c7d2fe 78%, #a5b4fc 100%);
+            border: 3px solid #6366f1;
+            box-shadow: 0 8px 18px rgba(79, 70, 229, 0.28), inset 0 -6px 12px rgba(0,0,0,0.08);
+            user-select: none;
+            transform: translateZ(0);
+        }
+        .dice-disc.is-rolling {
+            animation: diceRollSpin 0.85s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        .dice-disc.is-nat20 {
+            color: #15803d;
+            border-color: #22c55e;
+            background: radial-gradient(circle at 30% 28%, #ffffff 0%, #dcfce7 45%, #86efac 100%);
+        }
+        .dice-disc.is-nat1 {
+            color: #b91c1c;
+            border-color: #ef4444;
+            background: radial-gradient(circle at 30% 28%, #ffffff 0%, #fee2e2 45%, #fca5a5 100%);
+        }
+        .dice-disc.is-settle {
+            animation: diceSettle 0.35s ease-out;
+        }
+        @keyframes diceRollSpin {
+            0%   { transform: rotate(0deg) scale(1); }
+            20%  { transform: rotate(140deg) scale(1.08) translateY(-8px); }
+            45%  { transform: rotate(320deg) scale(0.94) translateY(4px); }
+            70%  { transform: rotate(520deg) scale(1.06) translateY(-4px); }
+            100% { transform: rotate(720deg) scale(1) translateY(0); }
+        }
+        @keyframes diceSettle {
+            0%   { transform: scale(1.12); }
+            60%  { transform: scale(0.96); }
+            100% { transform: scale(1); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .dice-disc.is-rolling,
+            .dice-disc.is-settle { animation: none; }
+        }
 
     </style>
 </head>
@@ -468,16 +525,19 @@ if (window.caches) {
     <!-- 通用擲骰器 -->
     <div class="bg-white p-5 rounded-xl shadow border">
         <h3 class="text-lg font-bold mb-3 border-b pb-2"><i class="fa-solid fa-dice mr-2 text-purple-600"></i>通用擲骰器</h3>
-        <div class="flex flex-wrap gap-2 mb-4 justify-center">
-            <button onclick="rDice(4)" class="px-4 py-1.5 bg-gray-100 rounded font-bold border hover:bg-gray-200">D4</button>
-            <button onclick="rDice(6)" class="px-4 py-1.5 bg-gray-100 rounded font-bold border hover:bg-gray-200">D6</button>
-            <button onclick="rDice(8)" class="px-4 py-1.5 bg-gray-100 rounded font-bold border hover:bg-gray-200">D8</button>
-            <button onclick="rDice(10)" class="px-4 py-1.5 bg-gray-100 rounded font-bold border hover:bg-gray-200">D10</button>
-            <button onclick="rDice(12)" class="px-4 py-1.5 bg-gray-100 rounded font-bold border hover:bg-gray-200">D12</button>
-            <button onclick="rDice(20)" class="px-4 py-1.5 bg-purple-100 text-purple-800 rounded font-bold border border-purple-300 hover:bg-purple-200">D20</button>
-            <button onclick="rDice(100)" class="px-4 py-1.5 bg-gray-100 rounded font-bold border hover:bg-gray-200">D100</button>
+        <div class="flex flex-wrap gap-2 mb-3 justify-center">
+            <button onclick="rDice(4)" class="dice-btn min-h-[44px] min-w-[52px] px-4 py-2 bg-gray-100 rounded-lg font-bold border hover:bg-gray-200">D4</button>
+            <button onclick="rDice(6)" class="dice-btn min-h-[44px] min-w-[52px] px-4 py-2 bg-gray-100 rounded-lg font-bold border hover:bg-gray-200">D6</button>
+            <button onclick="rDice(8)" class="dice-btn min-h-[44px] min-w-[52px] px-4 py-2 bg-gray-100 rounded-lg font-bold border hover:bg-gray-200">D8</button>
+            <button onclick="rDice(10)" class="dice-btn min-h-[44px] min-w-[52px] px-4 py-2 bg-gray-100 rounded-lg font-bold border hover:bg-gray-200">D10</button>
+            <button onclick="rDice(12)" class="dice-btn min-h-[44px] min-w-[52px] px-4 py-2 bg-gray-100 rounded-lg font-bold border hover:bg-gray-200">D12</button>
+            <button onclick="rDice(20)" class="dice-btn min-h-[44px] min-w-[52px] px-4 py-2 bg-purple-100 text-purple-800 rounded-lg font-bold border border-purple-300 hover:bg-purple-200">D20</button>
+            <button onclick="rDice(100)" class="dice-btn min-h-[44px] min-w-[52px] px-4 py-2 bg-gray-100 rounded-lg font-bold border hover:bg-gray-200">D100</button>
         </div>
-        <div id="dice-res" class="text-4xl font-black text-center mb-3 h-12 flex items-center justify-center text-gray-800"></div>
+        <div class="dice-stage">
+            <div id="dice-disc" class="dice-disc" aria-live="polite">—</div>
+        </div>
+        <div id="dice-res" class="text-sm font-bold text-center mb-3 h-6 flex items-center justify-center text-gray-500">點擊上方骰面開始</div>
         <div id="dice-hist" class="h-28 overflow-y-auto bg-gray-50 border rounded p-2 text-sm custom-scrollbar"></div>
     </div>
 
@@ -2329,10 +2389,58 @@ let savedQuests = JSON.parse(localStorage.getItem('dm_saved_quests') || '{}');
             }).join(''));
         }
 
+        let diceRolling = false;
+        let diceRollTimer = null;
+        let diceFlickerTimer = null;
+
         function rDice(s) {
-            const r = Math.floor(Math.random()*s)+1;
-            setH('dice-res', `<span class="${s===20&&r===20?'text-green-600':(s===20&&r===1?'text-red-600':'text-gray-800')}">${r}</span>`);
-            $('dice-hist').insertAdjacentHTML('afterbegin', `<div class="border-b py-1 text-gray-600">擲出 D${s}: <b class="text-gray-900">${r}</b></div>`);
+            const disc = $('dice-disc');
+            const res = $('dice-res');
+            if (!disc || !res || diceRolling) return;
+
+            const final = Math.floor(Math.random() * s) + 1;
+            diceRolling = true;
+            document.querySelectorAll('.dice-btn').forEach(b => b.disabled = true);
+
+            disc.classList.remove('is-nat20', 'is-nat1', 'is-settle');
+            disc.classList.remove('is-rolling');
+            // restart CSS animation
+            void disc.offsetWidth;
+            disc.classList.add('is-rolling');
+            res.textContent = `擲 D${s} 中…`;
+            res.className = 'text-sm font-bold text-center mb-3 h-6 flex items-center justify-center text-indigo-500';
+
+            if (diceFlickerTimer) clearInterval(diceFlickerTimer);
+            if (diceRollTimer) clearTimeout(diceRollTimer);
+
+            diceFlickerTimer = setInterval(() => {
+                disc.textContent = String(Math.floor(Math.random() * s) + 1);
+            }, 55);
+
+            diceRollTimer = setTimeout(() => {
+                clearInterval(diceFlickerTimer);
+                diceFlickerTimer = null;
+                disc.classList.remove('is-rolling');
+                disc.textContent = String(final);
+
+                let tone = 'text-gray-700';
+                if (s === 20 && final === 20) {
+                    disc.classList.add('is-nat20');
+                    tone = 'text-green-600';
+                } else if (s === 20 && final === 1) {
+                    disc.classList.add('is-nat1');
+                    tone = 'text-red-600';
+                }
+
+                void disc.offsetWidth;
+                disc.classList.add('is-settle');
+                res.innerHTML = `D${s} → <span class="${tone}">${final}</span>`;
+                res.className = 'text-sm font-bold text-center mb-3 h-6 flex items-center justify-center text-gray-700';
+                $('dice-hist').insertAdjacentHTML('afterbegin', `<div class="border-b py-1 text-gray-600">擲出 D${s}: <b class="text-gray-900">${final}</b></div>`);
+
+                diceRolling = false;
+                document.querySelectorAll('.dice-btn').forEach(b => b.disabled = false);
+            }, 850);
         }
 
 let cmbs = [];
@@ -3147,7 +3255,7 @@ window.onload = () => {
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     // Register self-destructing SW so any old caching SW is replaced and cleared
-    navigator.serviceWorker.register('./sw.js?v=20261110-runsheet1')
+    navigator.serviceWorker.register('./sw.js?v=20261110-dice1')
       .then(reg => console.log('SW clear registered', reg.scope))
       .catch(err => console.log('SW clear failed', err));
   });
