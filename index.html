@@ -9,14 +9,14 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="戰役助手">
-    <link rel="manifest" href="manifest.json?v=20261110-combat1">
-    <link rel="apple-touch-icon" href="icon-192.png?v=20261110-combat1">
+    <link rel="manifest" href="manifest.json?v=20261110-wolf1">
+    <link rel="apple-touch-icon" href="icon-192.png?v=20261110-wolf1">
     <title>TRPG 戰役助手</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
     <script>
-    // cache-bust: 20261110-combat1 — clear old SW/cache, then install self-destructing SW
+    // cache-bust: 20261110-wolf1 — clear old SW/cache, then install self-destructing SW
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.getRegistrations().then(regs => {
     regs.forEach(r => r.unregister());
@@ -2250,6 +2250,31 @@ function clearNpcHistory() {
               {id:"c8e", t:"尾聲", d:"凡戴爾存續、人質歸宿、角色落幕"}
             ],
             tips: ["終局前先問玩家想保護誰／犧牲什麼。","PDF：Briny Maze / Endless Void / Wrapping Up。","原文朗讀框仍以 PDF 為準。"]
+          },
+          {
+            id: "wolf1", book: "1人團", title: "狼魂｜靈魂收集者", pages: "交接文件 2026-11-10", level: "凡戴爾支線",
+            goal: "呀甘＆小蕉的狼魂向法師求救；調查凡戴林占卜師（鬼婆），在交易、救狼、Sildar／玻璃杖之間做出抉擇。",
+            quests: [],
+            npcs: ["呀甘（狼魂）","小蕉（狼魂）","占卜師／鬼婆","玻璃杖（靈魂）","席爾達·哈爾溫特","法師（PC）"],
+            flow: [
+              {id:"w1a", t:"狼魂現身", d:"呀甘＆小蕉以靈魂體向法師求救；說明已死一週、途中被攔截、靠連結找到法師"},
+              {id:"w1b", t:"調查占卜師", d:"凡戴林表面占卜師＝鬼婆；她攔截星界靈魂、用占卜找弱點、交易把人變棋子"},
+              {id:"w1c", t:"第一次交易壓力", d:"她願給「救狼方法」，代價＝未來一個承諾（或記憶／傳訊）；強調時間壓力"},
+              {id:"w1d", t:"Sildar 異常", d:"發現席爾達行為不對勁；鬼婆已攔截玻璃杖靈魂並要脅他"},
+              {id:"w1e", t:"玻璃杖籌碼", d:"鬼婆話術：「你喜歡她…她也喜歡你…可惜沒說…現在想告訴她嗎？」"},
+              {id:"w1f", t:"道德抉擇關", d:"①跟不跟鬼婆交易 ②告不告訴席爾達 ③救狼 vs 阻止鬼婆 ④玻璃杖：救／安息／利用"},
+              {id:"w1g", t:"材料與儀式", d:"若走救狼線：星銀粉、狼的遺物、月光草、法師的血"},
+              {id:"w1h", t:"後果落地", d:"依抉擇結算：欠人情／狼消散／席爾達暴走／鬼婆逃走或失去籌碼；連回主線 Boss"}
+            ],
+            tips: [
+              "核心衝突：要不要跟鬼婆交易來救狼魂。",
+              "時間壓力：1–3天可顯現1小時 → 4–6天30分 → 7–9天10分 → 10天後可能永久消散。",
+              "操控手法：後悔／希望／恐懼／逐步加深／切斷退路。",
+              "靈魂規則：死亡→星界→迷霧位面；復活需靈魂自由且願意；鬼婆在到達 Fugue Plane 前攔截。",
+              "主線連結：鬼婆＝Boss；散塔林／冰／死；曾騙凱爾；靈魂＝力量來源。",
+              "待補：鬼婆外貌、玻璃杖靈魂狀態、席爾達被逼做的具體事、交易代價細節、失敗後果。",
+              "1人團節奏：每次只逼一個抉擇；狼魂顯現時限當倒數時鐘用。"
+            ]
           }
         ];
 
@@ -2307,6 +2332,7 @@ function clearNpcHistory() {
                 // Tailwind purge-safe explicit classes:
                 const activeCls = s.book === 'Obelisk' ? 'bg-purple-600 text-white border-purple-700'
                   : s.book === 'DoIP' ? 'bg-blue-600 text-white border-blue-700'
+                  : s.book === '1人團' ? 'bg-rose-600 text-white border-rose-700'
                   : 'bg-amber-600 text-white border-amber-700';
                 const idleCls = 'bg-white text-gray-700 border-gray-200';
                 return `<button onclick="selectRunSheet('${s.id}')" class="min-h-[44px] px-3 rounded-lg border text-sm font-bold whitespace-nowrap shadow-sm ${active ? activeCls : idleCls}">${s.title}</button>`;
@@ -2317,18 +2343,22 @@ function clearNpcHistory() {
             const pct = Math.round(doneCount / sheet.flow.length * 100);
             if (prog) prog.innerHTML = `<div class="flex items-center justify-between gap-3"><span>${sheet.title}　進度 ${doneCount}/${sheet.flow.length}</span><span class="text-purple-700">${pct}%</span></div><div class="mt-1 h-2 rounded-full bg-gray-200 overflow-hidden"><div class="h-full bg-purple-500" style="width:${pct}%"></div></div>`;
 
+            const questBlock = (sheet.quests && sheet.quests.length)
+              ? sheet.quests.map(questChip).join('')
+              : `<span class="px-2.5 py-1.5 rounded-lg bg-rose-50 border border-rose-100 text-rose-800 text-xs font-bold">1人團支線・無任務板編號</span>`;
+
             panel.innerHTML = `
               <div class="bg-white rounded-xl border shadow-sm p-4">
                 <div class="flex flex-wrap gap-2 text-xs font-bold mb-3">
                   <span class="px-2 py-1 rounded bg-gray-100 border">${sheet.book}</span>
-                  <span class="px-2 py-1 rounded bg-gray-100 border">PDF ${sheet.pages}</span>
+                  <span class="px-2 py-1 rounded bg-gray-100 border">${sheet.pages}</span>
                   <span class="px-2 py-1 rounded bg-gray-100 border">等級 ${sheet.level}</span>
                 </div>
                 <p class="text-sm text-gray-700 leading-relaxed mb-3"><span class="font-black text-gray-900">本章目標：</span>${sheet.goal}</p>
                 <div class="mb-2 text-xs font-black text-gray-500">關鍵 NPC</div>
                 <div class="flex flex-wrap gap-2 mb-4">${sheet.npcs.map(n => `<span class="px-2.5 py-1.5 rounded-lg bg-amber-50 border border-amber-100 text-amber-900 text-xs font-bold">${n}</span>`).join('')}</div>
                 <div class="mb-2 text-xs font-black text-gray-500">關聯任務（點擊可跳任務板搜尋）</div>
-                <div class="flex flex-wrap gap-2">${sheet.quests.map(questChip).join('')}</div>
+                <div class="flex flex-wrap gap-2">${questBlock}</div>
               </div>
 
               <div class="bg-white rounded-xl border shadow-sm p-4">
@@ -3644,7 +3674,7 @@ function generateWebDungeon() {
 
 
         // ===== 怪物速查卡（API / JSON 載入）=====
-        const MONSTER_API = './data/monsters.json?v=20261110-combat1';
+        const MONSTER_API = './data/monsters.json?v=20261110-wolf1';
         let monsterData = { monsters: [], modules: [] };
         let monstersLoaded = false;
         let monstersLoading = false;
@@ -3949,7 +3979,7 @@ window.onload = () => {
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     // Register self-destructing SW so any old caching SW is replaced and cleared
-    navigator.serviceWorker.register('./sw.js?v=20261110-combat1')
+    navigator.serviceWorker.register('./sw.js?v=20261110-wolf1')
       .then(reg => console.log('SW clear registered', reg.scope))
       .catch(err => console.log('SW clear failed', err));
   });
