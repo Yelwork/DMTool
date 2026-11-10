@@ -9,13 +9,13 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="戰役助手">
-    <link rel="manifest" href="manifest.json?v=20261110-dice1">
-    <link rel="apple-touch-icon" href="icon-192.png?v=20261110-dice1">
+    <link rel="manifest" href="manifest.json?v=20261110-dice2">
+    <link rel="apple-touch-icon" href="icon-192.png?v=20261110-dice2">
     <title>TRPG 戰役助手</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script>
-    // cache-bust: 20261110-dice1 — clear old SW/cache, then install self-destructing SW
+    // cache-bust: 20261110-dice2 — clear old SW/cache, then install self-destructing SW
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.getRegistrations().then(regs => {
     regs.forEach(r => r.unregister());
@@ -49,22 +49,24 @@ if (window.caches) {
         }
         #tab-houserules { min-height: 0; }
 
-        /* 通用擲骰器：單顆 disc 滾動動畫 */
+        /* 通用擲骰器：多顆 disc 滾動動畫 */
         .dice-stage {
             min-height: 120px;
             display: flex;
+            flex-wrap: wrap;
             align-items: center;
             justify-content: center;
+            gap: 0.6rem;
             margin-bottom: 0.75rem;
         }
         .dice-disc {
-            width: 88px;
-            height: 88px;
+            width: 72px;
+            height: 72px;
             border-radius: 9999px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2rem;
+            font-size: 1.6rem;
             font-weight: 900;
             color: #1f2937;
             background: radial-gradient(circle at 30% 28%, #ffffff 0%, #eef2ff 42%, #c7d2fe 78%, #a5b4fc 100%);
@@ -72,7 +74,11 @@ if (window.caches) {
             box-shadow: 0 8px 18px rgba(79, 70, 229, 0.28), inset 0 -6px 12px rgba(0,0,0,0.08);
             user-select: none;
             transform: translateZ(0);
+            flex: 0 0 auto;
         }
+        .dice-stage[data-count="1"] .dice-disc { width: 88px; height: 88px; font-size: 2rem; }
+        .dice-stage[data-count="2"] .dice-disc,
+        .dice-stage[data-count="3"] .dice-disc { width: 78px; height: 78px; font-size: 1.75rem; }
         .dice-disc.is-rolling {
             animation: diceRollSpin 0.85s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
@@ -525,6 +531,20 @@ if (window.caches) {
     <!-- 通用擲骰器 -->
     <div class="bg-white p-5 rounded-xl shadow border">
         <h3 class="text-lg font-bold mb-3 border-b pb-2"><i class="fa-solid fa-dice mr-2 text-purple-600"></i>通用擲骰器</h3>
+        <div class="flex flex-wrap items-center justify-center gap-2 mb-3 bg-indigo-50 border border-indigo-100 rounded-xl p-2.5">
+            <span class="text-sm font-bold text-indigo-800">數量</span>
+            <button type="button" onclick="changeDiceCount(-1)" class="min-h-[44px] min-w-[44px] rounded-lg bg-white border font-black text-lg hover:bg-gray-50">−</button>
+            <input id="dice-count" type="number" min="1" max="12" value="1" onchange="syncDiceCountFromInput()" class="w-16 min-h-[44px] text-center text-lg font-black border rounded-lg outline-none">
+            <button type="button" onclick="changeDiceCount(1)" class="min-h-[44px] min-w-[44px] rounded-lg bg-white border font-black text-lg hover:bg-gray-50">＋</button>
+            <div class="flex flex-wrap gap-1.5 ml-1">
+                <button type="button" onclick="setDiceCount(1)" class="dice-count-preset min-h-[36px] px-2.5 rounded-lg text-xs font-bold border bg-indigo-600 text-white border-indigo-700">1</button>
+                <button type="button" onclick="setDiceCount(2)" class="dice-count-preset min-h-[36px] px-2.5 rounded-lg text-xs font-bold border bg-white text-gray-700">2</button>
+                <button type="button" onclick="setDiceCount(3)" class="dice-count-preset min-h-[36px] px-2.5 rounded-lg text-xs font-bold border bg-white text-gray-700">3</button>
+                <button type="button" onclick="setDiceCount(4)" class="dice-count-preset min-h-[36px] px-2.5 rounded-lg text-xs font-bold border bg-white text-gray-700">4</button>
+                <button type="button" onclick="setDiceCount(6)" class="dice-count-preset min-h-[36px] px-2.5 rounded-lg text-xs font-bold border bg-white text-gray-700">6</button>
+                <button type="button" onclick="setDiceCount(8)" class="dice-count-preset min-h-[36px] px-2.5 rounded-lg text-xs font-bold border bg-white text-gray-700">8</button>
+            </div>
+        </div>
         <div class="flex flex-wrap gap-2 mb-3 justify-center">
             <button onclick="rDice(4)" class="dice-btn min-h-[44px] min-w-[52px] px-4 py-2 bg-gray-100 rounded-lg font-bold border hover:bg-gray-200">D4</button>
             <button onclick="rDice(6)" class="dice-btn min-h-[44px] min-w-[52px] px-4 py-2 bg-gray-100 rounded-lg font-bold border hover:bg-gray-200">D6</button>
@@ -534,10 +554,10 @@ if (window.caches) {
             <button onclick="rDice(20)" class="dice-btn min-h-[44px] min-w-[52px] px-4 py-2 bg-purple-100 text-purple-800 rounded-lg font-bold border border-purple-300 hover:bg-purple-200">D20</button>
             <button onclick="rDice(100)" class="dice-btn min-h-[44px] min-w-[52px] px-4 py-2 bg-gray-100 rounded-lg font-bold border hover:bg-gray-200">D100</button>
         </div>
-        <div class="dice-stage">
-            <div id="dice-disc" class="dice-disc" aria-live="polite">—</div>
+        <div id="dice-stage" class="dice-stage" data-count="1" aria-live="polite">
+            <div class="dice-disc">—</div>
         </div>
-        <div id="dice-res" class="text-sm font-bold text-center mb-3 h-6 flex items-center justify-center text-gray-500">點擊上方骰面開始</div>
+        <div id="dice-res" class="text-sm font-bold text-center mb-3 min-h-[24px] flex items-center justify-center text-gray-500">選擇數量後點骰面開始</div>
         <div id="dice-hist" class="h-28 overflow-y-auto bg-gray-50 border rounded p-2 text-sm custom-scrollbar"></div>
     </div>
 
@@ -2392,51 +2412,119 @@ let savedQuests = JSON.parse(localStorage.getItem('dm_saved_quests') || '{}');
         let diceRolling = false;
         let diceRollTimer = null;
         let diceFlickerTimer = null;
+        let diceCount = Math.max(1, Math.min(12, parseInt(localStorage.getItem('dm_dice_count') || '1', 10) || 1));
+
+        function getDiceCount() {
+            return Math.max(1, Math.min(12, diceCount | 0));
+        }
+
+        function updateDiceCountUI() {
+            const n = getDiceCount();
+            const input = $('dice-count');
+            const stage = $('dice-stage');
+            if (input) input.value = String(n);
+            if (stage) stage.setAttribute('data-count', String(n));
+            document.querySelectorAll('.dice-count-preset').forEach(btn => {
+                const v = parseInt(btn.textContent, 10);
+                const on = v === n;
+                btn.classList.toggle('bg-indigo-600', on);
+                btn.classList.toggle('text-white', on);
+                btn.classList.toggle('border-indigo-700', on);
+                btn.classList.toggle('bg-white', !on);
+                btn.classList.toggle('text-gray-700', !on);
+            });
+            localStorage.setItem('dm_dice_count', String(n));
+        }
+
+        window.setDiceCount = (n) => {
+            if (diceRolling) return;
+            diceCount = Math.max(1, Math.min(12, n | 0));
+            updateDiceCountUI();
+            renderDicePlaceholders();
+        };
+
+        window.changeDiceCount = (delta) => {
+            setDiceCount(getDiceCount() + delta);
+        };
+
+        window.syncDiceCountFromInput = () => {
+            const input = $('dice-count');
+            setDiceCount(parseInt(input && input.value, 10) || 1);
+        };
+
+        function renderDicePlaceholders() {
+            const stage = $('dice-stage');
+            if (!stage || diceRolling) return;
+            const n = getDiceCount();
+            stage.innerHTML = Array.from({ length: n }, () => `<div class="dice-disc">—</div>`).join('');
+            stage.setAttribute('data-count', String(n));
+        }
 
         function rDice(s) {
-            const disc = $('dice-disc');
+            const stage = $('dice-stage');
             const res = $('dice-res');
-            if (!disc || !res || diceRolling) return;
+            if (!stage || !res || diceRolling) return;
 
-            const final = Math.floor(Math.random() * s) + 1;
+            const count = getDiceCount();
+            const finals = Array.from({ length: count }, () => Math.floor(Math.random() * s) + 1);
+            const total = finals.reduce((a, b) => a + b, 0);
+
             diceRolling = true;
             document.querySelectorAll('.dice-btn').forEach(b => b.disabled = true);
 
-            disc.classList.remove('is-nat20', 'is-nat1', 'is-settle');
-            disc.classList.remove('is-rolling');
-            // restart CSS animation
-            void disc.offsetWidth;
-            disc.classList.add('is-rolling');
-            res.textContent = `擲 D${s} 中…`;
-            res.className = 'text-sm font-bold text-center mb-3 h-6 flex items-center justify-center text-indigo-500';
+            stage.setAttribute('data-count', String(count));
+            stage.innerHTML = finals.map((_, i) =>
+                `<div class="dice-disc" data-i="${i}" style="animation-delay:${i * 45}ms">?</div>`
+            ).join('');
+            const discs = [...stage.querySelectorAll('.dice-disc')];
+
+            res.textContent = count > 1 ? `擲 ${count}D${s} 中…` : `擲 D${s} 中…`;
+            res.className = 'text-sm font-bold text-center mb-3 min-h-[24px] flex items-center justify-center text-indigo-500';
 
             if (diceFlickerTimer) clearInterval(diceFlickerTimer);
             if (diceRollTimer) clearTimeout(diceRollTimer);
 
+            // restart animations
+            discs.forEach(disc => {
+                disc.classList.remove('is-nat20', 'is-nat1', 'is-settle', 'is-rolling');
+                void disc.offsetWidth;
+                disc.classList.add('is-rolling');
+            });
+
             diceFlickerTimer = setInterval(() => {
-                disc.textContent = String(Math.floor(Math.random() * s) + 1);
+                discs.forEach(disc => {
+                    disc.textContent = String(Math.floor(Math.random() * s) + 1);
+                });
             }, 55);
 
             diceRollTimer = setTimeout(() => {
                 clearInterval(diceFlickerTimer);
                 diceFlickerTimer = null;
-                disc.classList.remove('is-rolling');
-                disc.textContent = String(final);
 
-                let tone = 'text-gray-700';
-                if (s === 20 && final === 20) {
-                    disc.classList.add('is-nat20');
-                    tone = 'text-green-600';
-                } else if (s === 20 && final === 1) {
-                    disc.classList.add('is-nat1');
-                    tone = 'text-red-600';
+                discs.forEach((disc, i) => {
+                    const final = finals[i];
+                    disc.classList.remove('is-rolling');
+                    disc.textContent = String(final);
+                    disc.classList.remove('is-nat20', 'is-nat1');
+                    if (s === 20 && final === 20) disc.classList.add('is-nat20');
+                    else if (s === 20 && final === 1) disc.classList.add('is-nat1');
+                    void disc.offsetWidth;
+                    disc.classList.add('is-settle');
+                });
+
+                const detail = finals.join(' + ');
+                if (count === 1) {
+                    const final = finals[0];
+                    let tone = 'text-gray-700';
+                    if (s === 20 && final === 20) tone = 'text-green-600';
+                    else if (s === 20 && final === 1) tone = 'text-red-600';
+                    res.innerHTML = `D${s} → <span class="${tone}">${final}</span>`;
+                    $('dice-hist').insertAdjacentHTML('afterbegin', `<div class="border-b py-1 text-gray-600">擲出 D${s}: <b class="text-gray-900">${final}</b></div>`);
+                } else {
+                    res.innerHTML = `${count}D${s} → <span class="text-indigo-700">${detail}</span> = <span class="text-gray-900 text-base">${total}</span>`;
+                    $('dice-hist').insertAdjacentHTML('afterbegin', `<div class="border-b py-1 text-gray-600">擲出 ${count}D${s}: <b class="text-gray-900">${detail}</b> = <b>${total}</b></div>`);
                 }
-
-                void disc.offsetWidth;
-                disc.classList.add('is-settle');
-                res.innerHTML = `D${s} → <span class="${tone}">${final}</span>`;
-                res.className = 'text-sm font-bold text-center mb-3 h-6 flex items-center justify-center text-gray-700';
-                $('dice-hist').insertAdjacentHTML('afterbegin', `<div class="border-b py-1 text-gray-600">擲出 D${s}: <b class="text-gray-900">${final}</b></div>`);
+                res.className = 'text-sm font-bold text-center mb-3 min-h-[24px] flex items-center justify-center text-gray-700';
 
                 diceRolling = false;
                 document.querySelectorAll('.dice-btn').forEach(b => b.disabled = false);
@@ -3138,7 +3226,8 @@ function generateWebDungeon() {
 window.onload = () => {
     // 來自 DM_index.html 的初始化
     initArena(); genOdds(); 
-    renderQuests(); renderLocs(); renderSpells(); renderStore(); renderPlayers(); renderRunSheets(); 
+    renderQuests(); renderLocs(); renderSpells(); renderStore(); renderPlayers(); renderRunSheets();
+    updateDiceCountUI(); renderDicePlaceholders(); 
     renderNpcHistory(); 
     
     // 預填並載入時間線 API
@@ -3255,7 +3344,7 @@ window.onload = () => {
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     // Register self-destructing SW so any old caching SW is replaced and cleared
-    navigator.serviceWorker.register('./sw.js?v=20261110-dice1')
+    navigator.serviceWorker.register('./sw.js?v=20261110-dice2')
       .then(reg => console.log('SW clear registered', reg.scope))
       .catch(err => console.log('SW clear failed', err));
   });
