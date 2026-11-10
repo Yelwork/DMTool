@@ -9,14 +9,14 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="戰役助手">
-    <link rel="manifest" href="manifest.json?v=20261110-dice6">
-    <link rel="apple-touch-icon" href="icon-192.png?v=20261110-dice6">
+    <link rel="manifest" href="manifest.json?v=20261110-combat1">
+    <link rel="apple-touch-icon" href="icon-192.png?v=20261110-combat1">
     <title>TRPG 戰役助手</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
     <script>
-    // cache-bust: 20261110-dice6 — clear old SW/cache, then install self-destructing SW
+    // cache-bust: 20261110-combat1 — clear old SW/cache, then install self-destructing SW
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.getRegistrations().then(regs => {
     regs.forEach(r => r.unregister());
@@ -216,6 +216,8 @@ if (window.caches) {
 <nav class="container mx-auto px-2 flex space-x-1 overflow-x-auto custom-scrollbar pb-1">
     <button onclick="switchTab('tab-story')" class="tab-btn bg-gray-700 text-gray-300 px-4 py-2 rounded-t-lg whitespace-nowrap"><i class="fa-solid fa-clipboard-list mr-2"></i>任務板</button>
     <button onclick="switchTab('tab-runsheets')" class="tab-btn bg-gray-700 text-gray-300 px-4 py-2 rounded-t-lg whitespace-nowrap"><i class="fa-solid fa-list-check mr-2"></i>跑團卡</button>
+    <button onclick="switchTab('tab-monsters')" class="tab-btn bg-gray-700 text-gray-300 px-4 py-2 rounded-t-lg whitespace-nowrap"><i class="fa-solid fa-dragon mr-2"></i>怪物速查</button>
+    <button onclick="switchTab('tab-session')" class="tab-btn bg-gray-700 text-gray-300 px-4 py-2 rounded-t-lg whitespace-nowrap"><i class="fa-solid fa-pen-to-square mr-2"></i>場次筆記</button>
     <button onclick="switchTab('tab-locations')" class="tab-btn bg-gray-700 text-gray-300 px-4 py-2 rounded-t-lg whitespace-nowrap"><i class="fa-solid fa-map-pin mr-2"></i>地點與NPC</button>
 <button onclick="switchTab('tab-map')" class="tab-btn bg-gray-700 text-gray-300 px-4 py-2 rounded-t-lg whitespace-nowrap"><i class="fa-solid fa-map mr-2"></i>地圖</button>
     <button onclick="switchTab('tab-timeline')" class="tab-btn bg-gray-700 text-gray-300 px-4 py-2 rounded-t-lg whitespace-nowrap"><i class="fa-solid fa-clock-rotate-left mr-2"></i>時間線</button>
@@ -291,6 +293,54 @@ if (window.caches) {
 </div>
 
         <!-- 地點與 NPC -->
+<!-- 怪物速查卡 -->
+<div id="tab-monsters" class="tab-content max-w-6xl mx-auto pb-16">
+    <div class="bg-white rounded-xl shadow border p-4 sm:p-5 mb-4">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
+            <h2 class="text-lg font-black text-gray-800"><i class="fa-solid fa-dragon mr-2 text-red-600"></i>怪物速查卡</h2>
+            <div class="text-xs text-gray-500 font-bold" id="monster-api-status">資料：尚未載入</div>
+        </div>
+        <p class="text-sm text-gray-600 mb-3">精簡戰鬥卡（AC／HP／攻擊／特性）。資料以 API 方式從 <code class="bg-gray-100 px-1 rounded">data/monsters.json</code> 載入，不塞進 index。</p>
+        <div class="flex flex-wrap gap-2 mb-3 items-center">
+            <input id="monster-search" type="search" placeholder="搜尋中／英名稱…" oninput="renderMonsters()" class="min-h-[44px] flex-1 min-w-[180px] border rounded-lg px-3 font-bold outline-none focus:ring-2 focus:ring-red-300">
+            <select id="monster-module" onchange="renderMonsters()" class="min-h-[44px] border rounded-lg px-3 font-bold bg-white">
+                <option value="all">全部模組</option>
+                <option value="lmop">失落礦坑 LMoP</option>
+                <option value="doip">冰塔峰 DoIP</option>
+                <option value="obelisk">破碎方尖碑</option>
+                <option value="common">通用</option>
+            </select>
+            <button type="button" onclick="reloadMonsters(true)" class="min-h-[44px] px-3 rounded-lg bg-red-50 text-red-800 border border-red-200 font-bold">重新載入</button>
+        </div>
+        <div id="monster-cards" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
+    </div>
+</div>
+
+<!-- 場次筆記 -->
+<div id="tab-session" class="tab-content max-w-4xl mx-auto pb-16">
+    <div class="bg-white rounded-xl shadow border p-4 sm:p-5">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
+            <h2 class="text-lg font-black text-gray-800"><i class="fa-solid fa-pen-to-square mr-2 text-amber-600"></i>場次筆記</h2>
+            <div class="flex flex-wrap gap-2">
+                <button type="button" onclick="exportSessionNotes()" class="min-h-[40px] px-3 rounded-lg bg-slate-100 border font-bold text-sm">匯出文字</button>
+                <button type="button" onclick="clearSessionNotes()" class="min-h-[40px] px-3 rounded-lg bg-red-50 text-red-700 border border-red-200 font-bold text-sm">清空本場</button>
+            </div>
+        </div>
+        <div class="bg-amber-50 border border-amber-100 rounded-xl p-3 mb-4">
+            <div class="flex flex-wrap gap-2 mb-2">
+                <button type="button" onclick="setSessionTag('戰鬥')" class="session-tag min-h-[40px] px-3 rounded-lg text-sm font-bold border bg-red-600 text-white border-red-700" data-tag="戰鬥">戰鬥</button>
+                <button type="button" onclick="setSessionTag('任務')" class="session-tag min-h-[40px] px-3 rounded-lg text-sm font-bold border bg-white text-gray-700" data-tag="任務">任務</button>
+                <button type="button" onclick="setSessionTag('戰利品')" class="session-tag min-h-[40px] px-3 rounded-lg text-sm font-bold border bg-white text-gray-700" data-tag="戰利品">戰利品</button>
+                <button type="button" onclick="setSessionTag('NPC')" class="session-tag min-h-[40px] px-3 rounded-lg text-sm font-bold border bg-white text-gray-700" data-tag="NPC">NPC</button>
+                <button type="button" onclick="setSessionTag('其他')" class="session-tag min-h-[40px] px-3 rounded-lg text-sm font-bold border bg-white text-gray-700" data-tag="其他">其他</button>
+            </div>
+            <textarea id="session-note-input" rows="3" placeholder="例：殺了熊地精隊長、拿到地圖碎片、答應助長老人…" class="w-full border rounded-lg p-3 text-sm font-medium outline-none focus:ring-2 focus:ring-amber-300"></textarea>
+            <button type="button" onclick="addSessionNote()" class="mt-2 w-full min-h-[48px] rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-black shadow">＋ 快速記入</button>
+        </div>
+        <div id="session-notes-list" class="space-y-2"></div>
+    </div>
+</div>
+
         <div id="tab-locations" class="tab-content max-w-6xl mx-auto">
             <div class="mb-4 flex gap-2">
                 <input type="text" id="loc-search" placeholder="搜尋地點或 NPC..." class="w-full md:w-1/3 px-3 py-1.5 border rounded-full text-sm shadow-inner outline-none focus:ring-2 focus:ring-blue-400" onkeyup="renderLocs()">
@@ -2014,7 +2064,7 @@ function saveCurrentNPC() {
     }
     savedNPCs.unshift(currentNPC);
     localStorage.setItem('dm_saved_npcs', JSON.stringify(savedNPCs));
-    renderNpcHistory();
+    renderNpcHistory(); renderSessionNotes(); setSessionTag('戰鬥');
 }
 
 function renderNpcHistory() {
@@ -2052,14 +2102,14 @@ function renderNpcHistory() {
 function deleteNpcHistory(id) {
     savedNPCs = savedNPCs.filter(x => x.id !== id);
     localStorage.setItem('dm_saved_npcs', JSON.stringify(savedNPCs));
-    renderNpcHistory();
+    renderNpcHistory(); renderSessionNotes(); setSessionTag('戰鬥');
 }
 
 function clearNpcHistory() {
     if (confirm('確定要清空所有儲存的 NPC 記錄嗎？')) {
         savedNPCs = [];
         localStorage.removeItem('dm_saved_npcs');
-        renderNpcHistory();
+        renderNpcHistory(); renderSessionNotes(); setSessionTag('戰鬥');
     }
 }
         // =========================================================================
@@ -2322,6 +2372,9 @@ function switchTab(t) {
         b.classList.remove('bg-gray-700', 'text-gray-300');
         b.classList.add('bg-white', 'text-campaign-dark', 'font-bold');
     }
+
+    if (t === 'tab-monsters') loadMonsters();
+    if (t === 'tab-session') renderSessionNotes();
 }
 let savedQuests = JSON.parse(localStorage.getItem('dm_saved_quests') || '{}');
         quests.forEach(q => { if(savedQuests[q.id]) q.completed = savedQuests[q.id]; });
@@ -3589,12 +3642,198 @@ function generateWebDungeon() {
             setTimeout(resetBtn, 3000);
         }
 
+
+        // ===== 怪物速查卡（API / JSON 載入）=====
+        const MONSTER_API = './data/monsters.json?v=20261110-combat1';
+        let monsterData = { monsters: [], modules: [] };
+        let monstersLoaded = false;
+        let monstersLoading = false;
+
+        async function loadMonsters(force = false) {
+            const status = $('monster-api-status');
+            if (monstersLoaded && !force) {
+                renderMonsters();
+                return;
+            }
+            if (monstersLoading) return;
+            monstersLoading = true;
+            if (status) status.textContent = '資料：載入中…';
+            try {
+                const res = await fetch(MONSTER_API, { cache: force ? 'reload' : 'default' });
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                monsterData = await res.json();
+                monstersLoaded = true;
+                if (status) status.textContent = `資料：API OK・${(monsterData.monsters||[]).length} 筆・v${monsterData.version||'?'}`;
+                renderMonsters();
+            } catch (err) {
+                console.error(err);
+                if (status) status.textContent = '資料：載入失敗（檢查 data/monsters.json）';
+                const box = $('monster-cards');
+                if (box) box.innerHTML = `<div class="p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm font-bold">無法載入怪物資料：${err.message}</div>`;
+            } finally {
+                monstersLoading = false;
+            }
+        }
+        window.reloadMonsters = (force) => loadMonsters(!!force);
+
+        function renderMonsters() {
+            const box = $('monster-cards');
+            if (!box) return;
+            const q = (($('monster-search')||{}).value || '').trim().toLowerCase();
+            const mod = (($('monster-module')||{}).value || 'all');
+            let list = monsterData.monsters || [];
+            if (mod !== 'all') list = list.filter(m => (m.modules||[]).includes(mod));
+            if (q) {
+                list = list.filter(m =>
+                    (m.name||'').toLowerCase().includes(q) ||
+                    (m.nameEn||'').toLowerCase().includes(q) ||
+                    (m.where||'').toLowerCase().includes(q)
+                );
+            }
+            if (!list.length) {
+                box.innerHTML = '<div class="text-gray-400 text-sm font-bold p-4 border rounded-xl bg-gray-50">沒有符合的怪物</div>';
+                return;
+            }
+            const modLabel = {
+                lmop: 'LMoP', doip: 'DoIP', obelisk: '方尖碑', common: '通用'
+            };
+            box.innerHTML = list.map(m => {
+                const tags = (m.modules||[]).map(x => `<span class="text-[10px] font-black px-1.5 py-0.5 rounded bg-gray-100 text-gray-600 border">${modLabel[x]||x}</span>`).join(' ');
+                const atks = (m.attacks||[]).map(a => `<li>${a}</li>`).join('');
+                const traits = (m.traits||[]).map(a => `<li>${a}</li>`).join('');
+                return `<div class="rounded-xl border border-red-100 bg-gradient-to-br from-white to-red-50/40 p-4 shadow-sm">
+                    <div class="flex justify-between gap-2 items-start mb-2">
+                        <div>
+                            <div class="font-black text-gray-900 text-lg leading-tight">${m.name}</div>
+                            <div class="text-xs text-gray-500 font-bold">${m.nameEn||''}・${m.type||''}</div>
+                        </div>
+                        <div class="text-right shrink-0">
+                            <div class="text-xs font-black text-red-700 bg-red-100 border border-red-200 rounded-lg px-2 py-1">CR ${m.cr}</div>
+                        </div>
+                    </div>
+                    <div class="flex flex-wrap gap-1 mb-2">${tags}</div>
+                    <div class="grid grid-cols-3 gap-2 mb-2 text-center">
+                        <div class="rounded-lg bg-white border p-2"><div class="text-[10px] text-gray-400 font-bold">AC</div><div class="font-black text-gray-800">${m.ac}</div></div>
+                        <div class="rounded-lg bg-white border p-2 col-span-2"><div class="text-[10px] text-gray-400 font-bold">HP</div><div class="font-black text-gray-800 text-sm">${m.hp}</div></div>
+                    </div>
+                    <div class="text-xs text-gray-600 mb-2"><b>速度</b> ${m.speed||'—'}　<b>屬性</b> ${m.stats||'—'}</div>
+                    <div class="text-xs mb-2"><b class="text-red-700">攻擊</b><ul class="list-disc pl-4 mt-1 space-y-0.5 text-gray-700">${atks}</ul></div>
+                    <div class="text-xs mb-2"><b class="text-indigo-700">特性</b><ul class="list-disc pl-4 mt-1 space-y-0.5 text-gray-700">${traits}</ul></div>
+                    <div class="text-[11px] text-gray-500 font-bold border-t pt-2">出現：${m.where||'—'}</div>
+                    <button type="button" onclick="addSessionNoteFromMonster('${(m.name||'').replace(/'/g, "\\'")}')" class="mt-2 w-full min-h-[40px] rounded-lg bg-white border font-bold text-sm hover:bg-amber-50">記入場次筆記</button>
+                </div>`;
+            }).join('');
+        }
+
+        // ===== 場次筆記（localStorage）=====
+        let sessionTag = '戰鬥';
+        function getSessionNotes() {
+            try { return JSON.parse(localStorage.getItem('dm_session_notes') || '[]'); }
+            catch { return []; }
+        }
+        function saveSessionNotes(list) {
+            localStorage.setItem('dm_session_notes', JSON.stringify(list));
+        }
+        window.setSessionTag = (tag) => {
+            sessionTag = tag;
+            document.querySelectorAll('.session-tag').forEach(btn => {
+                const on = btn.dataset.tag === tag;
+                btn.classList.toggle('bg-red-600', on && tag === '戰鬥');
+                btn.classList.toggle('bg-blue-600', on && tag === '任務');
+                btn.classList.toggle('bg-yellow-500', on && tag === '戰利品');
+                btn.classList.toggle('bg-indigo-600', on && tag === 'NPC');
+                btn.classList.toggle('bg-slate-700', on && tag === '其他');
+                btn.classList.toggle('text-white', on);
+                btn.classList.toggle('border-transparent', on);
+                btn.classList.toggle('bg-white', !on);
+                btn.classList.toggle('text-gray-700', !on);
+            });
+        };
+        window.addSessionNote = () => {
+            const input = $('session-note-input');
+            const text = (input && input.value || '').trim();
+            if (!text) return;
+            const list = getSessionNotes();
+            list.unshift({
+                id: Date.now(),
+                tag: sessionTag,
+                text,
+                at: new Date().toISOString()
+            });
+            saveSessionNotes(list);
+            if (input) input.value = '';
+            renderSessionNotes();
+        };
+        window.addSessionNoteFromMonster = (name) => {
+            const list = getSessionNotes();
+            list.unshift({
+                id: Date.now(),
+                tag: '戰鬥',
+                text: `遭遇／查閱：${name}`,
+                at: new Date().toISOString()
+            });
+            saveSessionNotes(list);
+            const tip = $('monster-api-status');
+            if (tip) tip.textContent = `已記入筆記：${name}`;
+        };
+        window.deleteSessionNote = (id) => {
+            saveSessionNotes(getSessionNotes().filter(n => n.id !== id));
+            renderSessionNotes();
+        };
+        window.clearSessionNotes = () => {
+            if (!confirm('確定清空本場全部筆記？')) return;
+            saveSessionNotes([]);
+            renderSessionNotes();
+        };
+        window.exportSessionNotes = () => {
+            const list = getSessionNotes();
+            const lines = list.map(n => {
+                const t = new Date(n.at).toLocaleString('zh-HK', { hour12: false });
+                return `[${t}] [${n.tag}] ${n.text}`;
+            });
+            const blob = new Blob([lines.join('\n') || '（尚無筆記）'], { type: 'text/plain;charset=utf-8' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `session-notes-${new Date().toISOString().slice(0,10)}.txt`;
+            a.click();
+            URL.revokeObjectURL(a.href);
+        };
+        function renderSessionNotes() {
+            const box = $('session-notes-list');
+            if (!box) return;
+            const list = getSessionNotes();
+            if (!list.length) {
+                box.innerHTML = '<div class="text-gray-400 text-sm font-bold p-4 border rounded-xl bg-gray-50">尚無筆記。開戰／領任務／拿戰利品時快速記入。</div>';
+                return;
+            }
+            const color = {
+                '戰鬥': 'border-l-red-500',
+                '任務': 'border-l-blue-500',
+                '戰利品': 'border-l-yellow-500',
+                'NPC': 'border-l-indigo-500',
+                '其他': 'border-l-slate-500'
+            };
+            box.innerHTML = list.map(n => {
+                const t = new Date(n.at).toLocaleString('zh-HK', { hour12: false });
+                return `<div class="border rounded-xl bg-white p-3 border-l-4 ${color[n.tag]||'border-l-gray-400'} shadow-sm">
+                    <div class="flex justify-between gap-2 items-start">
+                        <div>
+                            <div class="text-[11px] font-black text-gray-500 mb-1"><span class="px-1.5 py-0.5 rounded bg-gray-100">${n.tag}</span> ${t}</div>
+                            <div class="text-sm text-gray-800 font-medium whitespace-pre-wrap">${n.text.replace(/</g,'&lt;')}</div>
+                        </div>
+                        <button type="button" onclick="deleteSessionNote(${n.id})" class="text-gray-400 hover:text-red-600 font-bold min-h-[36px] min-w-[36px]">刪</button>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+
 window.onload = () => {
     // 來自 DM_index.html 的初始化
     initArena(); genOdds(); 
     renderQuests(); renderLocs(); renderSpells(); renderStore(); renderPlayers(); renderRunSheets();
     updateDiceCountUI(); initDice3D(); renderDicePlaceholders(); 
-    renderNpcHistory(); 
+    renderNpcHistory(); renderSessionNotes(); setSessionTag('戰鬥'); 
     
     // 預填並載入時間線 API
     const urlEl = document.getElementById('apiUrl');
@@ -3710,7 +3949,7 @@ window.onload = () => {
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     // Register self-destructing SW so any old caching SW is replaced and cleared
-    navigator.serviceWorker.register('./sw.js?v=20261110-dice6')
+    navigator.serviceWorker.register('./sw.js?v=20261110-combat1')
       .then(reg => console.log('SW clear registered', reg.scope))
       .catch(err => console.log('SW clear failed', err));
   });
