@@ -9,14 +9,14 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="戰役助手">
-    <link rel="manifest" href="manifest.json?v=20261110-combat3">
-    <link rel="apple-touch-icon" href="icon-192.png?v=20261110-combat3">
+    <link rel="manifest" href="manifest.json?v=20261110-combat4">
+    <link rel="apple-touch-icon" href="icon-192.png?v=20261110-combat4">
     <title>TRPG 戰役助手</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
     <script>
-    // cache-bust: 20261110-combat3 — clear old SW/cache, then install self-destructing SW
+    // cache-bust: 20261110-combat4 — clear old SW/cache, then install self-destructing SW
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.getRegistrations().then(regs => {
     regs.forEach(r => r.unregister());
@@ -217,10 +217,10 @@ if (window.caches) {
     <button onclick="switchTab('tab-story')" class="tab-btn bg-gray-700 text-gray-300 px-4 py-2 rounded-t-lg whitespace-nowrap"><i class="fa-solid fa-clipboard-list mr-2"></i>任務板</button>
     <button onclick="switchTab('tab-runsheets')" class="tab-btn bg-gray-700 text-gray-300 px-4 py-2 rounded-t-lg whitespace-nowrap"><i class="fa-solid fa-list-check mr-2"></i>跑團卡</button>
     <button onclick="switchTab('tab-monsters')" class="tab-btn bg-gray-700 text-gray-300 px-4 py-2 rounded-t-lg whitespace-nowrap"><i class="fa-solid fa-dragon mr-2"></i>怪物速查</button>
+    <button onclick="switchTab('tab-combat')" class="tab-btn bg-gray-700 text-gray-300 px-4 py-2 rounded-t-lg whitespace-nowrap"><i class="fa-solid fa-swords mr-2"></i>戰鬥</button>
     <button onclick="switchTab('tab-session')" class="tab-btn bg-gray-700 text-gray-300 px-4 py-2 rounded-t-lg whitespace-nowrap"><i class="fa-solid fa-pen-to-square mr-2"></i>場次筆記</button>
     <button onclick="switchTab('tab-locations')" class="tab-btn bg-gray-700 text-gray-300 px-4 py-2 rounded-t-lg whitespace-nowrap"><i class="fa-solid fa-map-pin mr-2"></i>地點與NPC</button>
 <button onclick="switchTab('tab-map')" class="tab-btn bg-gray-700 text-gray-300 px-4 py-2 rounded-t-lg whitespace-nowrap"><i class="fa-solid fa-map mr-2"></i>地圖</button>
-    <button onclick="switchTab('tab-combat')" class="tab-btn bg-gray-700 text-gray-300 px-4 py-2 rounded-t-lg whitespace-nowrap"><i class="fa-solid fa-swords mr-2"></i>戰鬥</button>
     <button onclick="switchTab('tab-timeline')" class="tab-btn bg-gray-700 text-gray-300 px-4 py-2 rounded-t-lg whitespace-nowrap"><i class="fa-solid fa-clock-rotate-left mr-2"></i>時間線</button>
 
     
@@ -317,7 +317,45 @@ if (window.caches) {
     </div>
 </div>
 
-<!-- 場次筆記 -->
+<!-- 戰鬥先攻／狀態追蹤 -->
+<div id="tab-combat" class="tab-content max-w-4xl mx-auto pb-16">
+  <div class="bg-white rounded-xl shadow border p-4 sm:p-5">
+    <div class="flex flex-wrap items-center justify-between gap-2 mb-3 border-b pb-3">
+      <h2 class="text-xl font-black text-gray-800"><i class="fa-solid fa-swords mr-2 text-red-600"></i>戰鬥追蹤</h2>
+      <div class="flex flex-wrap gap-2">
+        <button type="button" onclick="combatPrevTurn()" class="min-h-[48px] min-w-[48px] px-3 rounded-xl bg-slate-100 border font-black text-lg">‹</button>
+        <button type="button" onclick="combatNextTurn()" class="min-h-[48px] px-4 rounded-xl bg-red-600 text-white font-black shadow hover:bg-red-700">下一回合 ▶</button>
+        <button type="button" onclick="combatEndFight()" class="min-h-[48px] px-3 rounded-xl bg-red-50 text-red-700 border border-red-200 font-bold">結束戰鬥</button>
+      </div>
+    </div>
+
+    <div id="combat-turn-banner" class="mb-4 rounded-xl bg-slate-900 text-white p-3 flex flex-wrap items-center justify-between gap-2">
+      <div class="font-black text-lg">第 <span id="combat-round">1</span> 輪</div>
+      <div class="text-sm font-bold text-amber-300" id="combat-now">尚未開始 — 新增單位後按「下一回合」</div>
+    </div>
+
+    <div class="flex flex-wrap gap-2 mb-4 bg-gray-50 p-2.5 rounded-xl border items-center">
+      <input type="number" id="c-init" placeholder="先攻" class="min-h-[44px] w-16 px-2 border rounded-lg text-center font-black">
+      <input type="text" id="c-name" placeholder="名稱" class="min-h-[44px] flex-1 min-w-[120px] px-3 border rounded-lg font-bold">
+      <input type="number" id="c-ac" placeholder="AC" class="min-h-[44px] w-16 px-2 border rounded-lg text-center text-blue-800 font-bold">
+      <input type="number" id="c-hp" placeholder="HP" class="min-h-[44px] w-16 px-2 border rounded-lg text-center text-red-600 font-bold">
+      <input type="number" id="c-mhp" placeholder="Max" class="min-h-[44px] w-16 px-2 border rounded-lg text-center text-gray-600 font-bold" title="最大HP">
+      <select id="c-fac" class="min-h-[44px] px-2 border rounded-lg text-sm font-bold">
+        <option value="e">敵方</option>
+        <option value="p">友方</option>
+      </select>
+      <button type="button" onclick="addCmb()" class="min-h-[44px] bg-green-600 text-white px-4 rounded-lg font-black hover:bg-green-700">＋ 新增</button>
+    </div>
+
+    <div class="mb-3 bg-gray-800 text-gray-300 rounded-xl p-2 text-xs font-mono h-24 overflow-y-auto" id="combat-log">
+      <div class="text-gray-500 italic">系統：戰鬥紀錄已準備就緒...</div>
+    </div>
+    <div class="text-xs text-gray-500 mb-2 font-bold">提示：負數傷害＝治療｜狀態可點選切換｜目前回合會高亮</div>
+    <div class="space-y-2" id="combat-list"></div>
+  </div>
+</div>
+
+
 <div id="tab-session" class="tab-content max-w-4xl mx-auto pb-16">
     <div class="bg-white rounded-xl shadow border p-4 sm:p-5">
         <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
@@ -390,7 +428,7 @@ if (window.caches) {
             </div>
         </div>
 
-<!-- 🆕 戰鬥先攻助手 (獨立分頁) -->
+<!-- 採集小遊戲 -->
 <div id="tab-minigames" class="tab-content max-w-6xl mx-auto pb-10">
     <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start">
         
@@ -3829,7 +3867,7 @@ function generateWebDungeon() {
 
 
         // ===== 怪物速查卡（API / JSON 載入）=====
-        const MONSTER_API = './data/monsters.json?v=20261110-combat3';
+        const MONSTER_API = './data/monsters.json?v=20261110-combat4';
         let monsterData = { monsters: [], modules: [] };
         let monstersLoaded = false;
         let monstersLoading = false;
@@ -4039,44 +4077,6 @@ window.onload = () => {
 
     <!-- 地圖 Tab (DM 端) -->
     
-<!-- 戰鬥先攻／狀態追蹤 -->
-<div id="tab-combat" class="tab-content max-w-4xl mx-auto pb-16">
-  <div class="bg-white rounded-xl shadow border p-4 sm:p-5">
-    <div class="flex flex-wrap items-center justify-between gap-2 mb-3 border-b pb-3">
-      <h2 class="text-xl font-black text-gray-800"><i class="fa-solid fa-swords mr-2 text-red-600"></i>戰鬥追蹤</h2>
-      <div class="flex flex-wrap gap-2">
-        <button type="button" onclick="combatPrevTurn()" class="min-h-[48px] min-w-[48px] px-3 rounded-xl bg-slate-100 border font-black text-lg">‹</button>
-        <button type="button" onclick="combatNextTurn()" class="min-h-[48px] px-4 rounded-xl bg-red-600 text-white font-black shadow hover:bg-red-700">下一回合 ▶</button>
-        <button type="button" onclick="combatEndFight()" class="min-h-[48px] px-3 rounded-xl bg-red-50 text-red-700 border border-red-200 font-bold">結束戰鬥</button>
-      </div>
-    </div>
-
-    <div id="combat-turn-banner" class="mb-4 rounded-xl bg-slate-900 text-white p-3 flex flex-wrap items-center justify-between gap-2">
-      <div class="font-black text-lg">第 <span id="combat-round">1</span> 輪</div>
-      <div class="text-sm font-bold text-amber-300" id="combat-now">尚未開始 — 新增單位後按「下一回合」</div>
-    </div>
-
-    <div class="flex flex-wrap gap-2 mb-4 bg-gray-50 p-2.5 rounded-xl border items-center">
-      <input type="number" id="c-init" placeholder="先攻" class="min-h-[44px] w-16 px-2 border rounded-lg text-center font-black">
-      <input type="text" id="c-name" placeholder="名稱" class="min-h-[44px] flex-1 min-w-[120px] px-3 border rounded-lg font-bold">
-      <input type="number" id="c-ac" placeholder="AC" class="min-h-[44px] w-16 px-2 border rounded-lg text-center text-blue-800 font-bold">
-      <input type="number" id="c-hp" placeholder="HP" class="min-h-[44px] w-16 px-2 border rounded-lg text-center text-red-600 font-bold">
-      <input type="number" id="c-mhp" placeholder="Max" class="min-h-[44px] w-16 px-2 border rounded-lg text-center text-gray-600 font-bold" title="最大HP">
-      <select id="c-fac" class="min-h-[44px] px-2 border rounded-lg text-sm font-bold">
-        <option value="e">敵方</option>
-        <option value="p">友方</option>
-      </select>
-      <button type="button" onclick="addCmb()" class="min-h-[44px] bg-green-600 text-white px-4 rounded-lg font-black hover:bg-green-700">＋ 新增</button>
-    </div>
-
-    <div class="mb-3 bg-gray-800 text-gray-300 rounded-xl p-2 text-xs font-mono h-24 overflow-y-auto" id="combat-log">
-      <div class="text-gray-500 italic">系統：戰鬥紀錄已準備就緒...</div>
-    </div>
-    <div class="text-xs text-gray-500 mb-2 font-bold">提示：負數傷害＝治療｜狀態可點選切換｜目前回合會高亮</div>
-    <div class="space-y-2" id="combat-list"></div>
-  </div>
-</div>
-
 <div id="tab-map" class="tab-content p-4">
         <div class="bg-white rounded-lg shadow p-4 mb-4">
             <h2 class="text-xl font-bold mb-2">地圖管理</h2>
@@ -4161,7 +4161,7 @@ window.onload = () => {
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     // Register self-destructing SW so any old caching SW is replaced and cleared
-    navigator.serviceWorker.register('./sw.js?v=20261110-combat3')
+    navigator.serviceWorker.register('./sw.js?v=20261110-combat4')
       .then(reg => console.log('SW clear registered', reg.scope))
       .catch(err => console.log('SW clear failed', err));
   });
