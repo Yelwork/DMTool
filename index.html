@@ -9,14 +9,14 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="戰役助手">
-    <link rel="manifest" href="manifest.json?v=20261111-playercombat3">
-    <link rel="apple-touch-icon" href="icon-192.png?v=20261111-playercombat3">
+    <link rel="manifest" href="manifest.json?v=20261111-combatplayers1">
+    <link rel="apple-touch-icon" href="icon-192.png?v=20261111-combatplayers1">
     <title>TRPG 戰役助手</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
     <script>
-    // cache-bust: 20261111-playercombat3 — clear old SW/cache, then install self-destructing SW
+    // cache-bust: 20261111-combatplayers1 — clear old SW/cache, then install self-destructing SW
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.getRegistrations().then(regs => {
     regs.forEach(r => r.unregister());
@@ -217,7 +217,7 @@ if (window.caches) {
     <button onclick="switchTab('tab-story')" class="tab-btn bg-gray-700 text-gray-300 px-4 py-2 rounded-t-lg whitespace-nowrap"><i class="fa-solid fa-clipboard-list mr-2"></i>任務板</button>
     <button onclick="switchTab('tab-runsheets')" class="tab-btn bg-gray-700 text-gray-300 px-4 py-2 rounded-t-lg whitespace-nowrap"><i class="fa-solid fa-list-check mr-2"></i>跑團卡</button>
     <button onclick="switchTab('tab-monsters')" class="tab-btn bg-gray-700 text-gray-300 px-4 py-2 rounded-t-lg whitespace-nowrap"><i class="fa-solid fa-dragon mr-2"></i>怪物速查</button>
-    <button onclick="switchTab('tab-combat')" class="tab-btn bg-gray-700 text-gray-300 px-4 py-2 rounded-t-lg whitespace-nowrap"><i class="fa-solid fa-swords mr-2"></i>戰鬥</button>
+    <button onclick="switchTab('tab-combat')" class="tab-btn bg-gray-700 text-gray-300 px-4 py-2 rounded-t-lg whitespace-nowrap"><i class="fa-solid fa-swords mr-2"></i>戰鬥／玩家</button>
     <button onclick="switchTab('tab-session')" class="tab-btn bg-gray-700 text-gray-300 px-4 py-2 rounded-t-lg whitespace-nowrap"><i class="fa-solid fa-pen-to-square mr-2"></i>場次筆記</button>
     <button onclick="switchTab('tab-locations')" class="tab-btn bg-gray-700 text-gray-300 px-4 py-2 rounded-t-lg whitespace-nowrap"><i class="fa-solid fa-map-pin mr-2"></i>地點與NPC</button>
 <button onclick="switchTab('tab-map')" class="tab-btn bg-gray-700 text-gray-300 px-4 py-2 rounded-t-lg whitespace-nowrap"><i class="fa-solid fa-map mr-2"></i>地圖</button>
@@ -230,7 +230,6 @@ if (window.caches) {
     
     <button onclick="switchTab('tab-tools')" class="tab-btn active bg-white text-campaign-dark px-4 py-2 rounded-t-lg font-bold whitespace-nowrap"><i class="fa-solid fa-dice-d20 mr-2"></i>DM 工具</button>
     <button onclick="switchTab('tab-houserules')" class="tab-btn bg-gray-700 text-gray-300 px-4 py-2 rounded-t-lg whitespace-nowrap"><i class="fa-solid fa-scroll mr-2"></i>House Rules</button>
-    <button onclick="switchTab('tab-players')" class="tab-btn bg-gray-700 text-gray-300 px-4 py-2 rounded-t-lg whitespace-nowrap"><i class="fa-solid fa-id-card mr-2"></i>玩家面板</button>
     <button onclick="switchTab('tab-ref')" class="tab-btn bg-gray-700 text-gray-300 px-4 py-2 rounded-t-lg whitespace-nowrap"><i class="fa-solid fa-book-bookmark mr-2"></i>5e 規則速查</button>
 	<button onclick="switchTab('tab-minigames')" class="tab-btn bg-gray-700 text-gray-300 px-4 py-2 rounded-t-lg whitespace-nowrap"><i class="fa-solid fa-gamepad mr-2"></i>採集小遊戲</button>
 </nav>
@@ -318,8 +317,29 @@ if (window.caches) {
 </div>
 
 <!-- 戰鬥先攻／狀態追蹤 -->
-<div id="tab-combat" class="tab-content max-w-4xl mx-auto pb-16">
-  <div class="bg-white rounded-xl shadow border p-4 sm:p-5">
+<div id="tab-combat" class="tab-content max-w-7xl mx-auto pb-16">
+
+  <!-- 玩家面板（已併入戰鬥頁） -->
+  <div id="combat-players-section" class="mb-6">
+    <div class="mb-4 flex flex-wrap justify-between items-center gap-2 bg-white p-3 rounded-xl shadow border-l-4 border-green-500">
+      <div>
+        <h2 class="text-xl font-bold"><i class="fa-solid fa-users mr-2 text-green-700"></i>極簡角色面板</h2>
+        <p class="text-xs text-gray-500 mt-0.5">勾選角色、填好先攻後一鍵加入下方戰鬥表（玩家手動輸入；怪物自動骰先攻）</p>
+        <div class="mt-2 flex flex-wrap items-center gap-2 text-xs font-bold text-gray-600">
+          <button type="button" onclick="setAllPlayerCombatTicks(true)" class="min-h-[36px] px-2.5 rounded-lg bg-gray-100 border">全選</button>
+          <button type="button" onclick="setAllPlayerCombatTicks(false)" class="min-h-[36px] px-2.5 rounded-lg bg-gray-100 border">全不選</button>
+          <span id="player-combat-pick-count" class="px-2 py-1 rounded-lg bg-red-50 text-red-700 border border-red-100">已選 0 人</span>
+        </div>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <button type="button" onclick="addSelectedPlayersToCombat()" id="btn-add-selected-combat" class="min-h-[44px] px-4 py-2 bg-red-600 text-white rounded-xl shadow font-bold hover:bg-red-700 transition"><i class="fa-solid fa-swords mr-1"></i>加入已選戰鬥</button>
+        <button type="button" onclick="addP()" class="min-h-[44px] px-4 py-2 bg-green-600 text-white rounded-xl shadow font-bold hover:bg-green-700 transition"><i class="fa-solid fa-plus mr-1"></i>新增角色</button>
+      </div>
+    </div>
+    <div id="players-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"></div>
+  </div>
+
+  <div id="combat-tracker-section" class="bg-white rounded-xl shadow border p-4 sm:p-5">
     <div class="flex flex-wrap items-center justify-between gap-2 mb-3 border-b pb-3">
       <h2 class="text-xl font-black text-gray-800"><i class="fa-solid fa-swords mr-2 text-red-600"></i>戰鬥追蹤</h2>
       <div class="flex flex-wrap gap-2">
@@ -795,26 +815,6 @@ if (window.caches) {
 
                 </div>
             </div>
-        </div>
-
-        <!-- 玩家面板 -->
-        <div id="tab-players" class="tab-content max-w-7xl mx-auto">
-            <div class="mb-4 flex flex-wrap justify-between items-center gap-2 bg-white p-3 rounded-xl shadow border-l-4 border-green-500">
-                <div>
-                  <h2 class="text-xl font-bold"><i class="fa-solid fa-users mr-2 text-green-700"></i>極簡角色面板</h2>
-                  <p class="text-xs text-gray-500 mt-0.5">勾選角色、填好先攻後一鍵加入「戰鬥」（玩家手動輸入；怪物自動骰先攻）</p>
-                  <div class="mt-2 flex flex-wrap items-center gap-2 text-xs font-bold text-gray-600">
-                    <button type="button" onclick="setAllPlayerCombatTicks(true)" class="min-h-[36px] px-2.5 rounded-lg bg-gray-100 border">全選</button>
-                    <button type="button" onclick="setAllPlayerCombatTicks(false)" class="min-h-[36px] px-2.5 rounded-lg bg-gray-100 border">全不選</button>
-                    <span id="player-combat-pick-count" class="px-2 py-1 rounded-lg bg-red-50 text-red-700 border border-red-100">已選 0 人</span>
-                  </div>
-                </div>
-                <div class="flex flex-wrap gap-2">
-                  <button type="button" onclick="addSelectedPlayersToCombat()" id="btn-add-selected-combat" class="min-h-[44px] px-4 py-2 bg-red-600 text-white rounded-xl shadow font-bold hover:bg-red-700 transition"><i class="fa-solid fa-swords mr-1"></i>加入已選戰鬥</button>
-                  <button type="button" onclick="addP()" class="min-h-[44px] px-4 py-2 bg-green-600 text-white rounded-xl shadow font-bold hover:bg-green-700 transition"><i class="fa-solid fa-plus mr-1"></i>新增角色</button>
-                </div>
-            </div>
-            <div id="players-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pb-10"></div>
         </div>
 
 <!-- 🆕 5e 規則速查頁面 (Quick Reference) -->
@@ -1893,6 +1893,14 @@ function clearNpcHistory() {
 
 
 function switchTab(t) {
+    // legacy: 玩家面板已併入戰鬥頁
+    if (t === 'tab-players') {
+        switchTab('tab-combat');
+        const sec = document.getElementById('combat-players-section');
+        if (sec) setTimeout(() => sec.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+        return;
+    }
+
     // 1. 隱藏所有的分頁內容
     document.querySelectorAll('.tab-content').forEach(e => e.classList.remove('active'));
     
@@ -1917,8 +1925,13 @@ function switchTab(t) {
     if (t === 'tab-session') renderSessionNotes();
     if (t === 'tab-spells') loadSpells();
     if (t === 'tab-store') loadStore();
-    if (t === 'tab-combat') { renderCmb(); renderCmbLog(); }
+    if (t === 'tab-combat') {
+        renderPlayers();
+        renderCmb();
+        renderCmbLog();
+    }
 }
+
 let savedQuests = JSON.parse(localStorage.getItem('dm_saved_quests') || '{}');
         quests.forEach(q => { if(savedQuests[q.id]) q.completed = savedQuests[q.id]; });
 
@@ -2781,6 +2794,8 @@ let cmbs = [];
             if (added) {
                 renderCmb();
                 switchTab('tab-combat');
+                const sec = document.getElementById('combat-tracker-section');
+                if (sec) setTimeout(() => sec.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
             } else {
                 alert('沒有新增（可能都已在戰鬥列表）');
             }
@@ -2791,6 +2806,7 @@ let cmbs = [];
             setAllPlayerCombatTicks(true);
             addSelectedPlayersToCombat();
         };
+
 
         window.modCmb = (id, k, v) => {
             const c = cmbs.find(x => x.id === id);
@@ -3535,7 +3551,7 @@ function generateWebDungeon() {
 
 
         // ===== 怪物速查卡（API / JSON 載入）=====
-        const MONSTER_API = './data/monsters.json?v=20261111-playercombat3';
+        const MONSTER_API = './data/monsters.json?v=20261111-combatplayers1';
         let monsterData = { monsters: [], modules: [] };
         let monstersLoaded = false;
         let monstersLoading = false;
@@ -3568,8 +3584,8 @@ function generateWebDungeon() {
         window.reloadMonsters = (force) => loadMonsters(!!force);
 
         // ===== 法術庫 / 萬物商店（Google Sheet API GET）=====
-        const DEFAULT_SPELLS_API = './data/spells.json?v=20261111-playercombat3';
-        const DEFAULT_STORE_API = './data/store.json?v=20261111-playercombat3';
+        const DEFAULT_SPELLS_API = './data/spells.json?v=20261111-combatplayers1';
+        const DEFAULT_STORE_API = './data/store.json?v=20261111-combatplayers1';
         let spellsLoaded = false, spellsLoading = false;
         let storeLoaded = false, storeLoading = false;
 
@@ -3958,7 +3974,7 @@ window.onload = () => {
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     // Register self-destructing SW so any old caching SW is replaced and cleared
-    navigator.serviceWorker.register('./sw.js?v=20261111-playercombat3')
+    navigator.serviceWorker.register('./sw.js?v=20261111-combatplayers1')
       .then(reg => console.log('SW clear registered', reg.scope))
       .catch(err => console.log('SW clear failed', err));
   });
