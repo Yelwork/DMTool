@@ -9,14 +9,14 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="戰役助手">
-    <link rel="manifest" href="manifest.json?v=20261110-wolf1">
-    <link rel="apple-touch-icon" href="icon-192.png?v=20261110-wolf1">
+    <link rel="manifest" href="manifest.json?v=20261110-hag1">
+    <link rel="apple-touch-icon" href="icon-192.png?v=20261110-hag1">
     <title>TRPG 戰役助手</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
     <script>
-    // cache-bust: 20261110-wolf1 — clear old SW/cache, then install self-destructing SW
+    // cache-bust: 20261110-hag1 — clear old SW/cache, then install self-destructing SW
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.getRegistrations().then(regs => {
     regs.forEach(r => r.unregister());
@@ -2252,28 +2252,28 @@ function clearNpcHistory() {
             tips: ["終局前先問玩家想保護誰／犧牲什麼。","PDF：Briny Maze / Endless Void / Wrapping Up。","原文朗讀框仍以 PDF 為準。"]
           },
           {
-            id: "wolf1", book: "1人團", title: "狼魂｜靈魂收集者", pages: "交接文件 2026-11-10", level: "凡戴爾支線",
-            goal: "呀甘＆小蕉的狼魂向法師求救；調查凡戴林占卜師（鬼婆），在交易、救狼、Sildar／玻璃杖之間做出抉擇。",
+            id: "wolf1", book: "1人團", title: "狼魂｜靈魂收集者", pages: "交接文件 2026-11-10（暫定，可再修）", level: "施琳 1人團",
+            goal: "施琳午夜抉擇：狼魂求救→取材料→銀霧古泉與盲眼索拉（鬼婆）交易→「最後一撲」只救一魂；之後可銜接打鬼婆時的死靈玻璃杖機制。",
             quests: [],
-            npcs: ["呀甘（狼魂）","小蕉（狼魂）","占卜師／鬼婆","玻璃杖（靈魂）","席爾達·哈爾溫特","法師（PC）"],
+            npcs: ["施琳（PC）","呀甘（狼魂）","小蕉（狼魂）","盲眼索拉／占卜師","死靈玻璃杖（伊亞諾）","西爾達／席爾達","修女加雷爾"],
             flow: [
-              {id:"w1a", t:"狼魂現身", d:"呀甘＆小蕉以靈魂體向法師求救；說明已死一週、途中被攔截、靠連結找到法師"},
-              {id:"w1b", t:"調查占卜師", d:"凡戴林表面占卜師＝鬼婆；她攔截星界靈魂、用占卜找弱點、交易把人變棋子"},
-              {id:"w1c", t:"第一次交易壓力", d:"她願給「救狼方法」，代價＝未來一個承諾（或記憶／傳訊）；強調時間壓力"},
-              {id:"w1d", t:"Sildar 異常", d:"發現席爾達行為不對勁；鬼婆已攔截玻璃杖靈魂並要脅他"},
-              {id:"w1e", t:"玻璃杖籌碼", d:"鬼婆話術：「你喜歡她…她也喜歡你…可惜沒說…現在想告訴她嗎？」"},
-              {id:"w1f", t:"道德抉擇關", d:"①跟不跟鬼婆交易 ②告不告訴席爾達 ③救狼 vs 阻止鬼婆 ④玻璃杖：救／安息／利用"},
-              {id:"w1g", t:"材料與儀式", d:"若走救狼線：星銀粉、狼的遺物、月光草、法師的血"},
-              {id:"w1h", t:"後果落地", d:"依抉擇結算：欠人情／狼消散／席爾達暴走／鬼婆逃走或失去籌碼；連回主線 Boss"}
+              {id:"w1a", t:"客棧求救", d:"狼魂死後第7–9天；每日僅剩約10分鐘顯現（可用真實沙漏）。抗衡靈魂耗 1d4 當前HP 或 ≥1環法術位"},
+              {id:"w1b", t:"神殿指引", d:"修女加雷爾確認四要素：星銀粉、狼遺物、月光草、法師血；給星銀粉與防護道具"},
+              {id:"w1c", t:"地精舊營地", d:"取遺物（磨牙項圈、銅鈴鐺）；雨水窪＋家規「水＋電 +1d4」打食屍鬼"},
+              {id:"w1d", t:"銀霧古泉·信差層", d:"盲眼占卜師（鬼婆分身）第一層交易：命施琳帶加密口信給西爾達（埋動搖伏線）"},
+              {id:"w1e", t:"銀霧古泉·承諾層", d:"第二層：立誓未來為鬼婆解讀古文／開門（波浪回音洞／幽暗地域伏筆）"},
+              {id:"w1f", t:"高潮「最後一撲」", d:"生門僅容一魂；喊出一個名字。未獲選者撞入生門助另一魂掙脫；生還狼→靈體魔寵"},
+              {id:"w1g", t:"（暫）打鬼婆本體", d:"捏碎無火黑鐵提燈→放出死靈玻璃杖守衛。火屬性可降其冰霜護甲AC；死靈奧術飛彈；自爆餘波＝力場＋寒冷AOE；水窪可觸發雷電家規"},
+              {id:"w1h", t:"玻璃杖解脫", d:"擊殺後冰霜碎裂、靈魂清明；遺言給西爾達（老地方油燈）後赴迷霧位面；西爾達走出消沉"}
             ],
             tips: [
-              "核心衝突：要不要跟鬼婆交易來救狼魂。",
-              "時間壓力：1–3天可顯現1小時 → 4–6天30分 → 7–9天10分 → 10天後可能永久消散。",
+              "【暫定可再修】鬼婆化身＝盲眼索拉：灰白布纏眼（動星界時滲血）、銀白髮＋烏鴉／幼狼趾骨簪、蠟白膚／指尖發黑、深紫炭灰披肩繡星界束縛陣；氣味＝融雪＋腐葉＋鐵鏽。",
+              "招牌：無火黑鐵提燈（幽藍星界霧，囚小蕉／呀甘／玻璃杖）；骨粉塔羅（薄冰觸感，試探七弦琴／心理操控）。",
+              "提燈內玻璃杖：混亂殘缺＋冰封侵蝕，只剩破碎夢囈——先別劇透完整情報。",
+              "死靈玻璃杖（暫）：冰霜護甲（火可降AC）、死靈奧術飛彈、自爆餘波（力場＋寒冷）；踩水窪可 +1d4 雷電（家規）。",
               "操控手法：後悔／希望／恐懼／逐步加深／切斷退路。",
-              "靈魂規則：死亡→星界→迷霧位面；復活需靈魂自由且願意；鬼婆在到達 Fugue Plane 前攔截。",
-              "主線連結：鬼婆＝Boss；散塔林／冰／死；曾騙凱爾；靈魂＝力量來源。",
-              "待補：鬼婆外貌、玻璃杖靈魂狀態、席爾達被逼做的具體事、交易代價細節、失敗後果。",
-              "1人團節奏：每次只逼一個抉擇；狼魂顯現時限當倒數時鐘用。"
+              "待補：西爾達被逼的具體阻撓、拒絕／違約懲罰、施琳等級與法術表。",
+              "1人團節奏：每次只逼一個抉擇；10分鐘顯現當倒數時鐘。"
             ]
           }
         ];
@@ -3674,7 +3674,7 @@ function generateWebDungeon() {
 
 
         // ===== 怪物速查卡（API / JSON 載入）=====
-        const MONSTER_API = './data/monsters.json?v=20261110-wolf1';
+        const MONSTER_API = './data/monsters.json?v=20261110-hag1';
         let monsterData = { monsters: [], modules: [] };
         let monstersLoaded = false;
         let monstersLoading = false;
@@ -3979,7 +3979,7 @@ window.onload = () => {
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     // Register self-destructing SW so any old caching SW is replaced and cleared
-    navigator.serviceWorker.register('./sw.js?v=20261110-wolf1')
+    navigator.serviceWorker.register('./sw.js?v=20261110-hag1')
       .then(reg => console.log('SW clear registered', reg.scope))
       .catch(err => console.log('SW clear failed', err));
   });
