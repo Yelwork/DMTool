@@ -9,14 +9,14 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="戰役助手">
-    <link rel="manifest" href="manifest.json?v=20261111-playerscompact1">
-    <link rel="apple-touch-icon" href="icon-192.png?v=20261111-playerscompact1">
+    <link rel="manifest" href="manifest.json?v=20261111-musictab1">
+    <link rel="apple-touch-icon" href="icon-192.png?v=20261111-musictab1">
     <title>TRPG 戰役助手</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
     <script>
-    // cache-bust: 20261111-playerscompact1 — clear old SW/cache, then install self-destructing SW
+    // cache-bust: 20261111-musictab1 — clear old SW/cache, then install self-destructing SW
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.getRegistrations().then(regs => {
     regs.forEach(r => r.unregister());
@@ -159,58 +159,25 @@ if (window.caches) {
 <div class="container mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-2">
             <h1 class="text-xl font-bold tracking-wider"><i class="fa-solid fa-dragon mr-2"></i>戰役助手：礦坑 & 冰塔峰</h1>
             
-            <!-- BGM 播放器區塊 -->
-            <div class="flex items-center gap-2 bg-gray-800 p-1 rounded-lg border border-gray-600 shadow-inner">
-                <i class="fa-solid fa-music text-gray-400 pl-2 text-sm"></i>
-                <select id="bgm-select" onchange="changeBGM()" class="bg-gray-700 text-white text-xs rounded outline-none border border-gray-500 py-1.5 px-2 cursor-pointer max-w-[150px] sm:max-w-[200px] truncate custom-scrollbar">
-                    <option value="">🔇 停播 / 選擇音樂...</option>
-                    
-                    <optgroup label="🏙️ 城市與酒館 (City & Tavern)">
-<option value="https://cdn.jsdelivr.net/gh/Yelwork/DMTool@main/Three_Coins_for_the_Bard%20-%20happy%20forest.mp3">🍃 吟遊詩人的三枚硬幣 (歡樂森林/酒館)</option>
-<option value="https://cdn.jsdelivr.net/gh/Yelwork/DMTool@main/Tankards_on_the_Table-Rowdy%20Tavern.mp3">🍻 桌上的大酒杯 (吵鬧酒館)</option>
-<option value="https://cdn.jsdelivr.net/gh/Yelwork/DMTool@main/The_Gilded_Gambit-Royal%20Castle.mp3">👑 鍍金的博弈 (皇家城堡)</option>
-<option value="https://cdn.jsdelivr.net/gh/Yelwork/DMTool@main/Cobblestone_Revelry-Bustling%20City.mp3">🏙️ 鵝卵石上的狂歡 (繁華城市)</option>
-<option value="https://cdn.jsdelivr.net/gh/Yelwork/DMTool@main/Seven_Veils_of_Grace%20-%20Sacred%20Shrine%20Altar.mp3">⛪ 恩典七重紗 (神聖神龕/祭壇)</option>
-<option value="https://cdn.jsdelivr.net/gh/Yelwork/DMTool@main/Between_the_Orchard_Stones%20-%20Small%20Remote%20Village.mp3">🏡 果園石塊之間 (偏遠小村莊)</option>
-<option value="https://cdn.jsdelivr.net/gh/Yelwork/DMTool@main/Beneath_the_Rowan_Tree%20-%20Lively%20Village%20Festival.mp3">🎊 羅文樹下 (熱鬧村莊慶典)</option>
-		  </optgroup>
-
-                    <optgroup label="🌲 野外與探索 (Wilderness & Exploration)">
-<option value="https://cdn.jsdelivr.net/gh/Yelwork/DMTool@main/Under_the_Sleeping_Canopy-Night%20Grassland.mp3">🌙 沉睡天篷之下 (夜晚/草原)</option>
-<option value="https://cdn.jsdelivr.net/gh/Yelwork/DMTool@main/The_Morning_at_the_Citadel%20-%20Noon%20Grassland.mp3">☀️ 堡壘之晨 (正午/草原)</option>                  14:31 7/10/2026
-<option value="https://cdn.jsdelivr.net/gh/Yelwork/DMTool@main/First_Light_on_Ancient_Boughs-village.mp3">🌲 古老樹枝上的晨光 (村莊/平靜)</option>
-<option value="https://cdn.jsdelivr.net/gh/Yelwork/DMTool@main/Footsteps_in_the_Undergrowth-Grassland%20Sudden%20Event.mp3">🐾 灌木叢中的腳步聲 (草原/突發事件)</option>
- 		</optgroup>
-
-                    <optgroup label="⚔️ 一般戰鬥 (Combat & Encounters)">
-<option value="https://cdn.jsdelivr.net/gh/Yelwork/DMTool@main/Ambush_at_the_Narrow_Pass%20-%20Legendary%20Fight%202.mp3">⚔️ 伏擊！(狹道遭遇戰)</option>
-<option value="https://cdn.jsdelivr.net/gh/Yelwork/DMTool@main/When_the_Mountains_Bow-Mob%20Fight.mp3">⚔️ 當群山低頭 (小怪/群體戰鬥)</option>
-<option value="https://cdn.jsdelivr.net/gh/Yelwork/DMTool@main/The_Beast_at_the_Threshold%20-%20normal%20Fight.mp3">🐺 門檻之獸 (一般戰鬥)</option>
-                    </optgroup>
-
-                    <optgroup label="🐉 地下城與礦坑 (Dungeons & Caves)">
-<option value="https://cdn.jsdelivr.net/gh/Yelwork/DMTool@main/The_Sunless_Path%20-%20dungeon.mp3">🦇 無日之徑 (地下城探索)</option>
-<option value="https://cdn.jsdelivr.net/gh/Yelwork/DMTool@main/Beneath_the_Stone_Vault-Dungeon%20-%20Middle%20Section.mp3">🧱 石穹之下 (地下城/中段探索)</option>
-<option value="https://cdn.jsdelivr.net/gh/Yelwork/DMTool@main/Breath_of_the_Sunless_Deep-Dungeon%20-%20Just%20Entered.mp3">🦇 無日深淵的氣息 (地下城/剛進入)</option>
-                    </optgroup>
-
-                    <optgroup label="🔥 BOSS 戰鬥 (Boss Battles)">
-<option value="https://cdn.jsdelivr.net/gh/Yelwork/DMTool@main/Command_Of_The_Fallen_Keep%20-%20Legendary%20Fight.mp3">⚔️ 隕落堡壘的指揮 (BOSS戰)</option>
-<option value="https://cdn.jsdelivr.net/gh/Yelwork/DMTool@main/Where_Giants_Fall-Dungeon%20-%20Epic%20Boss%20Fight.mp3">🔥 巨人倒下之處 (地下城/史詩BOSS戰)</option>
-<option value="https://cdn.jsdelivr.net/gh/Yelwork/DMTool@main/King_of_Ash%20-%20dragon%20fight.mp3">🐉 灰燼之王 (巨龍戰鬥)</option>
-                    </optgroup>
-
-                    <optgroup label="🎭 懸疑、劇情與結算 (Story & Mood)">
-                        <option value="YOUR_GITHUB_LINK_26">👁️ 26. 諾斯克的凝視</option>
-                        <option value="YOUR_GITHUB_LINK_27">👻 27. 女妖阿嘉莎的悲嘆</option>
-                        <option value="YOUR_GITHUB_LINK_28">✨ 28. 發現星月熔爐</option>
-                        <option value="YOUR_GITHUB_LINK_29">🩸 29. 英雄的倒下</option>
-                        <option value="YOUR_GITHUB_LINK_30">🏆 30. 勝利與歸鄉</option>
-                    </optgroup>
-                </select>
-<audio id="bgm-player" controls loop class="h-8 w-60 sm:w-80 md:w-96 rounded shadow-sm"></audio>
+            <!-- 音樂迷你播放器（曲目庫在「音樂」分頁） -->
+            <div id="music-mini" class="flex flex-wrap items-center gap-1.5 bg-gray-800 p-1.5 rounded-lg border border-gray-600 shadow-inner max-w-full">
+                <button type="button" onclick="switchTab('tab-music')" class="min-h-[36px] px-2 rounded-md bg-gray-700 text-amber-300 text-xs font-black border border-gray-500" title="開啟音樂庫"><i class="fa-solid fa-music"></i></button>
+                <div id="music-scene-bar" class="flex flex-wrap gap-1"></div>
+                <div class="flex items-center gap-1.5 min-w-0">
+                    <button type="button" id="music-btn-toggle" onclick="toggleMusicPlay()" class="min-h-[36px] min-w-[36px] rounded-md bg-gray-700 text-white border border-gray-500" title="播放／暫停"><i class="fa-solid fa-play"></i></button>
+                    <button type="button" onclick="stopMusic()" class="min-h-[36px] min-w-[36px] rounded-md bg-gray-700 text-white border border-gray-500" title="停止"><i class="fa-solid fa-stop"></i></button>
+                    <div class="min-w-0 max-w-[140px] sm:max-w-[200px]">
+                        <div id="music-now-title" class="text-[11px] font-bold text-white truncate leading-tight">尚未選曲</div>
+                        <div id="music-now-sub" class="text-[10px] text-gray-400 truncate leading-tight">快捷鍵 1–5 · Space 停 · M 靜音</div>
+                    </div>
+                    <label class="flex items-center gap-1 text-gray-300 text-xs" title="音量">
+                        <i class="fa-solid fa-volume-low text-[10px]"></i>
+                        <input type="range" id="music-volume" min="0" max="100" value="70" class="w-16 sm:w-24 accent-amber-400" oninput="setMusicVolume(this.value)">
+                    </label>
+                </div>
+                <audio id="bgm-player" loop class="hidden"></audio>
             </div>
-        </div>     
+        </div>
 
 
 <nav class="container mx-auto px-2 flex space-x-1 overflow-x-auto custom-scrollbar pb-1">
@@ -218,6 +185,7 @@ if (window.caches) {
     <button onclick="switchTab('tab-runsheets')" class="tab-btn bg-gray-700 text-gray-300 px-4 py-2 rounded-t-lg whitespace-nowrap"><i class="fa-solid fa-list-check mr-2"></i>跑團卡</button>
     <button onclick="switchTab('tab-monsters')" class="tab-btn bg-gray-700 text-gray-300 px-4 py-2 rounded-t-lg whitespace-nowrap"><i class="fa-solid fa-dragon mr-2"></i>怪物速查</button>
     <button onclick="switchTab('tab-combat')" class="tab-btn bg-gray-700 text-gray-300 px-4 py-2 rounded-t-lg whitespace-nowrap"><i class="fa-solid fa-swords mr-2"></i>戰鬥／玩家</button>
+    <button onclick="switchTab('tab-music')" class="tab-btn bg-gray-700 text-gray-300 px-4 py-2 rounded-t-lg whitespace-nowrap"><i class="fa-solid fa-music mr-2"></i>音樂</button>
     <button onclick="switchTab('tab-session')" class="tab-btn bg-gray-700 text-gray-300 px-4 py-2 rounded-t-lg whitespace-nowrap"><i class="fa-solid fa-pen-to-square mr-2"></i>場次筆記</button>
     <button onclick="switchTab('tab-locations')" class="tab-btn bg-gray-700 text-gray-300 px-4 py-2 rounded-t-lg whitespace-nowrap"><i class="fa-solid fa-map-pin mr-2"></i>地點與NPC</button>
 <button onclick="switchTab('tab-map')" class="tab-btn bg-gray-700 text-gray-300 px-4 py-2 rounded-t-lg whitespace-nowrap"><i class="fa-solid fa-map mr-2"></i>地圖</button>
@@ -314,6 +282,32 @@ if (window.caches) {
         </div>
         <div id="monster-cards" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
     </div>
+</div>
+
+<!-- 跑團音樂庫 -->
+<div id="tab-music" class="tab-content max-w-6xl mx-auto pb-16">
+  <div class="bg-white rounded-xl shadow border p-4 sm:p-5 mb-4">
+    <div class="flex flex-wrap items-start justify-between gap-3 mb-3">
+      <div>
+        <h2 class="text-xl font-black text-gray-800"><i class="fa-solid fa-music mr-2 text-amber-600"></i>跑團音樂庫</h2>
+        <p class="text-sm text-gray-500 mt-0.5">本機曲目 · 分類／搜尋／收藏 · 頂欄可隨時切場景（快捷鍵 1–5）</p>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <button type="button" onclick="playMusicScene('combat')" class="min-h-[40px] px-3 rounded-lg bg-red-600 text-white text-sm font-black shadow">⚔️ 戰鬥曲</button>
+        <button type="button" onclick="stopMusic()" class="min-h-[40px] px-3 rounded-lg bg-gray-100 border text-sm font-bold">停止</button>
+      </div>
+    </div>
+    <div class="flex flex-wrap gap-2 mb-3">
+      <input type="search" id="music-search" placeholder="搜尋曲目、情緒、標籤…" oninput="renderMusicLibrary()" class="flex-1 min-w-[180px] min-h-[40px] px-3 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-amber-300">
+      <label class="flex items-center gap-2 text-sm font-bold text-gray-600 px-2">
+        <input type="checkbox" id="music-loop" checked onchange="syncMusicLoop()" class="accent-amber-600"> 循環
+      </label>
+    </div>
+    <div id="music-scene-chips" class="flex flex-wrap gap-2 mb-3"></div>
+    <div id="music-cat-bar" class="flex flex-wrap gap-1.5 mb-4"></div>
+    <div id="music-track-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5"></div>
+    <p id="music-status" class="text-xs text-gray-400 mt-3">載入曲目中…</p>
+  </div>
 </div>
 
 <!-- 戰鬥先攻／狀態追蹤 -->
@@ -1931,6 +1925,7 @@ function switchTab(t) {
         renderCmb();
         renderCmbLog();
     }
+    if (t === 'tab-music') renderMusicLibrary();
 }
 
 let savedQuests = JSON.parse(localStorage.getItem('dm_saved_quests') || '{}');
@@ -3278,57 +3273,270 @@ function generateWebDungeon() {
     setH('dungeon-info', infoHtml);
 }
 
-// BGM 控制邏輯 (含淡入淡出 Fade In/Out)
-        let fadeInterval;
-        window.changeBGM = () => {
-            const player = document.getElementById('bgm-player');
-            const select = document.getElementById('bgm-select');
-            const nextUrl = select.value;
+// ===== 跑團音樂庫（本機 MP3 + 頂欄迷你控） =====
+        const MUSIC_API = './data/music.json?v=20261111-musictab1';
+        let musicCatalog = { categories: [], scenes: [], tracks: [] };
+        let musicReady = false;
+        let musicCat = 'all';
+        let musicCurrentId = null;
+        let musicFadeTimer = null;
+        let musicMuted = false;
+        let musicVolume = Math.max(0, Math.min(100, parseInt(localStorage.getItem('dm_music_volume') || '70', 10) || 70));
+        let musicFavs = new Set(JSON.parse(localStorage.getItem('dm_music_favs') || '[]'));
 
-            // 清除之前的淡入淡出排程
-            if (fadeInterval) clearInterval(fadeInterval);
+        function musicPlayer() { return document.getElementById('bgm-player'); }
+        function musicTrackById(id) { return (musicCatalog.tracks || []).find(t => t.id === id); }
+        function musicFileUrl(track) {
+            if (!track || !track.file) return '';
+            return './' + encodeURIComponent(track.file).replace(/%2F/g, '/');
+        }
+        function saveMusicFavs() {
+            localStorage.setItem('dm_music_favs', JSON.stringify([...musicFavs]));
+        }
+        function isMusicFav(id) { return musicFavs.has(id); }
+        window.toggleMusicFav = (id) => {
+            if (musicFavs.has(id)) musicFavs.delete(id); else musicFavs.add(id);
+            saveMusicFavs();
+            renderMusicLibrary();
+            renderMusicSceneBar();
+        };
 
-            // 若目前沒有在播放，或者初次播放，直接切換不用淡出
-            if (player.paused || !player.src) {
-                if (nextUrl && nextUrl.startsWith('http')) {
-                    player.src = nextUrl;
-                    player.volume = 1;
-                    player.play();
+        function clearMusicFade() {
+            if (musicFadeTimer) { clearInterval(musicFadeTimer); musicFadeTimer = null; }
+        }
+        function applyMusicVolumeNow() {
+            const p = musicPlayer();
+            if (!p) return;
+            p.volume = musicMuted ? 0 : (musicVolume / 100);
+        }
+        window.setMusicVolume = (v) => {
+            musicVolume = Math.max(0, Math.min(100, Number(v) || 0));
+            localStorage.setItem('dm_music_volume', String(musicVolume));
+            musicMuted = false;
+            applyMusicVolumeNow();
+            updateMusicMiniUI();
+        };
+        window.syncMusicLoop = () => {
+            const p = musicPlayer();
+            const box = document.getElementById('music-loop');
+            if (p && box) p.loop = !!box.checked;
+        };
+
+        function fadeMusicTo(targetVol, thenFn) {
+            const p = musicPlayer();
+            if (!p) { if (thenFn) thenFn(); return; }
+            clearMusicFade();
+            const goal = musicMuted ? 0 : targetVol;
+            musicFadeTimer = setInterval(() => {
+                const cur = p.volume;
+                const step = 0.05;
+                if (Math.abs(cur - goal) <= step) {
+                    p.volume = goal;
+                    clearMusicFade();
+                    if (thenFn) thenFn();
                 } else {
-                    player.src = "";
+                    p.volume = cur + (goal > cur ? step : -step);
                 }
+            }, 40);
+        }
+
+        function updateMusicMiniUI() {
+            const track = musicTrackById(musicCurrentId);
+            const title = document.getElementById('music-now-title');
+            const sub = document.getElementById('music-now-sub');
+            const btn = document.getElementById('music-btn-toggle');
+            const vol = document.getElementById('music-volume');
+            const p = musicPlayer();
+            if (title) title.textContent = track ? track.title : '尚未選曲';
+            if (sub) sub.textContent = track ? (track.subtitle || '') : '快捷鍵 1–5 · Space 停 · M 靜音';
+            if (vol) vol.value = String(musicVolume);
+            if (btn) {
+                const playing = p && !p.paused && musicCurrentId;
+                btn.innerHTML = playing ? '<i class="fa-solid fa-pause"></i>' : '<i class="fa-solid fa-play"></i>';
+            }
+            document.querySelectorAll('[data-music-track]').forEach(el => {
+                const on = el.getAttribute('data-music-track') === musicCurrentId;
+                el.classList.toggle('ring-2', on);
+                el.classList.toggle('ring-amber-500', on);
+            });
+            document.querySelectorAll('[data-music-scene]').forEach(el => {
+                const sc = (musicCatalog.scenes || []).find(s => s.id === el.getAttribute('data-music-scene'));
+                const on = !!(sc && sc.trackId === musicCurrentId);
+                el.classList.toggle('bg-amber-500', on);
+                el.classList.toggle('text-white', on);
+                el.classList.toggle('bg-gray-700', !on && el.closest('#music-scene-bar'));
+                el.classList.toggle('text-gray-200', !on && el.closest('#music-scene-bar'));
+                el.classList.toggle('bg-amber-50', !on && el.closest('#music-scene-chips'));
+                el.classList.toggle('text-amber-900', !on && el.closest('#music-scene-chips'));
+            });
+        }
+
+        window.playMusicTrack = (id) => {
+            const track = musicTrackById(id);
+            const p = musicPlayer();
+            if (!track || !p) return;
+            const url = musicFileUrl(track);
+            const startNew = () => {
+                musicCurrentId = id;
+                p.src = url;
+                syncMusicLoop();
+                p.volume = 0;
+                const playP = p.play();
+                const after = () => fadeMusicTo(musicVolume / 100);
+                if (playP && playP.then) playP.then(after).catch(() => updateMusicMiniUI());
+                else after();
+                updateMusicMiniUI();
+                renderMusicLibrary();
+            };
+            if (!p.paused && p.src) fadeMusicTo(0, () => { p.pause(); startNew(); });
+            else startNew();
+        };
+
+        window.toggleMusicPlay = () => {
+            const p = musicPlayer();
+            if (!p) return;
+            if (!musicCurrentId) {
+                const first = (musicCatalog.tracks || [])[0];
+                if (first) playMusicTrack(first.id);
                 return;
             }
-
-            // 執行淡出 (每 50 毫秒降低 5% 音量)
-            fadeInterval = setInterval(() => {
-                if (player.volume > 0.05) {
-                    player.volume -= 0.05;
-                } else {
-                    // 音量降到最低後，停止舊音樂並切換
-                    clearInterval(fadeInterval);
-                    player.pause();
-                    
-                    if (nextUrl && nextUrl.startsWith('http')) {
-                        player.src = nextUrl;
-                        player.volume = 0; // 歸零準備淡入
-                        player.play().then(() => {
-                            // 執行淡入 (每 50 毫秒增加 5% 音量)
-                            fadeInterval = setInterval(() => {
-                                if (player.volume < 0.95) {
-                                    player.volume += 0.05;
-                                } else {
-                                    player.volume = 1; // 恢復滿音量
-                                    clearInterval(fadeInterval);
-                                }
-                            }, 50);
-                        }).catch(e => console.log("Play interrupted", e));
-                    } else {
-                        player.src = "";
-                    }
-                }
-            }, 50);
+            if (p.paused) {
+                p.play().then(() => { applyMusicVolumeNow(); updateMusicMiniUI(); }).catch(() => {});
+            } else {
+                p.pause();
+                updateMusicMiniUI();
+            }
         };
+
+        window.stopMusic = () => {
+            const p = musicPlayer();
+            if (!p) return;
+            fadeMusicTo(0, () => {
+                p.pause();
+                p.removeAttribute('src');
+                p.load();
+                musicCurrentId = null;
+                updateMusicMiniUI();
+                renderMusicLibrary();
+            });
+        };
+
+        window.playMusicScene = (sceneId) => {
+            const sc = (musicCatalog.scenes || []).find(s => s.id === sceneId);
+            if (!sc) return;
+            if (sc.trackId && musicTrackById(sc.trackId)) playMusicTrack(sc.trackId);
+            else {
+                const t = (musicCatalog.tracks || []).find(x => x.category === sc.category);
+                if (t) playMusicTrack(t.id);
+            }
+        };
+
+        window.setMusicCategory = (cat) => {
+            musicCat = cat || 'all';
+            renderMusicLibrary();
+        };
+
+        function filteredMusicTracks() {
+            const q = (document.getElementById('music-search')?.value || '').trim().toLowerCase();
+            let list = musicCatalog.tracks || [];
+            if (musicCat === 'favorites') list = list.filter(t => isMusicFav(t.id));
+            else if (musicCat && musicCat !== 'all') list = list.filter(t => t.category === musicCat);
+            if (q) {
+                list = list.filter(t => {
+                    const blob = [t.title, t.subtitle, t.category, ...(t.tags || [])].join(' ').toLowerCase();
+                    return blob.includes(q);
+                });
+            }
+            return list;
+        }
+
+        window.renderMusicSceneBar = () => {
+            const bar = document.getElementById('music-scene-bar');
+            const chips = document.getElementById('music-scene-chips');
+            const scenes = musicCatalog.scenes || [];
+            const mk = (s, compact) => `<button type="button" data-music-scene="${s.id}" onclick="playMusicScene('${s.id}')" class="min-h-[32px] px-2 rounded-md border border-gray-500 text-[11px] font-black ${compact ? 'bg-gray-700 text-gray-200' : 'bg-amber-50 text-amber-900 border-amber-200'}" title="快捷鍵 ${s.key}">${s.icon || ''} ${s.label}<span class="opacity-60 ml-1">${s.key}</span></button>`;
+            if (bar) bar.innerHTML = scenes.map(s => mk(s, true)).join('');
+            if (chips) chips.innerHTML = scenes.map(s => mk(s, false)).join('');
+            updateMusicMiniUI();
+        };
+
+        window.renderMusicLibrary = () => {
+            const catBar = document.getElementById('music-cat-bar');
+            const listEl = document.getElementById('music-track-list');
+            const status = document.getElementById('music-status');
+            if (!listEl) return;
+            if (catBar) {
+                catBar.innerHTML = (musicCatalog.categories || []).map(c => {
+                    const on = musicCat === c.id;
+                    return `<button type="button" onclick="setMusicCategory('${c.id}')" class="min-h-[36px] px-3 rounded-lg text-sm font-bold border ${on ? 'bg-amber-600 text-white border-amber-700' : 'bg-white text-gray-700 border-gray-200'}">${c.icon || ''} ${c.name}</button>`;
+                }).join('');
+            }
+            const tracks = filteredMusicTracks();
+            listEl.innerHTML = tracks.map(t => {
+                const fav = isMusicFav(t.id);
+                const on = musicCurrentId === t.id;
+                return `<div data-music-track="${t.id}" class="rounded-xl border ${on ? 'border-amber-400 bg-amber-50' : 'border-gray-200 bg-white'} p-3 shadow-sm flex flex-col gap-2">
+                  <div class="flex items-start justify-between gap-2">
+                    <div class="min-w-0">
+                      <div class="font-black text-sm text-gray-800 truncate">${t.title}</div>
+                      <div class="text-xs text-gray-500 truncate">${t.subtitle || ''}</div>
+                    </div>
+                    <button type="button" onclick="toggleMusicFav('${t.id}')" class="min-h-[36px] min-w-[36px] rounded-md border ${fav ? 'bg-amber-100 text-amber-600 border-amber-200' : 'bg-gray-50 text-gray-400'}" title="收藏">${fav ? '★' : '☆'}</button>
+                  </div>
+                  <div class="flex flex-wrap gap-1">${(t.tags || []).slice(0,4).map(tag => `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-gray-100 text-gray-500">#${tag}</span>`).join('')}</div>
+                  <button type="button" onclick="playMusicTrack('${t.id}')" class="min-h-[40px] rounded-lg ${on ? 'bg-amber-600 text-white' : 'bg-gray-900 text-white'} text-sm font-black">${on ? '▶ 播放中' : '播放'}</button>
+                </div>`;
+            }).join('') || `<div class="text-sm text-gray-500 col-span-full py-8 text-center">沒有符合的曲目</div>`;
+            if (status) status.textContent = musicReady ? `共 ${tracks.length} 首` : '載入曲目中…';
+            updateMusicMiniUI();
+        };
+
+        async function loadMusicCatalog() {
+            try {
+                const res = await fetch(MUSIC_API, { cache: 'no-store' });
+                if (!res.ok) throw new Error('music http ' + res.status);
+                musicCatalog = await res.json();
+                musicReady = true;
+            } catch (e) {
+                console.warn('music catalog load failed', e);
+                musicCatalog = { categories: [{ id: 'all', name: '全部', icon: '🎵' }], scenes: [], tracks: [] };
+                musicReady = false;
+            }
+            const vol = document.getElementById('music-volume');
+            if (vol) vol.value = String(musicVolume);
+            applyMusicVolumeNow();
+            renderMusicSceneBar();
+            renderMusicLibrary();
+            const p = musicPlayer();
+            if (p && !p._musicBound) {
+                p._musicBound = true;
+                p.addEventListener('play', updateMusicMiniUI);
+                p.addEventListener('pause', updateMusicMiniUI);
+                p.addEventListener('ended', updateMusicMiniUI);
+            }
+        }
+
+        document.addEventListener('keydown', (ev) => {
+            const tag = (ev.target && ev.target.tagName || '').toLowerCase();
+            if (tag === 'input' || tag === 'textarea' || tag === 'select' || ev.target?.isContentEditable) return;
+            const scenes = musicCatalog.scenes || [];
+            if (ev.key >= '1' && ev.key <= '9') {
+                const sc = scenes.find(s => s.key === ev.key);
+                if (sc) { ev.preventDefault(); playMusicScene(sc.id); }
+            } else if (ev.code === 'Space') {
+                const musicOn = document.getElementById('tab-music')?.classList.contains('active');
+                const combatOn = document.getElementById('tab-combat')?.classList.contains('active');
+                if (musicOn || combatOn) { ev.preventDefault(); stopMusic(); }
+            } else if (ev.key === 'm' || ev.key === 'M') {
+                musicMuted = !musicMuted;
+                applyMusicVolumeNow();
+                updateMusicMiniUI();
+            }
+        });
+
+        window.changeBGM = () => {};
+        loadMusicCatalog();
+
 
 
         // Mock Data Fallback
@@ -3565,7 +3773,7 @@ function generateWebDungeon() {
 
 
         // ===== 怪物速查卡（API / JSON 載入）=====
-        const MONSTER_API = './data/monsters.json?v=20261111-playerscompact1';
+        const MONSTER_API = './data/monsters.json?v=20261111-musictab1';
         let monsterData = { monsters: [], modules: [] };
         let monstersLoaded = false;
         let monstersLoading = false;
@@ -3598,8 +3806,8 @@ function generateWebDungeon() {
         window.reloadMonsters = (force) => loadMonsters(!!force);
 
         // ===== 法術庫 / 萬物商店（Google Sheet API GET）=====
-        const DEFAULT_SPELLS_API = './data/spells.json?v=20261111-playerscompact1';
-        const DEFAULT_STORE_API = './data/store.json?v=20261111-playerscompact1';
+        const DEFAULT_SPELLS_API = './data/spells.json?v=20261111-musictab1';
+        const DEFAULT_STORE_API = './data/store.json?v=20261111-musictab1';
         let spellsLoaded = false, spellsLoading = false;
         let storeLoaded = false, storeLoading = false;
 
@@ -3988,7 +4196,7 @@ window.onload = () => {
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     // Register self-destructing SW so any old caching SW is replaced and cleared
-    navigator.serviceWorker.register('./sw.js?v=20261111-playerscompact1')
+    navigator.serviceWorker.register('./sw.js?v=20261111-musictab1')
       .then(reg => console.log('SW clear registered', reg.scope))
       .catch(err => console.log('SW clear failed', err));
   });
