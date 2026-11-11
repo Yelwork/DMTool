@@ -1,0 +1,190 @@
+{
+  "version": 1,
+  "categories": [
+    { "id": "all", "name": "全部", "icon": "🎵" },
+    { "id": "tavern", "name": "酒館／城鎮", "icon": "🍺" },
+    { "id": "travel", "name": "野外／旅行", "icon": "🌲" },
+    { "id": "dungeon", "name": "地下城", "icon": "🕳️" },
+    { "id": "combat", "name": "戰鬥", "icon": "⚔️" },
+    { "id": "boss", "name": "BOSS", "icon": "🐉" },
+    { "id": "sacred", "name": "神聖／劇情", "icon": "✨" },
+    { "id": "favorites", "name": "收藏", "icon": "⭐" }
+  ],
+  "scenes": [
+    { "id": "tavern", "label": "酒館", "key": "1", "icon": "🍺", "category": "tavern", "trackId": "tankards" },
+    { "id": "combat", "label": "戰鬥", "key": "2", "icon": "⚔️", "category": "combat", "trackId": "beast-threshold" },
+    { "id": "dungeon", "label": "洞穴", "key": "3", "icon": "🕳️", "category": "dungeon", "trackId": "sunless-path" },
+    { "id": "travel", "label": "旅行", "key": "4", "icon": "🌲", "category": "travel", "trackId": "morning-citadel" },
+    { "id": "rest", "label": "休息", "key": "5", "icon": "🔥", "category": "travel", "trackId": "sleeping-canopy" }
+  ],
+  "tracks": [
+    {
+      "id": "three-coins",
+      "title": "吟遊詩人的三枚硬幣",
+      "subtitle": "歡樂森林／酒館",
+      "category": "tavern",
+      "tags": ["tavern", "forest", "happy", "bard"],
+      "file": "Three_Coins_for_the_Bard - happy forest.mp3"
+    },
+    {
+      "id": "tankards",
+      "title": "桌上的大酒杯",
+      "subtitle": "吵鬧酒館",
+      "category": "tavern",
+      "tags": ["tavern", "rowdy", "inn"],
+      "file": "Tankards_on_the_Table-Rowdy Tavern.mp3"
+    },
+    {
+      "id": "gilded-gambit",
+      "title": "鍍金的博弈",
+      "subtitle": "皇家城堡",
+      "category": "tavern",
+      "tags": ["castle", "royal", "city"],
+      "file": "The_Gilded_Gambit-Royal Castle.mp3"
+    },
+    {
+      "id": "cobblestone",
+      "title": "鵝卵石上的狂歡",
+      "subtitle": "繁華城市",
+      "category": "tavern",
+      "tags": ["city", "bustling", "town"],
+      "file": "Cobblestone_Revelry-Bustling City.mp3"
+    },
+    {
+      "id": "orchard-stones",
+      "title": "果園石塊之間",
+      "subtitle": "偏遠小村莊",
+      "category": "tavern",
+      "tags": ["village", "quiet", "phandalin"],
+      "file": "Between_the_Orchard_Stones - Small Remote Village.mp3"
+    },
+    {
+      "id": "rowan-tree",
+      "title": "羅文樹下",
+      "subtitle": "熱鬧村莊慶典",
+      "category": "tavern",
+      "tags": ["village", "festival", "lively"],
+      "file": "Beneath_the_Rowan_Tree - Lively Village Festival.mp3"
+    },
+    {
+      "id": "seven-veils",
+      "title": "恩典七重紗",
+      "subtitle": "神聖神龕／祭壇",
+      "category": "sacred",
+      "tags": ["shrine", "sacred", "altar", "temple"],
+      "file": "Seven_Veils_of_Grace - Sacred Shrine Altar.mp3"
+    },
+    {
+      "id": "sleeping-canopy",
+      "title": "沉睡天篷之下",
+      "subtitle": "夜晚草原",
+      "category": "travel",
+      "tags": ["night", "grassland", "rest", "camp"],
+      "file": "Under_the_Sleeping_Canopy-Night Grassland.mp3"
+    },
+    {
+      "id": "morning-citadel",
+      "title": "堡壘之晨",
+      "subtitle": "正午草原",
+      "category": "travel",
+      "tags": ["noon", "grassland", "travel"],
+      "file": "The_Morning_at_the_Citadel - Noon Grassland.mp3"
+    },
+    {
+      "id": "first-light-village",
+      "title": "古老樹枝上的晨光",
+      "subtitle": "村莊／平靜",
+      "category": "travel",
+      "tags": ["morning", "village", "calm"],
+      "file": "First_Light_on_Ancient_Boughs-village.mp3"
+    },
+    {
+      "id": "first-light-grassland",
+      "title": "古老樹枝上的晨光",
+      "subtitle": "晨間草原",
+      "category": "travel",
+      "tags": ["morning", "grassland"],
+      "file": "First_Light_on_Ancient_Boughs-Morning Grassland.mp3"
+    },
+    {
+      "id": "undergrowth",
+      "title": "灌木叢中的腳步聲",
+      "subtitle": "草原突發事件",
+      "category": "travel",
+      "tags": ["sudden", "tension", "grassland"],
+      "file": "Footsteps_in_the_Undergrowth-Grassland Sudden Event.mp3"
+    },
+    {
+      "id": "sunless-path",
+      "title": "無日之徑",
+      "subtitle": "地下城探索",
+      "category": "dungeon",
+      "tags": ["dungeon", "cave", "explore"],
+      "file": "The_Sunless_Path - dungeon.mp3"
+    },
+    {
+      "id": "stone-vault",
+      "title": "石穹之下",
+      "subtitle": "地下城中段",
+      "category": "dungeon",
+      "tags": ["dungeon", "middle"],
+      "file": "Beneath_the_Stone_Vault-Dungeon - Middle Section.mp3"
+    },
+    {
+      "id": "sunless-deep",
+      "title": "無日深淵的氣息",
+      "subtitle": "剛進入地下城",
+      "category": "dungeon",
+      "tags": ["dungeon", "enter", "cave"],
+      "file": "Breath_of_the_Sunless_Deep-Dungeon - Just Entered.mp3"
+    },
+    {
+      "id": "ambush-narrow",
+      "title": "伏擊！狹道遭遇",
+      "subtitle": "傳奇戰鬥",
+      "category": "combat",
+      "tags": ["combat", "ambush", "legendary"],
+      "file": "Ambush_at_the_Narrow_Pass - Legendary Fight 2.mp3"
+    },
+    {
+      "id": "mountains-bow",
+      "title": "當群山低頭",
+      "subtitle": "小怪／群體戰鬥",
+      "category": "combat",
+      "tags": ["combat", "mob", "fight"],
+      "file": "When_the_Mountains_Bow-Mob Fight.mp3"
+    },
+    {
+      "id": "beast-threshold",
+      "title": "門檻之獸",
+      "subtitle": "一般戰鬥",
+      "category": "combat",
+      "tags": ["combat", "normal", "fight"],
+      "file": "The_Beast_at_the_Threshold - normal Fight.mp3"
+    },
+    {
+      "id": "fallen-keep",
+      "title": "隕落堡壘的指揮",
+      "subtitle": "BOSS 戰",
+      "category": "boss",
+      "tags": ["boss", "legendary", "combat"],
+      "file": "Command_Of_The_Fallen_Keep - Legendary Fight.mp3"
+    },
+    {
+      "id": "giants-fall",
+      "title": "巨人倒下之處",
+      "subtitle": "地下城史詩 BOSS",
+      "category": "boss",
+      "tags": ["boss", "dungeon", "epic"],
+      "file": "Where_Giants_Fall-Dungeon - Epic Boss Fight.mp3"
+    },
+    {
+      "id": "king-of-ash",
+      "title": "灰燼之王",
+      "subtitle": "巨龍戰鬥",
+      "category": "boss",
+      "tags": ["boss", "dragon", "icespire", "doip"],
+      "file": "King_of_Ash - dragon fight.mp3"
+    }
+  ]
+}
