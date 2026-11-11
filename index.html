@@ -9,14 +9,14 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="戰役助手">
-    <link rel="manifest" href="manifest.json?v=20261111-playerscompact1">
-    <link rel="apple-touch-icon" href="icon-192.png?v=20261111-playerscompact1">
+    <link rel="manifest" href="manifest.json?v=20261111-playersalign1">
+    <link rel="apple-touch-icon" href="icon-192.png?v=20261111-playersalign1">
     <title>TRPG 戰役助手</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
     <script>
-    // cache-bust: 20261111-playerscompact1 — clear old SW/cache, then install self-destructing SW
+    // cache-bust: 20261111-playersalign1 — clear old SW/cache, then install self-destructing SW
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.getRegistrations().then(regs => {
     regs.forEach(r => r.unregister());
@@ -49,6 +49,35 @@ if (window.caches) {
             max-height: 100%;
         }
         #tab-houserules { min-height: 0; }
+
+        /* 戰鬥頁角色緊湊列：固定欄寬對齊，隱藏 number spinner 避免溢出錯位 */
+        .player-compact-grid {
+            display: grid;
+            grid-template-columns: 28px 56px minmax(0, 1.3fr) minmax(0, 0.9fr) 52px 60px 52px 40px 48px minmax(68px, auto);
+            gap: 0.375rem;
+            align-items: center;
+        }
+        @media (max-width: 639px) {
+            .player-compact-grid {
+                grid-template-columns: 28px 52px minmax(0, 1fr) 48px 56px 48px auto;
+            }
+            .player-compact-grid > .pc-race,
+            .player-compact-grid > .pc-dex,
+            .player-compact-grid > .pc-dc {
+                display: none;
+            }
+        }
+        .player-compact-grid > * { min-width: 0; }
+        .player-compact-grid input[type="number"] {
+            min-width: 0;
+            -moz-appearance: textfield;
+            appearance: textfield;
+        }
+        .player-compact-grid input[type="number"]::-webkit-outer-spin-button,
+        .player-compact-grid input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
 
         /* 通用擲骰器：毛氈骰盤 + Three.js WebGL */
         .dice-tray {
@@ -334,8 +363,21 @@ if (window.caches) {
         <button type="button" onclick="addP()" class="min-h-[36px] px-3 rounded-lg bg-green-600 text-white text-sm font-black shadow hover:bg-green-700"><i class="fa-solid fa-plus mr-1"></i>新增</button>
       </div>
     </div>
-    <div class="hidden sm:grid grid-cols-[28px_64px_minmax(90px,1.2fr)_minmax(70px,0.8fr)_40px_48px_40px_44px_52px_auto] gap-1.5 px-2 pb-1 text-[10px] font-black text-gray-400 uppercase tracking-wide">
-      <span></span><span class="text-center">先攻</span><span>名稱</span><span>種族</span><span class="text-center">Lv</span><span class="text-center">HP</span><span class="text-center">AC</span><span class="text-center">DEX</span><span class="text-center">DC/ATK</span><span></span>
+    <div class="hidden sm:block pb-1">
+      <div class="border border-transparent px-2">
+        <div class="player-compact-grid text-[10px] font-black text-gray-400 uppercase tracking-wide">
+          <span></span>
+          <span class="text-center">先攻</span>
+          <span>名稱</span>
+          <span class="pc-race">種族</span>
+          <span class="pc-lv text-center">Lv</span>
+          <span class="pc-hp text-center">HP</span>
+          <span class="pc-ac text-center">AC</span>
+          <span class="pc-dex text-center">DEX</span>
+          <span class="pc-dc text-center">DC/ATK</span>
+          <span></span>
+        </div>
+      </div>
     </div>
     <div id="players-container" class="space-y-1.5"></div>
   </div>
@@ -2135,18 +2177,18 @@ let savedQuests = JSON.parse(localStorage.getItem('dm_saved_quests') || '{}');
                     <button type="button" onclick="delP(${i})" class="min-h-[32px] px-2.5 rounded-md bg-red-50 border border-red-200 text-red-700 text-[11px] font-black">刪除</button>
                   </div>` : '';
                 return `<div class="rounded-lg border ${picked ? 'border-red-400 bg-red-50/50' : 'border-gray-200 bg-white'} px-2 py-1.5 shadow-sm">
-                  <div class="grid grid-cols-1 sm:grid-cols-[28px_64px_minmax(90px,1.2fr)_minmax(70px,0.8fr)_40px_48px_40px_44px_52px_auto] gap-1.5 items-center">
+                  <div class="player-compact-grid">
                     <label class="justify-self-start flex items-center min-h-[36px] cursor-pointer">
                       <input type="checkbox" class="w-4 h-4 accent-red-600" ${picked ? 'checked' : ''} onchange="togglePlayerCombatPick(${i}, this.checked)" title="加入戰鬥">
                     </label>
                     <input type="number" id="p-init-${i}" value="${initVal}" placeholder="${dexHint>=0?'+':''}${dexHint}" oninput="setPlayerInitDraft(${i}, this.value)" class="w-full min-h-[36px] text-center font-black text-sm border rounded-md outline-none focus:ring-2 focus:ring-red-300 bg-white" title="先攻（手動輸入）">
                     <input value="${esc(p.n)}" onchange="updateP(${i},'n',this.value)" class="w-full min-h-[36px] px-1.5 font-black text-sm border rounded-md outline-none focus:ring-2 focus:ring-green-300 bg-white truncate" title="名稱">
-                    <input value="${esc(p.r)}" onchange="updateP(${i},'r',this.value)" class="w-full min-h-[36px] px-1.5 text-xs font-bold text-gray-600 border rounded-md outline-none bg-white truncate" title="種族">
-                    <input type="number" value="${p.l}" onchange="updateP(${i},'l',this.value)" class="w-full min-h-[36px] text-center font-black text-sm text-blue-700 border rounded-md outline-none bg-white" title="等級">
-                    <input type="number" value="${p.hp}" onchange="updateP(${i},'hp',this.value)" class="w-full min-h-[36px] text-center font-black text-sm text-red-600 border rounded-md outline-none bg-white" title="HP">
-                    <input type="number" value="${p.ac}" onchange="updateP(${i},'ac',this.value)" class="w-full min-h-[36px] text-center font-black text-sm text-blue-900 border rounded-md outline-none bg-white" title="AC">
-                    <div class="text-center text-[11px] font-black text-gray-500" title="敏捷調整值">${gs(dexHint)}</div>
-                    <div class="text-center text-[10px] font-black leading-tight text-gray-600" title="法術 DC / 攻擊"><span class="text-yellow-600">DC${dc}</span><br><span class="text-green-600">${gs(am)}</span></div>
+                    <input value="${esc(p.r)}" onchange="updateP(${i},'r',this.value)" class="pc-race w-full min-h-[36px] px-1.5 text-xs font-bold text-gray-600 border rounded-md outline-none bg-white truncate" title="種族">
+                    <input type="number" value="${p.l}" onchange="updateP(${i},'l',this.value)" class="pc-lv w-full min-h-[36px] px-0.5 text-center font-black text-sm text-blue-700 border rounded-md outline-none bg-white" title="等級" aria-label="等級">
+                    <input type="number" value="${p.hp}" onchange="updateP(${i},'hp',this.value)" class="pc-hp w-full min-h-[36px] px-0.5 text-center font-black text-sm text-red-600 border rounded-md outline-none bg-white" title="HP" aria-label="HP">
+                    <input type="number" value="${p.ac}" onchange="updateP(${i},'ac',this.value)" class="pc-ac w-full min-h-[36px] px-0.5 text-center font-black text-sm text-blue-900 border rounded-md outline-none bg-white" title="AC" aria-label="AC">
+                    <div class="pc-dex text-center text-[11px] font-black text-gray-500" title="敏捷調整值">${gs(dexHint)}</div>
+                    <div class="pc-dc text-center text-[10px] font-black leading-tight text-gray-600" title="法術 DC / 攻擊"><span class="text-yellow-600">DC${dc}</span><br><span class="text-green-600">${gs(am)}</span></div>
                     <div class="flex items-center justify-end gap-1">
                       <button type="button" onclick="togglePlayerDetail(${i})" class="min-h-[36px] px-2 rounded-md border bg-gray-50 text-[11px] font-black text-gray-700 whitespace-nowrap" title="${open?'收合':'展開屬性'}">${open?'▴ 收合':'▾ 詳情'}</button>
                     </div>
@@ -3565,7 +3607,7 @@ function generateWebDungeon() {
 
 
         // ===== 怪物速查卡（API / JSON 載入）=====
-        const MONSTER_API = './data/monsters.json?v=20261111-playerscompact1';
+        const MONSTER_API = './data/monsters.json?v=20261111-playersalign1';
         let monsterData = { monsters: [], modules: [] };
         let monstersLoaded = false;
         let monstersLoading = false;
@@ -3598,8 +3640,8 @@ function generateWebDungeon() {
         window.reloadMonsters = (force) => loadMonsters(!!force);
 
         // ===== 法術庫 / 萬物商店（Google Sheet API GET）=====
-        const DEFAULT_SPELLS_API = './data/spells.json?v=20261111-playerscompact1';
-        const DEFAULT_STORE_API = './data/store.json?v=20261111-playerscompact1';
+        const DEFAULT_SPELLS_API = './data/spells.json?v=20261111-playersalign1';
+        const DEFAULT_STORE_API = './data/store.json?v=20261111-playersalign1';
         let spellsLoaded = false, spellsLoading = false;
         let storeLoaded = false, storeLoading = false;
 
@@ -3988,7 +4030,7 @@ window.onload = () => {
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     // Register self-destructing SW so any old caching SW is replaced and cleared
-    navigator.serviceWorker.register('./sw.js?v=20261111-playerscompact1')
+    navigator.serviceWorker.register('./sw.js?v=20261111-playersalign1')
       .then(reg => console.log('SW clear registered', reg.scope))
       .catch(err => console.log('SW clear failed', err));
   });
