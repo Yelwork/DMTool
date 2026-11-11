@@ -9,14 +9,14 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="戰役助手">
-    <link rel="manifest" href="manifest.json?v=20261111-combatplayers1">
-    <link rel="apple-touch-icon" href="icon-192.png?v=20261111-combatplayers1">
+    <link rel="manifest" href="manifest.json?v=20261111-playerscompact1">
+    <link rel="apple-touch-icon" href="icon-192.png?v=20261111-playerscompact1">
     <title>TRPG 戰役助手</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
     <script>
-    // cache-bust: 20261111-combatplayers1 — clear old SW/cache, then install self-destructing SW
+    // cache-bust: 20261111-playerscompact1 — clear old SW/cache, then install self-destructing SW
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.getRegistrations().then(regs => {
     regs.forEach(r => r.unregister());
@@ -319,24 +319,25 @@ if (window.caches) {
 <!-- 戰鬥先攻／狀態追蹤 -->
 <div id="tab-combat" class="tab-content max-w-7xl mx-auto pb-16">
 
-  <!-- 玩家面板（已併入戰鬥頁） -->
-  <div id="combat-players-section" class="mb-6">
-    <div class="mb-4 flex flex-wrap justify-between items-center gap-2 bg-white p-3 rounded-xl shadow border-l-4 border-green-500">
-      <div>
-        <h2 class="text-xl font-bold"><i class="fa-solid fa-users mr-2 text-green-700"></i>極簡角色面板</h2>
-        <p class="text-xs text-gray-500 mt-0.5">勾選角色、填好先攻後一鍵加入下方戰鬥表（玩家手動輸入；怪物自動骰先攻）</p>
-        <div class="mt-2 flex flex-wrap items-center gap-2 text-xs font-bold text-gray-600">
-          <button type="button" onclick="setAllPlayerCombatTicks(true)" class="min-h-[36px] px-2.5 rounded-lg bg-gray-100 border">全選</button>
-          <button type="button" onclick="setAllPlayerCombatTicks(false)" class="min-h-[36px] px-2.5 rounded-lg bg-gray-100 border">全不選</button>
-          <span id="player-combat-pick-count" class="px-2 py-1 rounded-lg bg-red-50 text-red-700 border border-red-100">已選 0 人</span>
-        </div>
+  <!-- 玩家面板（已併入戰鬥頁・緊湊列） -->
+  <div id="combat-players-section" class="mb-4">
+    <div class="mb-2 flex flex-wrap justify-between items-center gap-2 bg-white px-3 py-2 rounded-xl shadow border-l-4 border-green-500">
+      <div class="flex flex-wrap items-center gap-2 min-w-0">
+        <h2 class="text-base font-black text-gray-800 whitespace-nowrap"><i class="fa-solid fa-users mr-1.5 text-green-700"></i>角色</h2>
+        <span id="player-combat-pick-count" class="px-2 py-0.5 rounded-md bg-red-50 text-red-700 border border-red-100 text-[11px] font-bold">已選 0 人</span>
+        <button type="button" onclick="setAllPlayerCombatTicks(true)" class="min-h-[32px] px-2 rounded-md bg-gray-100 border text-[11px] font-bold">全選</button>
+        <button type="button" onclick="setAllPlayerCombatTicks(false)" class="min-h-[32px] px-2 rounded-md bg-gray-100 border text-[11px] font-bold">全不選</button>
+        <button type="button" onclick="collapseAllPlayerDetails()" class="min-h-[32px] px-2 rounded-md bg-gray-100 border text-[11px] font-bold">全部收合</button>
       </div>
-      <div class="flex flex-wrap gap-2">
-        <button type="button" onclick="addSelectedPlayersToCombat()" id="btn-add-selected-combat" class="min-h-[44px] px-4 py-2 bg-red-600 text-white rounded-xl shadow font-bold hover:bg-red-700 transition"><i class="fa-solid fa-swords mr-1"></i>加入已選戰鬥</button>
-        <button type="button" onclick="addP()" class="min-h-[44px] px-4 py-2 bg-green-600 text-white rounded-xl shadow font-bold hover:bg-green-700 transition"><i class="fa-solid fa-plus mr-1"></i>新增角色</button>
+      <div class="flex flex-wrap gap-1.5">
+        <button type="button" onclick="addSelectedPlayersToCombat()" id="btn-add-selected-combat" class="min-h-[36px] px-3 rounded-lg bg-red-600 text-white text-sm font-black shadow hover:bg-red-700"><i class="fa-solid fa-swords mr-1"></i>加入已選</button>
+        <button type="button" onclick="addP()" class="min-h-[36px] px-3 rounded-lg bg-green-600 text-white text-sm font-black shadow hover:bg-green-700"><i class="fa-solid fa-plus mr-1"></i>新增</button>
       </div>
     </div>
-    <div id="players-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"></div>
+    <div class="hidden sm:grid grid-cols-[28px_64px_minmax(90px,1.2fr)_minmax(70px,0.8fr)_40px_48px_40px_44px_52px_auto] gap-1.5 px-2 pb-1 text-[10px] font-black text-gray-400 uppercase tracking-wide">
+      <span></span><span class="text-center">先攻</span><span>名稱</span><span>種族</span><span class="text-center">Lv</span><span class="text-center">HP</span><span class="text-center">AC</span><span class="text-center">DEX</span><span class="text-center">DC/ATK</span><span></span>
+    </div>
+    <div id="players-container" class="space-y-1.5"></div>
   </div>
 
   <div id="combat-tracker-section" class="bg-white rounded-xl shadow border p-4 sm:p-5">
@@ -2036,9 +2037,11 @@ let savedQuests = JSON.parse(localStorage.getItem('dm_saved_quests') || '{}');
                 if (idx === i) return;
                 nextInit[idx > i ? idx - 1 : idx] = playerInitDraft[k];
             });
+            const nextOpen = new Set([...playerDetailOpen].filter(idx => idx !== i).map(idx => idx > i ? idx - 1 : idx));
             pls.splice(i,1);
             playerCombatPicks = kept;
             playerInitDraft = nextInit;
+            playerDetailOpen = nextOpen;
             renderPlayers(); renderQuests();
         }
         function addP() {
@@ -2050,6 +2053,7 @@ let savedQuests = JSON.parse(localStorage.getItem('dm_saved_quests') || '{}');
         // 勾選要加入戰鬥的角色（預設全選）— index-based, remapped on delete
         let playerCombatPicks = new Set(pls.map((_, i) => i));
         let playerInitDraft = {}; // manual initiative inputs per player index
+        let playerDetailOpen = new Set();
         window.playerCombatPicks = playerCombatPicks;
 
         window.setPlayerInitDraft = (idx, val) => {
@@ -2086,6 +2090,16 @@ let savedQuests = JSON.parse(localStorage.getItem('dm_saved_quests') || '{}');
             renderPlayers();
         };
         
+        window.togglePlayerDetail = (idx) => {
+            if (playerDetailOpen.has(idx)) playerDetailOpen.delete(idx);
+            else playerDetailOpen.add(idx);
+            renderPlayers();
+        };
+        window.collapseAllPlayerDetails = () => {
+            playerDetailOpen = new Set();
+            renderPlayers();
+        };
+
         function renderPlayers() {
             setH('players-container', pls.map((p,i) => {
                 const pb = Math.ceil(p.l/4)+1;
@@ -2094,50 +2108,50 @@ let savedQuests = JSON.parse(localStorage.getItem('dm_saved_quests') || '{}');
                 const am = gm(p.s[p.m]) + pb;
                 const dc = 8 + am;
                 const picked = playerCombatPicks.has(i);
+                const open = playerDetailOpen.has(i);
                 const dexHint = gm(p.s.dex);
                 const initVal = (playerInitDraft[i] !== undefined && playerInitDraft[i] !== '') ? playerInitDraft[i] : '';
-                return `<div class="bg-excel-bg p-3 rounded-xl shadow-md border-2 ${picked ? 'border-red-500 ring-2 ring-red-200' : 'border-gray-800'} relative group hover:shadow-lg transition">
-                    <div class="absolute top-2 left-2 right-12 z-10 flex flex-wrap items-center gap-2">
-                      <label class="flex items-center gap-1 min-h-[36px] px-2 rounded-lg bg-white/95 border shadow-sm cursor-pointer select-none">
-                        <input type="checkbox" class="w-5 h-5 accent-red-600" ${picked ? 'checked' : ''} onchange="togglePlayerCombatPick(${i}, this.checked)">
-                        <span class="text-[11px] font-black text-red-700">戰鬥</span>
-                      </label>
-                      <label class="flex items-center gap-1 min-h-[36px] px-2 rounded-lg bg-white/95 border shadow-sm">
-                        <span class="text-[11px] font-black text-gray-600">先攻</span>
-                        <input type="number" id="p-init-${i}" value="${initVal}" placeholder="DEX${dexHint>=0?'+':''}${dexHint}" oninput="setPlayerInitDraft(${i}, this.value)" class="w-16 min-h-[32px] text-center font-black border rounded-lg outline-none focus:ring-2 focus:ring-red-300">
-                      </label>
+                const esc = (s) => String(s ?? '').replace(/"/g, '&quot;');
+                const detail = open ? `
+                  <div class="mt-1.5 pt-1.5 border-t border-gray-200 grid grid-cols-6 gap-1 text-center text-[11px] font-mono">
+                    ${[['str','STR','bg-str border-red-200','text-red-900 bg-red-100/50'],['dex','DEX','bg-dex border-blue-200','text-blue-900 bg-blue-100/50'],['con','CON','bg-con border-orange-200','text-orange-900 bg-orange-100/50'],['int','INT','bg-int border-green-200','text-green-900 bg-green-100/50'],['wis','WIS','bg-wis border-yellow-300','text-yellow-900 bg-yellow-100/50'],['cha','CHA','bg-cha border-purple-200','text-purple-900 bg-purple-100/50']].map(([k,lab,box,hd]) => `
+                      <div class="${box} rounded border">
+                        <div class="text-[9px] font-black py-0.5 border-b ${hd}">${lab}</div>
+                        <input type="number" value="${p.s[k]}" onchange="updateP(${i},'s',this.value,'${k}')" class="w-full text-center bg-transparent font-bold outline-none py-1">
+                        <div class="text-[10px] font-black border-t bg-white ${gm(p.s[k])>=0?'text-green-700':'text-red-600'}">${gs(gm(p.s[k]))}</div>
+                      </div>`).join('')}
+                  </div>
+                  <div class="mt-1.5 flex flex-wrap items-center gap-2">
+                    <select onchange="updateP(${i},'m',this.value)" class="min-h-[32px] bg-gray-800 text-yellow-400 text-xs font-bold rounded px-2 border border-gray-700">
+                      <option value="str" ${p.m==='str'?'selected':''}>力量施法</option>
+                      <option value="dex" ${p.m==='dex'?'selected':''}>敏捷施法</option>
+                      <option value="con" ${p.m==='con'?'selected':''}>體質施法</option>
+                      <option value="int" ${p.m==='int'?'selected':''}>智力施法</option>
+                      <option value="wis" ${p.m==='wis'?'selected':''}>感知施法</option>
+                      <option value="cha" ${p.m==='cha'?'selected':''}>魅力施法</option>
+                    </select>
+                    <span class="text-[11px] font-bold text-gray-500">Prof +${pb}</span>
+                    <button type="button" onclick="addPlayerToCombat(${i})" class="min-h-[32px] px-2.5 rounded-md bg-white border border-red-200 text-red-700 text-[11px] font-black">單獨加入</button>
+                    <button type="button" onclick="delP(${i})" class="min-h-[32px] px-2.5 rounded-md bg-red-50 border border-red-200 text-red-700 text-[11px] font-black">刪除</button>
+                  </div>` : '';
+                return `<div class="rounded-lg border ${picked ? 'border-red-400 bg-red-50/50' : 'border-gray-200 bg-white'} px-2 py-1.5 shadow-sm">
+                  <div class="grid grid-cols-1 sm:grid-cols-[28px_64px_minmax(90px,1.2fr)_minmax(70px,0.8fr)_40px_48px_40px_44px_52px_auto] gap-1.5 items-center">
+                    <label class="justify-self-start flex items-center min-h-[36px] cursor-pointer">
+                      <input type="checkbox" class="w-4 h-4 accent-red-600" ${picked ? 'checked' : ''} onchange="togglePlayerCombatPick(${i}, this.checked)" title="加入戰鬥">
+                    </label>
+                    <input type="number" id="p-init-${i}" value="${initVal}" placeholder="${dexHint>=0?'+':''}${dexHint}" oninput="setPlayerInitDraft(${i}, this.value)" class="w-full min-h-[36px] text-center font-black text-sm border rounded-md outline-none focus:ring-2 focus:ring-red-300 bg-white" title="先攻（手動輸入）">
+                    <input value="${esc(p.n)}" onchange="updateP(${i},'n',this.value)" class="w-full min-h-[36px] px-1.5 font-black text-sm border rounded-md outline-none focus:ring-2 focus:ring-green-300 bg-white truncate" title="名稱">
+                    <input value="${esc(p.r)}" onchange="updateP(${i},'r',this.value)" class="w-full min-h-[36px] px-1.5 text-xs font-bold text-gray-600 border rounded-md outline-none bg-white truncate" title="種族">
+                    <input type="number" value="${p.l}" onchange="updateP(${i},'l',this.value)" class="w-full min-h-[36px] text-center font-black text-sm text-blue-700 border rounded-md outline-none bg-white" title="等級">
+                    <input type="number" value="${p.hp}" onchange="updateP(${i},'hp',this.value)" class="w-full min-h-[36px] text-center font-black text-sm text-red-600 border rounded-md outline-none bg-white" title="HP">
+                    <input type="number" value="${p.ac}" onchange="updateP(${i},'ac',this.value)" class="w-full min-h-[36px] text-center font-black text-sm text-blue-900 border rounded-md outline-none bg-white" title="AC">
+                    <div class="text-center text-[11px] font-black text-gray-500" title="敏捷調整值">${gs(dexHint)}</div>
+                    <div class="text-center text-[10px] font-black leading-tight text-gray-600" title="法術 DC / 攻擊"><span class="text-yellow-600">DC${dc}</span><br><span class="text-green-600">${gs(am)}</span></div>
+                    <div class="flex items-center justify-end gap-1">
+                      <button type="button" onclick="togglePlayerDetail(${i})" class="min-h-[36px] px-2 rounded-md border bg-gray-50 text-[11px] font-black text-gray-700 whitespace-nowrap" title="${open?'收合':'展開屬性'}">${open?'▴ 收合':'▾ 詳情'}</button>
                     </div>
-                    <button onclick="delP(${i})" class="absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-4 h-4 flex items-center justify-center shadow opacity-0 group-hover:opacity-100 transition z-10"><i class="fa-solid fa-times text-xs"></i></button>
-                    <div class="flex gap-2 mb-3 mt-12">
-                        <input value="${p.n}" onchange="updateP(${i},'n',this.value)" class="font-black text-xl bg-transparent border-b-2 border-gray-400 w-1/2 outline-none text-gray-800 px-1 focus:border-blue-500">
-                        <input value="${p.r}" onchange="updateP(${i},'r',this.value)" class="text-sm font-bold bg-transparent border-b border-gray-400 w-1/2 outline-none text-right text-gray-600 px-1 focus:border-blue-500">
-                    </div>
-                    <div class="grid grid-cols-4 gap-2 mb-3 text-center">
-                        <div class="bg-white rounded-lg border border-gray-300 p-1 shadow-sm"><div class="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Level</div><input type="number" value="${p.l}" onchange="updateP(${i},'l',this.value)" class="w-full text-center font-black text-xl text-blue-700 outline-none bg-transparent"></div>
-                        <div class="bg-white rounded-lg border border-red-200 p-1 shadow-sm bg-red-50/30"><div class="text-[10px] text-red-400 font-bold uppercase tracking-wider">Health</div><input type="number" value="${p.hp}" onchange="updateP(${i},'hp',this.value)" class="w-full text-center font-black text-xl text-red-600 outline-none bg-transparent"></div>
-                        <div class="bg-white rounded-lg border border-blue-200 p-1 shadow-sm bg-blue-50/30"><div class="text-[10px] text-blue-400 font-bold uppercase tracking-wider">Armor</div><input type="number" value="${p.ac}" onchange="updateP(${i},'ac',this.value)" class="w-full text-center font-black text-xl text-blue-900 outline-none bg-transparent"></div>
-                        <div class="bg-gray-800 rounded-lg border border-gray-900 p-1 shadow-sm flex flex-col justify-center"><div class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Prof.</div><div class="w-full text-center font-black text-xl text-yellow-400">+${pb}</div></div>
-                    </div>
-                    <div class="grid grid-cols-6 gap-1 mb-3 text-center text-xs font-mono shadow-sm">
-                        <div class="bg-str rounded border border-red-200"><div class="text-[10px] font-black py-0.5 border-b border-red-200 text-red-900 bg-red-100/50">STR</div><input type="number" value="${p.s.str}" onchange="updateP(${i},'s',this.value,'str')" class="w-full text-center bg-transparent font-bold outline-none py-1.5"><div class="text-[11px] ${gm(p.s.str)>=0?'text-green-700':'text-red-600'} font-black border-t border-red-200 bg-white">${gs(gm(p.s.str))}</div></div>
-                        <div class="bg-dex rounded border border-blue-200"><div class="text-[10px] font-black py-0.5 border-b border-blue-200 text-blue-900 bg-blue-100/50">DEX</div><input type="number" value="${p.s.dex}" onchange="updateP(${i},'s',this.value,'dex')" class="w-full text-center bg-transparent font-bold outline-none py-1.5"><div class="text-[11px] ${gm(p.s.dex)>=0?'text-green-700':'text-red-600'} font-black border-t border-blue-200 bg-white">${gs(gm(p.s.dex))}</div></div>
-                        <div class="bg-con rounded border border-orange-200"><div class="text-[10px] font-black py-0.5 border-b border-orange-200 text-orange-900 bg-orange-100/50">CON</div><input type="number" value="${p.s.con}" onchange="updateP(${i},'s',this.value,'con')" class="w-full text-center bg-transparent font-bold outline-none py-1.5"><div class="text-[11px] ${gm(p.s.con)>=0?'text-green-700':'text-red-600'} font-black border-t border-orange-200 bg-white">${gs(gm(p.s.con))}</div></div>
-                        <div class="bg-int rounded border border-green-200"><div class="text-[10px] font-black py-0.5 border-b border-green-200 text-green-900 bg-green-100/50">INT</div><input type="number" value="${p.s.int}" onchange="updateP(${i},'s',this.value,'int')" class="w-full text-center bg-transparent font-bold outline-none py-1.5"><div class="text-[11px] ${gm(p.s.int)>=0?'text-green-700':'text-red-600'} font-black border-t border-green-200 bg-white">${gs(gm(p.s.int))}</div></div>
-                        <div class="bg-wis rounded border border-yellow-300"><div class="text-[10px] font-black py-0.5 border-b border-yellow-300 text-yellow-900 bg-yellow-100/50">WIS</div><input type="number" value="${p.s.wis}" onchange="updateP(${i},'s',this.value,'wis')" class="w-full text-center bg-transparent font-bold outline-none py-1.5"><div class="text-[11px] ${gm(p.s.wis)>=0?'text-green-700':'text-red-600'} font-black border-t border-yellow-300 bg-white">${gs(gm(p.s.wis))}</div></div>
-                        <div class="bg-cha rounded border border-purple-200"><div class="text-[10px] font-black py-0.5 border-b border-purple-200 text-purple-900 bg-purple-100/50">CHA</div><input type="number" value="${p.s.cha}" onchange="updateP(${i},'s',this.value,'cha')" class="w-full text-center bg-transparent font-bold outline-none py-1.5"><div class="text-[11px] ${gm(p.s.cha)>=0?'text-green-700':'text-red-600'} font-black border-t border-purple-200 bg-white">${gs(gm(p.s.cha))}</div></div>
-                    </div>
-                    <div class="flex items-center gap-2 bg-gray-800 text-white p-2 rounded-lg text-sm shadow-inner">
-                        <select onchange="updateP(${i},'m',this.value)" class="bg-gray-700 font-bold outline-none text-yellow-400 rounded px-1 py-1 border border-gray-600 text-xs">
-                            <option value="str" ${p.m==='str'?'selected':''}>力量</option><option value="dex" ${p.m==='dex'?'selected':''}>敏捷</option><option value="con" ${p.m==='con'?'selected':''}>體質</option><option value="int" ${p.m==='int'?'selected':''}>智力</option><option value="wis" ${p.m==='wis'?'selected':''}>感知</option><option value="cha" ${p.m==='cha'?'selected':''}>魅力</option>
-                        </select>
-                        <div class="flex-grow text-center text-[10px] font-bold text-gray-400">施法面板</div>
-                        <div class="font-black border-l border-gray-600 pl-2 text-sm tracking-wider">DC <span class="text-yellow-400">${dc}</span></div>
-                        <div class="font-black border-l border-gray-600 pl-2 text-sm tracking-wider">ATK <span class="text-green-400">${gs(am)}</span></div>
-                    </div>
-                    <div class="mt-3 grid grid-cols-2 gap-2">
-                      <button type="button" onclick="addPlayerToCombat(${i})" class="min-h-[44px] rounded-xl bg-white border border-red-200 text-red-700 font-black shadow-sm hover:bg-red-50">單獨加入</button>
-                      <button type="button" onclick="flipPlayerCombatPick(${i})" class="min-h-[44px] rounded-xl ${picked ? 'bg-red-600 text-white' : 'bg-gray-200 text-gray-700'} font-black shadow-sm">${picked ? '已勾選' : '勾選'}</button>
-                    </div>
+                  </div>
+                  ${detail}
                 </div>`;
             }).join(''));
             updatePlayerCombatPickCount();
@@ -3551,7 +3565,7 @@ function generateWebDungeon() {
 
 
         // ===== 怪物速查卡（API / JSON 載入）=====
-        const MONSTER_API = './data/monsters.json?v=20261111-combatplayers1';
+        const MONSTER_API = './data/monsters.json?v=20261111-playerscompact1';
         let monsterData = { monsters: [], modules: [] };
         let monstersLoaded = false;
         let monstersLoading = false;
@@ -3584,8 +3598,8 @@ function generateWebDungeon() {
         window.reloadMonsters = (force) => loadMonsters(!!force);
 
         // ===== 法術庫 / 萬物商店（Google Sheet API GET）=====
-        const DEFAULT_SPELLS_API = './data/spells.json?v=20261111-combatplayers1';
-        const DEFAULT_STORE_API = './data/store.json?v=20261111-combatplayers1';
+        const DEFAULT_SPELLS_API = './data/spells.json?v=20261111-playerscompact1';
+        const DEFAULT_STORE_API = './data/store.json?v=20261111-playerscompact1';
         let spellsLoaded = false, spellsLoading = false;
         let storeLoaded = false, storeLoading = false;
 
@@ -3974,7 +3988,7 @@ window.onload = () => {
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     // Register self-destructing SW so any old caching SW is replaced and cleared
-    navigator.serviceWorker.register('./sw.js?v=20261111-combatplayers1')
+    navigator.serviceWorker.register('./sw.js?v=20261111-playerscompact1')
       .then(reg => console.log('SW clear registered', reg.scope))
       .catch(err => console.log('SW clear failed', err));
   });
