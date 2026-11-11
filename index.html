@@ -9,14 +9,14 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="戰役助手">
-    <link rel="manifest" href="manifest.json?v=20261111-catalog1">
-    <link rel="apple-touch-icon" href="icon-192.png?v=20261111-catalog1">
+    <link rel="manifest" href="manifest.json?v=20261111-playercombat3">
+    <link rel="apple-touch-icon" href="icon-192.png?v=20261111-playercombat3">
     <title>TRPG 戰役助手</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
     <script>
-    // cache-bust: 20261111-catalog1 — clear old SW/cache, then install self-destructing SW
+    // cache-bust: 20261111-playercombat3 — clear old SW/cache, then install self-destructing SW
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.getRegistrations().then(regs => {
     regs.forEach(r => r.unregister());
@@ -799,9 +799,20 @@ if (window.caches) {
 
         <!-- 玩家面板 -->
         <div id="tab-players" class="tab-content max-w-7xl mx-auto">
-            <div class="mb-4 flex justify-between items-center bg-white p-3 rounded-xl shadow border-l-4 border-green-500">
-                <div><h2 class="text-xl font-bold"><i class="fa-solid fa-users mr-2 text-green-700"></i>極簡角色面板</h2></div>
-                <button onclick="addP()" class="px-4 py-2 bg-green-600 text-white rounded shadow font-bold hover:bg-green-700 transition"><i class="fa-solid fa-plus mr-1"></i>新增角色</button>
+            <div class="mb-4 flex flex-wrap justify-between items-center gap-2 bg-white p-3 rounded-xl shadow border-l-4 border-green-500">
+                <div>
+                  <h2 class="text-xl font-bold"><i class="fa-solid fa-users mr-2 text-green-700"></i>極簡角色面板</h2>
+                  <p class="text-xs text-gray-500 mt-0.5">勾選角色、填好先攻後一鍵加入「戰鬥」（玩家手動輸入；怪物自動骰先攻）</p>
+                  <div class="mt-2 flex flex-wrap items-center gap-2 text-xs font-bold text-gray-600">
+                    <button type="button" onclick="setAllPlayerCombatTicks(true)" class="min-h-[36px] px-2.5 rounded-lg bg-gray-100 border">全選</button>
+                    <button type="button" onclick="setAllPlayerCombatTicks(false)" class="min-h-[36px] px-2.5 rounded-lg bg-gray-100 border">全不選</button>
+                    <span id="player-combat-pick-count" class="px-2 py-1 rounded-lg bg-red-50 text-red-700 border border-red-100">已選 0 人</span>
+                  </div>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                  <button type="button" onclick="addSelectedPlayersToCombat()" id="btn-add-selected-combat" class="min-h-[44px] px-4 py-2 bg-red-600 text-white rounded-xl shadow font-bold hover:bg-red-700 transition"><i class="fa-solid fa-swords mr-1"></i>加入已選戰鬥</button>
+                  <button type="button" onclick="addP()" class="min-h-[44px] px-4 py-2 bg-green-600 text-white rounded-xl shadow font-bold hover:bg-green-700 transition"><i class="fa-solid fa-plus mr-1"></i>新增角色</button>
+                </div>
             </div>
             <div id="players-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pb-10"></div>
         </div>
@@ -2003,8 +2014,64 @@ let savedQuests = JSON.parse(localStorage.getItem('dm_saved_quests') || '{}');
             else pls[i][k] = parseInt(v)||0;
             renderPlayers(); renderQuests();
         }
-        function delP(i){ if(confirm('刪除這張角色卡嗎？')){ pls.splice(i,1); renderPlayers(); renderQuests(); } }
-        function addP() { pls.push({n:"新角色", r:"種族", l:1, hp:10, ac:10, m:"str", s:{str:10,dex:10,con:10,int:10,wis:10,cha:10}}); renderPlayers(); renderQuests(); }
+        function delP(i){
+            if(!confirm('刪除這張角色卡嗎？')) return;
+            const kept = new Set([...playerCombatPicks].filter(idx => idx !== i).map(idx => idx > i ? idx - 1 : idx));
+            const nextInit = {};
+            Object.keys(playerInitDraft).forEach(k => {
+                const idx = Number(k);
+                if (idx === i) return;
+                nextInit[idx > i ? idx - 1 : idx] = playerInitDraft[k];
+            });
+            pls.splice(i,1);
+            playerCombatPicks = kept;
+            playerInitDraft = nextInit;
+            renderPlayers(); renderQuests();
+        }
+        function addP() {
+            pls.push({n:"新角色", r:"種族", l:1, hp:10, ac:10, m:"str", s:{str:10,dex:10,con:10,int:10,wis:10,cha:10}});
+            playerCombatPicks.add(pls.length-1);
+            renderPlayers(); renderQuests();
+        }
+
+        // 勾選要加入戰鬥的角色（預設全選）— index-based, remapped on delete
+        let playerCombatPicks = new Set(pls.map((_, i) => i));
+        let playerInitDraft = {}; // manual initiative inputs per player index
+        window.playerCombatPicks = playerCombatPicks;
+
+        window.setPlayerInitDraft = (idx, val) => {
+            playerInitDraft[idx] = val;
+        };
+
+        function updatePlayerCombatPickCount() {
+            const n = playerCombatPicks.size;
+            const el = $('player-combat-pick-count');
+            if (el) el.textContent = `已選 ${n} 人`;
+            const btn = $('btn-add-selected-combat');
+            if (btn) {
+                btn.innerHTML = `<i class="fa-solid fa-swords mr-1"></i>加入已選戰鬥（${n}）`;
+                btn.disabled = n === 0;
+                btn.classList.toggle('opacity-50', n === 0);
+            }
+        }
+
+        window.togglePlayerCombatPick = (idx, checked) => {
+            if (checked) playerCombatPicks.add(idx);
+            else playerCombatPicks.delete(idx);
+            window.playerCombatPicks = playerCombatPicks;
+            updatePlayerCombatPickCount();
+        };
+
+        window.flipPlayerCombatPick = (idx) => {
+            togglePlayerCombatPick(idx, !playerCombatPicks.has(idx));
+            renderPlayers();
+        };
+
+        window.setAllPlayerCombatTicks = (on) => {
+            playerCombatPicks = on ? new Set(pls.map((_, i) => i)) : new Set();
+            window.playerCombatPicks = playerCombatPicks;
+            renderPlayers();
+        };
         
         function renderPlayers() {
             setH('players-container', pls.map((p,i) => {
@@ -2013,9 +2080,22 @@ let savedQuests = JSON.parse(localStorage.getItem('dm_saved_quests') || '{}');
                 const gs = v => v>0?`+${v}`:(v===0?"0":v);
                 const am = gm(p.s[p.m]) + pb;
                 const dc = 8 + am;
-                return `<div class="bg-excel-bg p-3 rounded-xl shadow-md border-2 border-gray-800 relative group hover:shadow-lg transition">
+                const picked = playerCombatPicks.has(i);
+                const dexHint = gm(p.s.dex);
+                const initVal = (playerInitDraft[i] !== undefined && playerInitDraft[i] !== '') ? playerInitDraft[i] : '';
+                return `<div class="bg-excel-bg p-3 rounded-xl shadow-md border-2 ${picked ? 'border-red-500 ring-2 ring-red-200' : 'border-gray-800'} relative group hover:shadow-lg transition">
+                    <div class="absolute top-2 left-2 right-12 z-10 flex flex-wrap items-center gap-2">
+                      <label class="flex items-center gap-1 min-h-[36px] px-2 rounded-lg bg-white/95 border shadow-sm cursor-pointer select-none">
+                        <input type="checkbox" class="w-5 h-5 accent-red-600" ${picked ? 'checked' : ''} onchange="togglePlayerCombatPick(${i}, this.checked)">
+                        <span class="text-[11px] font-black text-red-700">戰鬥</span>
+                      </label>
+                      <label class="flex items-center gap-1 min-h-[36px] px-2 rounded-lg bg-white/95 border shadow-sm">
+                        <span class="text-[11px] font-black text-gray-600">先攻</span>
+                        <input type="number" id="p-init-${i}" value="${initVal}" placeholder="DEX${dexHint>=0?'+':''}${dexHint}" oninput="setPlayerInitDraft(${i}, this.value)" class="w-16 min-h-[32px] text-center font-black border rounded-lg outline-none focus:ring-2 focus:ring-red-300">
+                      </label>
+                    </div>
                     <button onclick="delP(${i})" class="absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-4 h-4 flex items-center justify-center shadow opacity-0 group-hover:opacity-100 transition z-10"><i class="fa-solid fa-times text-xs"></i></button>
-                    <div class="flex gap-2 mb-3">
+                    <div class="flex gap-2 mb-3 mt-12">
                         <input value="${p.n}" onchange="updateP(${i},'n',this.value)" class="font-black text-xl bg-transparent border-b-2 border-gray-400 w-1/2 outline-none text-gray-800 px-1 focus:border-blue-500">
                         <input value="${p.r}" onchange="updateP(${i},'r',this.value)" class="text-sm font-bold bg-transparent border-b border-gray-400 w-1/2 outline-none text-right text-gray-600 px-1 focus:border-blue-500">
                     </div>
@@ -2041,8 +2121,13 @@ let savedQuests = JSON.parse(localStorage.getItem('dm_saved_quests') || '{}');
                         <div class="font-black border-l border-gray-600 pl-2 text-sm tracking-wider">DC <span class="text-yellow-400">${dc}</span></div>
                         <div class="font-black border-l border-gray-600 pl-2 text-sm tracking-wider">ATK <span class="text-green-400">${gs(am)}</span></div>
                     </div>
+                    <div class="mt-3 grid grid-cols-2 gap-2">
+                      <button type="button" onclick="addPlayerToCombat(${i})" class="min-h-[44px] rounded-xl bg-white border border-red-200 text-red-700 font-black shadow-sm hover:bg-red-50">單獨加入</button>
+                      <button type="button" onclick="flipPlayerCombatPick(${i})" class="min-h-[44px] rounded-xl ${picked ? 'bg-red-600 text-white' : 'bg-gray-200 text-gray-700'} font-black shadow-sm">${picked ? '已勾選' : '勾選'}</button>
+                    </div>
                 </div>`;
             }).join(''));
+            updatePlayerCombatPickCount();
         }
 
         let diceRolling = false;
@@ -2574,22 +2659,137 @@ let cmbs = [];
             renderCmb();
         }
 
-        window.addMonsterToCombat = (name, ac, hpHint) => {
+        function dexModFromStatsText(stats) {
+            const s = String(stats || '');
+            const m = s.match(/敏\s*[：:]?\s*(\d+)/) || s.match(/dex\s*[：:]?\s*(\d+)/i);
+            if (!m) return 0;
+            return Math.floor((parseInt(m[1], 10) - 10) / 2);
+        }
+
+        function rollMonsterInitiative(dexMod = 0) {
+            const d20 = Math.floor(Math.random() * 20) + 1;
+            const dex = Number(dexMod) || 0;
+            return { init: d20 + dex, d20, dex };
+        }
+
+        window.addMonsterToCombat = (name, ac, hpHint, dexModOrStats) => {
             let hp = 10;
             if (typeof hpHint === 'number') hp = hpHint;
             else if (typeof hpHint === 'string') {
                 const m = hpHint.match(/(\d+)/);
                 if (m) hp = parseInt(m[1], 10) || 10;
             }
-            const init = parseInt(prompt(`「${name}」先攻值？`, '10'), 10);
-            if (isNaN(init)) return;
+            let dexMod = 0;
+            if (typeof dexModOrStats === 'number') dexMod = dexModOrStats;
+            else if (typeof dexModOrStats === 'string') dexMod = dexModFromStatsText(dexModOrStats);
+            const r = rollMonsterInitiative(dexMod);
             cmbs.push({
                 id: Date.now() + Math.floor(Math.random() * 1000),
-                n: name, i: init, ac: ac || 10, hp, mhp: hp, f: 'e', conds: []
+                n: name, i: r.init, ac: ac || 10, hp, mhp: hp, f: 'e', conds: []
             });
-            addCombatLog(`<span class="text-green-400 font-bold">加入</span> ${name}（來自怪物速查）先攻:${init} HP:${hp} AC:${ac||10}`);
+            addCombatLog(`<span class="text-green-400 font-bold">加入</span> ${name}（怪物速查）先攻:${r.init}（d20 ${r.d20}${r.dex >= 0 ? '+' : ''}${r.dex}） HP:${hp} AC:${ac||10}`);
             renderCmb();
             switchTab('tab-combat');
+        };
+
+        function playerDexMod(p) {
+            return Math.floor((Number(p?.s?.dex ?? 10) - 10) / 2);
+        }
+
+        function readPlayerInitInput(idx) {
+            const el = $('p-init-' + idx);
+            if (el && el.value !== '') {
+                const n = parseInt(el.value, 10);
+                if (!isNaN(n)) return n;
+            }
+            if (playerInitDraft[idx] !== undefined && playerInitDraft[idx] !== '') {
+                const n = parseInt(playerInitDraft[idx], 10);
+                if (!isNaN(n)) return n;
+            }
+            return null;
+        }
+
+        window.addPlayerToCombat = (idx, opts = {}) => {
+            const p = pls[idx];
+            if (!p) return false;
+            const quiet = !!opts.quiet;
+            const hp = parseInt(p.hp, 10) || 10;
+            const ac = parseInt(p.ac, 10) || 10;
+            const dex = playerDexMod(p);
+            let init = opts.init;
+            if (init === undefined || init === null || isNaN(Number(init))) {
+                const fromInput = readPlayerInitInput(idx);
+                if (fromInput !== null) {
+                    init = fromInput;
+                } else {
+                    const suggested = '';
+                    const raw = prompt(
+                        `「${p.n}」先攻值？（敏捷 ${dex >= 0 ? '+' : ''}${dex}，請自行輸入骰值）`,
+                        suggested
+                    );
+                    if (raw === null) return false;
+                    init = parseInt(raw, 10);
+                    if (isNaN(init)) {
+                        if (!quiet) alert('請輸入有效先攻數字');
+                        return false;
+                    }
+                    playerInitDraft[idx] = String(init);
+                }
+            }
+            if (!opts.force) {
+                const exists = cmbs.find(c => c.f === 'p' && c.n === p.n);
+                if (exists) {
+                    if (!quiet && !confirm(`「${p.n}」已在戰鬥列表。仍要再加一筆？`)) return false;
+                    if (quiet) return false;
+                }
+            }
+            cmbs.push({
+                id: Date.now() + Math.floor(Math.random() * 1000) + idx,
+                n: p.n, i: init, ac, hp, mhp: hp, f: 'p', conds: [],
+                src: 'player', playerIdx: idx
+            });
+            addCombatLog(`<span class="text-green-400 font-bold">加入</span> ${p.n}（玩家面板）先攻:${init} HP:${hp} AC:${ac}`);
+            if (!quiet) {
+                renderCmb();
+                switchTab('tab-combat');
+            }
+            return true;
+        };
+
+        window.addSelectedPlayersToCombat = () => {
+            const idxs = [...playerCombatPicks].filter(i => i >= 0 && i < pls.length).sort((a, b) => a - b);
+            if (!idxs.length) {
+                alert('請先勾選要加入戰鬥的角色');
+                return;
+            }
+            // sync drafts from DOM before validate
+            idxs.forEach(i => {
+                const el = $('p-init-' + i);
+                if (el) playerInitDraft[i] = el.value;
+            });
+            const missing = idxs.filter(i => readPlayerInitInput(i) === null).map(i => pls[i].n);
+            if (missing.length) {
+                alert(`請先為以下角色輸入先攻：\n${missing.join('、')}`);
+                return;
+            }
+            const names = idxs.map(i => `${pls[i].n}(${readPlayerInitInput(i)})`).join('、');
+            if (!confirm(`一鍵加入 ${idxs.length} 人？\n${names}`)) return;
+            let added = 0;
+            idxs.forEach(i => {
+                if (addPlayerToCombat(i, { quiet: true, init: readPlayerInitInput(i) })) added += 1;
+            });
+            if (added) {
+                renderCmb();
+                switchTab('tab-combat');
+            } else {
+                alert('沒有新增（可能都已在戰鬥列表）');
+            }
+        };
+
+        // backward-compatible alias
+        window.addAllPlayersToCombat = () => {
+            setAllPlayerCombatTicks(true);
+            addSelectedPlayersToCombat();
         };
 
         window.modCmb = (id, k, v) => {
@@ -3335,7 +3535,7 @@ function generateWebDungeon() {
 
 
         // ===== 怪物速查卡（API / JSON 載入）=====
-        const MONSTER_API = './data/monsters.json?v=20261111-catalog1';
+        const MONSTER_API = './data/monsters.json?v=20261111-playercombat3';
         let monsterData = { monsters: [], modules: [] };
         let monstersLoaded = false;
         let monstersLoading = false;
@@ -3368,8 +3568,8 @@ function generateWebDungeon() {
         window.reloadMonsters = (force) => loadMonsters(!!force);
 
         // ===== 法術庫 / 萬物商店（Google Sheet API GET）=====
-        const DEFAULT_SPELLS_API = './data/spells.json?v=20261111-catalog1';
-        const DEFAULT_STORE_API = './data/store.json?v=20261111-catalog1';
+        const DEFAULT_SPELLS_API = './data/spells.json?v=20261111-playercombat3';
+        const DEFAULT_STORE_API = './data/store.json?v=20261111-playercombat3';
         let spellsLoaded = false, spellsLoading = false;
         let storeLoaded = false, storeLoading = false;
 
@@ -3534,7 +3734,7 @@ function generateWebDungeon() {
                     <div class="text-xs mb-2"><b class="text-indigo-700">特性</b><ul class="list-disc pl-4 mt-1 space-y-0.5 text-gray-700">${traits}</ul></div>
                     <div class="text-[11px] text-gray-500 font-bold border-t pt-2">出現：${m.where||'—'}</div>
                     <div class="mt-2 grid grid-cols-2 gap-2">
-                      <button type="button" onclick="addMonsterToCombat('${(m.name||'').replace(/'/g, "\\'")}', ${Number(m.ac)||10}, '${String(m.hp||'').replace(/'/g, "\\'")}')" class="min-h-[44px] rounded-lg bg-red-600 text-white font-bold text-sm hover:bg-red-700">加入先攻</button>
+                      <button type="button" onclick="addMonsterToCombat('${(m.name||'').replace(/'/g, "\\'")}', ${Number(m.ac)||10}, '${String(m.hp||'').replace(/'/g, "\\'")}', '${String(m.stats||'').replace(/'/g, "\\'")}')" class="min-h-[44px] rounded-lg bg-red-600 text-white font-bold text-sm hover:bg-red-700">加入先攻（自動）</button>
                       <button type="button" onclick="addSessionNoteFromMonster('${(m.name||'').replace(/'/g, "\\'")}')" class="min-h-[44px] rounded-lg bg-white border font-bold text-sm hover:bg-amber-50">記入筆記</button>
                     </div>
                 </div>`;
@@ -3758,7 +3958,7 @@ window.onload = () => {
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     // Register self-destructing SW so any old caching SW is replaced and cleared
-    navigator.serviceWorker.register('./sw.js?v=20261111-catalog1')
+    navigator.serviceWorker.register('./sw.js?v=20261111-playercombat3')
       .then(reg => console.log('SW clear registered', reg.scope))
       .catch(err => console.log('SW clear failed', err));
   });
@@ -4243,10 +4443,10 @@ function onMapClick(e) {
             .catch(err => alert('儲存失敗: ' + err.message));
         // 只有怪物加入先攻
         if (placeMode === 'monster') {
-            const init = parseInt(prompt('先攻值：', '10')) || 10;
             const hp = parseInt(prompt('HP：', '10')) || 10;
-            cmbs.push({ i: init, n: name, id: Date.now(), f: 'e', hp: hp, mhp: hp, ac: 10, conds: [] });
-            if (typeof addCombatLog === 'function') addCombatLog(`<span class="text-green-400 font-bold">加入</span> ${name}（地圖）先攻:${init} HP:${hp}`);
+            const r = (typeof rollMonsterInitiative === 'function') ? rollMonsterInitiative(0) : { init: Math.floor(Math.random()*20)+1, d20: 0, dex: 0 };
+            cmbs.push({ i: r.init, n: name, id: Date.now(), f: 'e', hp: hp, mhp: hp, ac: 10, conds: [] });
+            if (typeof addCombatLog === 'function') addCombatLog(`<span class="text-green-400 font-bold">加入</span> ${name}（地圖）先攻:${r.init}（自動） HP:${hp}`);
             if (typeof renderCmb === 'function') renderCmb();
         }
         return;
