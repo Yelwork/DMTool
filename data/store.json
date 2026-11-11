@@ -1,0 +1,1513 @@
+{
+  "version": "2026-11-11",
+  "source": "google-sheet-api",
+  "note": "萬物商店。預設 GET ./data/store.json；亦可部署 scripts/dmtool-sheet-api.gs 讀取 Google Sheet。",
+  "items": [
+    {
+      "n": "箭矢(20) / Arrows (20)",
+      "c": "1 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Gear"
+    },
+    {
+      "n": "弩箭(20) / Crossbow Bolts (20)",
+      "c": "1 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Gear"
+    },
+    {
+      "n": "投石索彈丸(20) / Bullets, Sling (20)",
+      "c": "4 cp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Gear"
+    },
+    {
+      "n": "吹箭針(50) / Blowgun Needles (50)",
+      "c": "1 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Gear"
+    },
+    {
+      "n": "火器彈藥(10) / Bullets, Firearm (10)",
+      "c": "3 gp",
+      "v": "-",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Gear"
+    },
+    {
+      "n": "火藥桶 / Gunpowder (keg)",
+      "c": "250 gp",
+      "v": "-",
+      "t": "-",
+      "ct": "✓",
+      "ty": "Gear"
+    },
+    {
+      "n": "火藥角 / Gunpowder (powder horn)",
+      "c": "35 gp",
+      "v": "-",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Gear"
+    },
+    {
+      "n": "冒險者背包 / Backpack",
+      "c": "2 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Gear"
+    },
+    {
+      "n": "睡袋 / Bedroll",
+      "c": "1 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Gear"
+    },
+    {
+      "n": "毛毯 / Blanket",
+      "c": "5 sp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Gear"
+    },
+    {
+      "n": "滑車與滑輪 / Block and Tackle",
+      "c": "1 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Gear"
+    },
+    {
+      "n": "玻璃瓶 / Bottle, Glass",
+      "c": "2 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Gear"
+    },
+    {
+      "n": "蠟燭 / Candle",
+      "c": "1 cp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Gear"
+    },
+    {
+      "n": "地圖或卷軸匣 / Case, Map or Scroll",
+      "c": "1 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Gear"
+    },
+    {
+      "n": "鐵鍊(10呎) / Chain (10 feet)",
+      "c": "5 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Gear"
+    },
+    {
+      "n": "箱子 / Chest",
+      "c": "5 gp",
+      "v": "-",
+      "t": "-",
+      "ct": "✓",
+      "ty": "Gear"
+    },
+    {
+      "n": "攀爬工具 / Climber's Kit",
+      "c": "25 gp",
+      "v": "-",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Gear"
+    },
+    {
+      "n": "旅行者服裝 / Clothes, Traveler's",
+      "c": "2 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Gear"
+    },
+    {
+      "n": "精良服裝 / Clothes, Fine",
+      "c": "15 gp",
+      "v": "-",
+      "t": "-",
+      "ct": "✓",
+      "ty": "Gear"
+    },
+    {
+      "n": "撬棍 / Crowbar",
+      "c": "2 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Gear"
+    },
+    {
+      "n": "地城探險包 / Dungeoneer's Pack",
+      "c": "12 gp",
+      "v": "-",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Gear"
+    },
+    {
+      "n": "探險家包 / Explorer's Pack",
+      "c": "10 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Gear"
+    },
+    {
+      "n": "水瓶 / Flask",
+      "c": "2 cp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Gear"
+    },
+    {
+      "n": "抓勾 / Grappling Hook",
+      "c": "2 gp",
+      "v": "-",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Gear"
+    },
+    {
+      "n": "醫療包 / Healer's Kit",
+      "c": "5 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Gear"
+    },
+    {
+      "n": "狩獵陷阱 / Hunting Trap",
+      "c": "5 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Gear"
+    },
+    {
+      "n": "墨水 / Ink",
+      "c": "10 gp",
+      "v": "-",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Gear"
+    },
+    {
+      "n": "墨水筆 / Ink Pen",
+      "c": "2 cp",
+      "v": "-",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Gear"
+    },
+    {
+      "n": "梯子(10呎) / Ladder (10 feet)",
+      "c": "1 sp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Gear"
+    },
+    {
+      "n": "油燈 / Lamp",
+      "c": "5 sp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Gear"
+    },
+    {
+      "n": "提燈(聚光) / Lantern, Bullseye",
+      "c": "10 gp",
+      "v": "-",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Gear"
+    },
+    {
+      "n": "提燈(兜帽) / Lantern, Hooded",
+      "c": "5 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Gear"
+    },
+    {
+      "n": "鎖 / Lock",
+      "c": "10 gp",
+      "v": "-",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Gear"
+    },
+    {
+      "n": "放大鏡 / Magnifying Glass",
+      "c": "100 gp",
+      "v": "-",
+      "t": "-",
+      "ct": "✓",
+      "ty": "Gear"
+    },
+    {
+      "n": "手銬 / Manacles",
+      "c": "2 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Gear"
+    },
+    {
+      "n": "鋼鏡 / Mirror, Steel",
+      "c": "5 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Gear"
+    },
+    {
+      "n": "油(1瓶) / Oil (flask)",
+      "c": "1 sp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Gear"
+    },
+    {
+      "n": "羊皮紙(1張) / Parchment",
+      "c": "1 sp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Gear"
+    },
+    {
+      "n": "紙(1張) / Paper",
+      "c": "2 sp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Gear"
+    },
+    {
+      "n": "木桿(10呎) / Pole (10 feet)",
+      "c": "5 cp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Gear"
+    },
+    {
+      "n": "鐵鍋 / Pot, Iron",
+      "c": "2 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Gear"
+    },
+    {
+      "n": "小袋 / Pouch",
+      "c": "5 sp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Gear"
+    },
+    {
+      "n": "箭袋 / Quiver",
+      "c": "1 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Gear"
+    },
+    {
+      "n": "口糧(1天) / Rations (1 day)",
+      "c": "5 sp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Gear"
+    },
+    {
+      "n": "破門槌 / Ram, Portable",
+      "c": "4 gp",
+      "v": "-",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Gear"
+    },
+    {
+      "n": "麻繩(50呎) / Rope, Hempen",
+      "c": "1 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Gear"
+    },
+    {
+      "n": "絲繩(50呎) / Rope, Silk",
+      "c": "10 gp",
+      "v": "-",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Gear"
+    },
+    {
+      "n": "麻布袋 / Sack",
+      "c": "1 sp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Gear"
+    },
+    {
+      "n": "望遠鏡 / Spyglass",
+      "c": "1000 gp",
+      "v": "-",
+      "t": "-",
+      "ct": "✓",
+      "ty": "Gear"
+    },
+    {
+      "n": "帳篷 / Tent",
+      "c": "2 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Gear"
+    },
+    {
+      "n": "鐵蒺藜 / Caltrops (bag of 20)",
+      "c": "1 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Gear"
+    },
+    {
+      "n": "滾珠 / Ball Bearings (bag of 1k)",
+      "c": "1 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Gear"
+    },
+    {
+      "n": "打火匣 / Tinderbox",
+      "c": "5 sp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Gear"
+    },
+    {
+      "n": "火把 / Torch",
+      "c": "1 cp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Gear"
+    },
+    {
+      "n": "水袋 / Waterskin",
+      "c": "2 sp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Gear"
+    },
+    {
+      "n": "匕首 / Dagger",
+      "c": "2 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Weapon"
+    },
+    {
+      "n": "手斧 / Handaxe",
+      "c": "5 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Weapon"
+    },
+    {
+      "n": "標槍 / Javelin",
+      "c": "5 sp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Weapon"
+    },
+    {
+      "n": "輕錘 / Light Hammer",
+      "c": "2 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Weapon"
+    },
+    {
+      "n": "硬頭鎚 / Mace",
+      "c": "5 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Weapon"
+    },
+    {
+      "n": "法杖 / Quarterstaff",
+      "c": "2 sp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Weapon"
+    },
+    {
+      "n": "鐮刀 / Sickle",
+      "c": "1 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Weapon"
+    },
+    {
+      "n": "矛 / Spear",
+      "c": "1 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Weapon"
+    },
+    {
+      "n": "輕弩 / Crossbow, Light",
+      "c": "25 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Weapon"
+    },
+    {
+      "n": "飛鏢 / Dart",
+      "c": "5 cp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Weapon"
+    },
+    {
+      "n": "短弓 / Shortbow",
+      "c": "25 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Weapon"
+    },
+    {
+      "n": "投石索 / Sling",
+      "c": "1 sp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Weapon"
+    },
+    {
+      "n": "戰斧 / Battleaxe",
+      "c": "10 gp",
+      "v": "-",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Weapon"
+    },
+    {
+      "n": "連枷 / Flail",
+      "c": "10 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Weapon"
+    },
+    {
+      "n": "長柄刀 / Glaive",
+      "c": "20 gp",
+      "v": "-",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Weapon"
+    },
+    {
+      "n": "巨斧 / Greataxe",
+      "c": "30 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Weapon"
+    },
+    {
+      "n": "巨劍 / Greatsword",
+      "c": "50 gp",
+      "v": "-",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Weapon"
+    },
+    {
+      "n": "戟 / Halberd",
+      "c": "20 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Weapon"
+    },
+    {
+      "n": "騎槍 / Lance",
+      "c": "10 gp",
+      "v": "-",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Weapon"
+    },
+    {
+      "n": "長劍 / Longsword",
+      "c": "15 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Weapon"
+    },
+    {
+      "n": "巨錘 / Maul",
+      "c": "10 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Weapon"
+    },
+    {
+      "n": "晨星槌 / Morningstar",
+      "c": "15 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Weapon"
+    },
+    {
+      "n": "長矛 / Pike",
+      "c": "5 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Weapon"
+    },
+    {
+      "n": "刺劍 / Rapier",
+      "c": "25 gp",
+      "v": "-",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Weapon"
+    },
+    {
+      "n": "彎刀 / Scimitar",
+      "c": "25 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Weapon"
+    },
+    {
+      "n": "短劍 / Shortsword",
+      "c": "10 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Weapon"
+    },
+    {
+      "n": "三叉戟 / Trident",
+      "c": "5 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Weapon"
+    },
+    {
+      "n": "戰錘 / Warhammer",
+      "c": "15 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Weapon"
+    },
+    {
+      "n": "軍用鎬 / War Pick",
+      "c": "5 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Weapon"
+    },
+    {
+      "n": "吹箭筒 / Blowgun",
+      "c": "10 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Weapon"
+    },
+    {
+      "n": "手弩 / Crossbow, Hand",
+      "c": "75 gp",
+      "v": "-",
+      "t": "-",
+      "ct": "✓",
+      "ty": "Weapon"
+    },
+    {
+      "n": "重弩 / Crossbow, Heavy",
+      "c": "50 gp",
+      "v": "-",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Weapon"
+    },
+    {
+      "n": "長弓 / Longbow",
+      "c": "50 gp",
+      "v": "-",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Weapon"
+    },
+    {
+      "n": "鞭子 / Whip",
+      "c": "2 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Weapon"
+    },
+    {
+      "n": "火槍 / Musket",
+      "c": "500 gp",
+      "v": "-",
+      "t": "-",
+      "ct": "✓",
+      "ty": "Weapon"
+    },
+    {
+      "n": "手槍 / Pistol",
+      "c": "250 gp",
+      "v": "-",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Weapon"
+    },
+    {
+      "n": "厚布甲 (AC11) / Padded",
+      "c": "5 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Armor"
+    },
+    {
+      "n": "皮甲 (AC11) / Leather",
+      "c": "10 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Armor"
+    },
+    {
+      "n": "鑲嵌皮甲 (AC12) / Studded Leather",
+      "c": "45 gp",
+      "v": "-",
+      "t": "-",
+      "ct": "✓",
+      "ty": "Armor"
+    },
+    {
+      "n": "獸皮甲 (AC12) / Hide",
+      "c": "10 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Armor"
+    },
+    {
+      "n": "鏈甲衫 (AC13) / Chain Shirt",
+      "c": "50 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Armor"
+    },
+    {
+      "n": "鱗甲 (AC14) / Scale Mail",
+      "c": "50 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Armor"
+    },
+    {
+      "n": "胸甲 (AC14) / Breastplate",
+      "c": "400 gp",
+      "v": "-",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Armor"
+    },
+    {
+      "n": "半身板甲 (AC15) / Half Plate",
+      "c": "750 gp",
+      "v": "-",
+      "t": "-",
+      "ct": "✓",
+      "ty": "Armor"
+    },
+    {
+      "n": "環甲 (AC14) / Ring Mail",
+      "c": "30 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Armor"
+    },
+    {
+      "n": "鏈甲 (AC16) / Chain Mail",
+      "c": "75 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Armor"
+    },
+    {
+      "n": "板條甲 (AC17) / Splint",
+      "c": "200 gp",
+      "v": "-",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Armor"
+    },
+    {
+      "n": "全身板甲 (AC18) / Plate",
+      "c": "1500 gp",
+      "v": "-",
+      "t": "-",
+      "ct": "✓",
+      "ty": "Armor"
+    },
+    {
+      "n": "盾牌 (+2 AC) / Shield",
+      "c": "10 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Armor"
+    },
+    {
+      "n": "酸液瓶 / Acid (vial)",
+      "c": "25 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Magic"
+    },
+    {
+      "n": "煉金火 / Alchemist's Fire",
+      "c": "50 gp",
+      "v": "-",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Magic"
+    },
+    {
+      "n": "解毒劑 / Antitoxin (vial)",
+      "c": "50 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Magic"
+    },
+    {
+      "n": "基礎毒藥 / Poison, Basic",
+      "c": "100 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Magic"
+    },
+    {
+      "n": "治療藥水 / Potion of Healing",
+      "c": "50 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Magic"
+    },
+    {
+      "n": "強效治療藥水 / Potion (Greater)",
+      "c": "200 gp",
+      "v": "-",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Magic"
+    },
+    {
+      "n": "極效治療藥水 / Potion (Superior)",
+      "c": "1000 gp",
+      "v": "-",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Magic"
+    },
+    {
+      "n": "無上治療藥水 / Potion (Supreme)",
+      "c": "5000 gp",
+      "v": "-",
+      "t": "-",
+      "ct": "✓",
+      "ty": "Magic"
+    },
+    {
+      "n": "刺客之血 (毒) / Assassin's Blood",
+      "c": "150 gp",
+      "v": "-",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Magic"
+    },
+    {
+      "n": "食腐蟲黏液 (毒) / Carrion Mucus",
+      "c": "200 gp",
+      "v": "-",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Magic"
+    },
+    {
+      "n": "卓爾毒藥 / Lolth's Sting",
+      "c": "200 gp",
+      "v": "-",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Magic"
+    },
+    {
+      "n": "飛龍毒藥 / Wyvern Poison",
+      "c": "1200 gp",
+      "v": "-",
+      "t": "-",
+      "ct": "✓",
+      "ty": "Magic"
+    },
+    {
+      "n": "紫蟲毒藥 / Purple Worm Poison",
+      "c": "2000 gp",
+      "v": "-",
+      "t": "-",
+      "ct": "✓",
+      "ty": "Magic"
+    },
+    {
+      "n": "聖水 / Holy Water",
+      "c": "25 gp",
+      "v": "-",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Magic"
+    },
+    {
+      "n": "法術材料包 / Component Pouch",
+      "c": "25 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Magic"
+    },
+    {
+      "n": "法器(水晶) / Crystal",
+      "c": "10 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Magic"
+    },
+    {
+      "n": "法器(法珠) / Orb",
+      "c": "20 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Magic"
+    },
+    {
+      "n": "法器(權杖) / Rod",
+      "c": "10 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Magic"
+    },
+    {
+      "n": "法器(魔杖) / Wand",
+      "c": "10 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Magic"
+    },
+    {
+      "n": "法器(木杖) / Wooden Staff",
+      "c": "5 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Magic"
+    },
+    {
+      "n": "聖徽(護身符) / Amulet",
+      "c": "5 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Magic"
+    },
+    {
+      "n": "聖徽(聖物箱) / Reliquary",
+      "c": "5 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Magic"
+    },
+    {
+      "n": "戲法卷軸 / Spell Scroll (Cantrip)",
+      "c": "30 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Magic"
+    },
+    {
+      "n": "1環卷軸 / Spell Scroll (Lv 1)",
+      "c": "50 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Magic"
+    },
+    {
+      "n": "2環卷軸 / Spell Scroll (Lv 2)",
+      "c": "200 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Magic"
+    },
+    {
+      "n": "3環卷軸 / Spell Scroll (Lv 3)",
+      "c": "300 gp",
+      "v": "-",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Magic"
+    },
+    {
+      "n": "4環卷軸 / Spell Scroll (Lv 4)",
+      "c": "2000 gp",
+      "v": "-",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Magic"
+    },
+    {
+      "n": "5環卷軸 / Spell Scroll (Lv 5)",
+      "c": "3000 gp",
+      "v": "-",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Magic"
+    },
+    {
+      "n": "煉金工具 / Alchemist's Supplies",
+      "c": "50 gp",
+      "v": "-",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Tool"
+    },
+    {
+      "n": "釀酒工具 / Brewer's Supplies",
+      "c": "20 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Tool"
+    },
+    {
+      "n": "書法工具 / Calligrapher's Supplies",
+      "c": "10 gp",
+      "v": "-",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Tool"
+    },
+    {
+      "n": "木匠工具 / Carpenter's Tools",
+      "c": "8 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Tool"
+    },
+    {
+      "n": "製圖工具 / Cartographer's Tools",
+      "c": "15 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Tool"
+    },
+    {
+      "n": "鞋匠工具 / Cobbler's Tools",
+      "c": "5 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Tool"
+    },
+    {
+      "n": "廚師用具 / Cook's Utensils",
+      "c": "1 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Tool"
+    },
+    {
+      "n": "易容工具 / Disguise Kit",
+      "c": "25 gp",
+      "v": "-",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Tool"
+    },
+    {
+      "n": "偽造文書包 / Forgery Kit",
+      "c": "15 gp",
+      "v": "-",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Tool"
+    },
+    {
+      "n": "玻璃匠工具 / Glassblower's Tools",
+      "c": "30 gp",
+      "v": "-",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Tool"
+    },
+    {
+      "n": "草藥工具 / Herbalism Kit",
+      "c": "5 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Tool"
+    },
+    {
+      "n": "珠寶匠工具 / Jeweler's Tools",
+      "c": "25 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Tool"
+    },
+    {
+      "n": "皮匠工具 / Leatherworker's Tools",
+      "c": "5 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Tool"
+    },
+    {
+      "n": "石匠工具 / Mason's Tools",
+      "c": "10 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Tool"
+    },
+    {
+      "n": "畫家工具 / Painter's Supplies",
+      "c": "10 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Tool"
+    },
+    {
+      "n": "毒藥工具 / Poisoner's Kit",
+      "c": "50 gp",
+      "v": "-",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Tool"
+    },
+    {
+      "n": "陶匠工具 / Potter's Tools",
+      "c": "10 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Tool"
+    },
+    {
+      "n": "鐵匠工具 / Smith's Tools",
+      "c": "20 gp",
+      "v": "-",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Tool"
+    },
+    {
+      "n": "盜賊工具 / Thieves' Tools",
+      "c": "25 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Tool"
+    },
+    {
+      "n": "工匠工具 / Tinker's Tools",
+      "c": "50 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Tool"
+    },
+    {
+      "n": "織布工具 / Weaver's Tools",
+      "c": "1 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Tool"
+    },
+    {
+      "n": "木雕工具 / Woodcarver's Tools",
+      "c": "1 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Tool"
+    },
+    {
+      "n": "風笛 / Bagpipes",
+      "c": "30 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Tool"
+    },
+    {
+      "n": "鼓 / Drum",
+      "c": "6 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Tool"
+    },
+    {
+      "n": "揚琴 / Dulcimer",
+      "c": "25 gp",
+      "v": "-",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Tool"
+    },
+    {
+      "n": "長笛 / Flute",
+      "c": "2 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Tool"
+    },
+    {
+      "n": "號角 / Horn",
+      "c": "3 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Tool"
+    },
+    {
+      "n": "魯特琴 / Lute",
+      "c": "12 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Tool"
+    },
+    {
+      "n": "里拉琴 / Lyre",
+      "c": "20 gp",
+      "v": "-",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Tool"
+    },
+    {
+      "n": "排簫 / Pan Flute",
+      "c": "12 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Tool"
+    },
+    {
+      "n": "雙簧管 / Shawm",
+      "c": "2 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Tool"
+    },
+    {
+      "n": "維奧爾琴 / Viol",
+      "c": "1 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Tool"
+    },
+    {
+      "n": "骰子組 / Dice Set",
+      "c": "1 sp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Tool"
+    },
+    {
+      "n": "龍棋組 / Dragonchess Set",
+      "c": "1 gp",
+      "v": "-",
+      "t": "-",
+      "ct": "✓",
+      "ty": "Tool"
+    },
+    {
+      "n": "撲克牌 / Playing Cards",
+      "c": "5 sp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Tool"
+    },
+    {
+      "n": "馬車 / Carriage",
+      "c": "100 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Mounts/Vehicles"
+    },
+    {
+      "n": "手推車 / Cart",
+      "c": "15 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Mounts/Vehicles"
+    },
+    {
+      "n": "戰車 / Chariot",
+      "c": "250 gp",
+      "v": "-",
+      "t": "-",
+      "ct": "✓",
+      "ty": "Mounts/Vehicles"
+    },
+    {
+      "n": "雪橇 / Sled",
+      "c": "20 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Mounts/Vehicles"
+    },
+    {
+      "n": "貨車 / Wagon",
+      "c": "35 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Mounts/Vehicles"
+    },
+    {
+      "n": "異國鞍座 / Saddle, Exotic",
+      "c": "60 gp",
+      "v": "-",
+      "t": "-",
+      "ct": "✓",
+      "ty": "Mounts/Vehicles"
+    },
+    {
+      "n": "軍用鞍座 / Saddle, Military",
+      "c": "20 gp",
+      "v": "-",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Mounts/Vehicles"
+    },
+    {
+      "n": "騎乘鞍座 / Saddle, Riding",
+      "c": "10 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Mounts/Vehicles"
+    },
+    {
+      "n": "駱駝 / Camel",
+      "c": "50 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Mounts/Vehicles"
+    },
+    {
+      "n": "馱馬 / Horse, Draft",
+      "c": "50 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Mounts/Vehicles"
+    },
+    {
+      "n": "騎乘馬 / Horse, Riding",
+      "c": "75 gp",
+      "v": "-",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Mounts/Vehicles"
+    },
+    {
+      "n": "獒犬 / Mastiff",
+      "c": "25 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Mounts/Vehicles"
+    },
+    {
+      "n": "騾子 / Mule",
+      "c": "8 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Mounts/Vehicles"
+    },
+    {
+      "n": "小馬 / Pony",
+      "c": "30 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Mounts/Vehicles"
+    },
+    {
+      "n": "戰馬 / Warhorse",
+      "c": "400 gp",
+      "v": "-",
+      "t": "-",
+      "ct": "✓",
+      "ty": "Mounts/Vehicles"
+    },
+    {
+      "n": "龍骨船 / Keelboat",
+      "c": "3000 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Mounts/Vehicles"
+    },
+    {
+      "n": "長船 / Longship",
+      "c": "10000 gp",
+      "v": "-",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Mounts/Vehicles"
+    },
+    {
+      "n": "划艇 / Rowboat",
+      "c": "50 gp",
+      "v": "✓",
+      "t": "✓",
+      "ct": "✓",
+      "ty": "Mounts/Vehicles"
+    },
+    {
+      "n": "帆船 / Sailing Ship",
+      "c": "10000 gp",
+      "v": "-",
+      "t": "-",
+      "ct": "✓",
+      "ty": "Mounts/Vehicles"
+    },
+    {
+      "n": "戰艦 / Warship",
+      "c": "25000 gp",
+      "v": "-",
+      "t": "-",
+      "ct": "✓",
+      "ty": "Mounts/Vehicles"
+    },
+    {
+      "n": "飛船 / Airship",
+      "c": "40000 gp",
+      "v": "-",
+      "t": "-",
+      "ct": "✓",
+      "ty": "Mounts/Vehicles"
+    }
+  ],
+  "sheetId": "1kqkRau0t0vzOsHvTMIJMqcaQ-vmOyH2McoyA_Ek_blA",
+  "sheetUrl": "https://docs.google.com/spreadsheets/d/1kqkRau0t0vzOsHvTMIJMqcaQ-vmOyH2McoyA_Ek_blA/edit"
+}
